@@ -77,19 +77,69 @@ public class TerrainGenerator : MonoBehaviour
         return terrainData;
     }
 
+    // float[,] GenerateHeights()
+    // {
+    //     int resolution = Mathf.Max(33, Mathf.ClosestPowerOfTwo(width) + 1);
+    //     float[,] heights = new float[resolution, resolution];
+    //     for (int x = 0; x < resolution; x++)
+    //     {
+    //         for (int y = 0; y < resolution; y++)
+    //         {
+    //             float xCoord = (float)x / width * scale + offsetX;
+    //             float yCoord = (float)y / width * scale + offsetY;
+    //             heights[x, y] = Mathf.PerlinNoise(xCoord, yCoord);
+    //         }
+    //     }
+    //     return heights;
+    // }
     float[,] GenerateHeights()
     {
         int resolution = Mathf.Max(33, Mathf.ClosestPowerOfTwo(width) + 1);
         float[,] heights = new float[resolution, resolution];
+
+        // Paramètres pour chaque type de terrain
+        float baseHeightStrength = 0.35f; // Terrain global uniforme
+        float lakeHeight = 0.2f;         // Hauteur pour lacs et rivières
+        float mountainHeightStrength = 0.5f; // Forces des montagnes miniatures
+        float mountainDetailStrength = 0.3f; // Détails des montagnes
+        float waterThreshold = 0.2f;     // Seuil pour l'eau/lacs (valeurs basses pour lacs)
+        float mountainThreshold = 0.6f;  // Seuil pour les montagnes (valeurs plus élevées)
+
+        // Génération du terrain uniforme
         for (int x = 0; x < resolution; x++)
         {
             for (int y = 0; y < resolution; y++)
             {
-                float xCoord = (float)x / width * scale + offsetX;
-                float yCoord = (float)y / width * scale + offsetY;
-                heights[x, y] = Mathf.PerlinNoise(xCoord, yCoord);
+                // Coordonnées pour PerlinNoise global
+                float xCoord = (float)x / resolution * scale + offsetX;
+                float yCoord = (float)y / resolution * scale + offsetY;
+
+                // Bruit de base pour terrain uniforme (plaines)
+                float baseHeight = Mathf.PerlinNoise(xCoord, yCoord) * baseHeightStrength;
+
+                // Créer des lacs (les zones avec une hauteur basse)
+                if (baseHeight < waterThreshold)
+                {
+                    baseHeight = lakeHeight; // Hauteur constante pour les lacs
+                }
+
+                // Ajouter des montagnes miniatures dans certaines zones
+                if (baseHeight > mountainThreshold)
+                {
+                    // Ajout de détails aux montagnes
+                    float mountainDetail = Mathf.PerlinNoise(xCoord * 10f, yCoord * 10f) * mountainDetailStrength;
+                    baseHeight += mountainDetail;
+                    baseHeight = Mathf.Pow(baseHeight, 2); // Accentuation de la forme montagneuse
+                }
+
+                // Assurer que la hauteur reste dans la plage [0, 1]
+                baseHeight = Mathf.Clamp01(baseHeight);
+
+                // Assignation de la hauteur à la cellule
+                heights[x, y] = baseHeight;
             }
         }
+
         return heights;
     }
 
