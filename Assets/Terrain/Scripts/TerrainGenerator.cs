@@ -1,12 +1,14 @@
 using UnityEngine;
 using UnityEditor;
 
+public enum TerrainSizeType { Petit, Moyen, Grand }
+
 [ExecuteInEditMode]
 public class TerrainGenerator : MonoBehaviour
 {
     [Header("Terrain Settings")]
-    public int width = 256;
-    public int height = 256;
+    public TerrainSizeType terrainSize = TerrainSizeType.Moyen;
+    [Range(1, 100)] public int detailLevel = 50;
     public int depth = 20;
     [Range(1f, 100f)] public float scale = 20f;
 
@@ -19,17 +21,37 @@ public class TerrainGenerator : MonoBehaviour
     public Material thicknessMaterial;
 
     [Header("Grid Settings")]
-    public int gridSize = 10;
+    public float cellSize = 5f; // Taille fixe des carrés
     public float gridHeight = 1f;
     public Color gridColor = Color.black;
 
     private Terrain terrain;
     private GameObject thicknessMeshObj;
     private GridCell[,] gridCells;
+    private int width = 0;
 
     void OnValidate()
     {
         if (!terrain) terrain = GetComponent<Terrain>();
+        width = GetWidthFromType(terrainSize);
+    }
+
+    private int GetWidthFromType(TerrainSizeType type)
+    {
+        int min, max;
+        switch (type)
+        {
+            case TerrainSizeType.Petit:
+                min = 23; max = 83; break;
+            case TerrainSizeType.Moyen:
+                min = 96; max = 151; break;
+            case TerrainSizeType.Grand:
+                min = 192; max = 287; break;
+            default:
+                return 128;
+        }
+        // Interpolation en fonction du detailLevel (0% → min, 100% → max)
+        return Mathf.RoundToInt(Mathf.Lerp(min, max, detailLevel / 100f));
     }
 
     public void GenerateTerrain()
@@ -43,22 +65,21 @@ public class TerrainGenerator : MonoBehaviour
     TerrainData GenerateTerrainData(TerrainData terrainData)
     {
         terrainData.heightmapResolution = width + 1;
-        terrainData.size = new Vector3(width, depth, height);
+        terrainData.size = new Vector3(width, depth, width);
         terrainData.SetHeights(0, 0, GenerateHeights());
         return terrainData;
     }
 
     float[,] GenerateHeights()
     {
-        float[,] heights = new float[width, height];
-        for (int x = 0; x < width; x++)
+        int resolution = Mathf.Max(33, Mathf.ClosestPowerOfTwo(width) + 1);
+        float[,] heights = new float[resolution, resolution];
+        for (int x = 0; x < resolution; x++)
         {
-            for (int y = 0; y < height; y++)
+            for (int y = 0; y < resolution; y++)
             {
                 float xCoord = (float)x / width * scale + offsetX;
-                float yCoord = (float)y / height * scale + offsetY;
-                if (xCoord == 0) xCoord = 1;
-                if (yCoord == 0) yCoord = 1;
+                float yCoord = (float)y / width * scale + offsetY;
                 heights[x, y] = Mathf.PerlinNoise(xCoord, yCoord);
             }
         }
@@ -83,8 +104,8 @@ public class TerrainGenerator : MonoBehaviour
     Mesh CreateThicknessMesh()
     {
         float w = width;
+        float d = width;
         float h = thickness;
-        float d = height;
 
         Vector3[] vertices = {
             new Vector3(0, -h, 0), new Vector3(w, -h, 0), new Vector3(w, -h, d), new Vector3(0, -h, d), // bottom
@@ -110,27 +131,33 @@ public class TerrainGenerator : MonoBehaviour
 
     void GenerateLogicalGrid()
     {
-        gridCells = new GridCell[gridSize, gridSize];
-        float cellWidth = width / (float)gridSize;
-        float cellHeight = height / (float)gridSize;
+        // Calcule le nombre de cellules pour remplir la map au mieux
+        int gridX = Mathf.RoundToInt(width / cellSize);
+        int gridY = Mathf.RoundToInt(width / cellSize);
+
+        // Ajuste la taille des cellules pour que ça match pile avec la map
+        float adjustedCellSizeX = width / (float)gridX;
+        float adjustedCellSizeY = width / (float)gridY;
+
+        gridCells = new GridCell[gridX + 1, gridY + 1];
         TerrainData terrainData = terrain.terrainData;
 
-        for (int x = 0; x <= gridSize; x++)
+        for (int x = 0; x <= gridX; x++)
         {
-            for (int y = 0; y <= gridSize; y++)
+            for (int y = 0; y <= gridY; y++)
             {
-                float worldX = x * cellWidth;
-                float worldZ = y * cellHeight;
+                float worldX = x * adjustedCellSizeX;
+                float worldZ = y * adjustedCellSizeY;
 
-                float normalizedX = Mathf.Clamp01(worldX / width);
-                float normalizedZ = Mathf.Clamp01(worldZ / height);
+                float normalizedX = worldX / width;
+                float normalizedZ = worldZ / width;
+
                 float terrainHeight = terrainData.GetHeight(
                     Mathf.RoundToInt(normalizedX * (terrainData.heightmapResolution - 1)),
                     Mathf.RoundToInt(normalizedZ * (terrainData.heightmapResolution - 1))
                 );
 
-                Vector3 worldPosition = new Vector3(worldX, terrainHeight, worldZ);
-                gridCells[Mathf.Clamp(x, 0, gridSize - 1), Mathf.Clamp(y, 0, gridSize - 1)] = new GridCell(worldPosition);
+                gridCells[x, y] = new GridCell(new Vector3(worldX, terrainHeight, worldZ));
             }
         }
     }
@@ -140,24 +167,43 @@ public class TerrainGenerator : MonoBehaviour
         if (gridCells == null) return;
 
         Gizmos.color = gridColor;
-        float cellWidth = width / (float)gridSize;
-        float cellHeight = height / (float)gridSize;
 
-        for (int x = 0; x < gridSize; x++)
+        int gridX = gridCells.GetLength(0) - 1;
+        int gridY = gridCells.GetLength(1) - 1;
+
+        for (int x = 0; x <= gridX; x++)
         {
-            for (int y = 0; y < gridSize; y++)
+            for (int y = 0; y <= gridY; y++)
             {
-                Vector3 bottomLeft = gridCells[x, y].position + new Vector3(0, gridHeight, 0);
-                Vector3 bottomRight = gridCells[Mathf.Min(x + 1, gridSize - 1), y].position + new Vector3(0, gridHeight, 0);
-                Vector3 topLeft = gridCells[x, Mathf.Min(y + 1, gridSize - 1)].position + new Vector3(0, gridHeight, 0);
-                Vector3 topRight = gridCells[Mathf.Min(x + 1, gridSize - 1), Mathf.Min(y + 1, gridSize - 1)].position + new Vector3(0, gridHeight, 0);
+                Vector3 current = gridCells[x, y].position + Vector3.up * gridHeight;
 
-                // Lignes suivant la courbure du terrain
-                Gizmos.DrawLine(bottomLeft, bottomRight);
-                Gizmos.DrawLine(bottomLeft, topLeft);
+                // Ligne horizontale (vers la droite)
+                if (x < gridX)
+                {
+                    Vector3 right = gridCells[x + 1, y].position + Vector3.up * gridHeight;
+                    Gizmos.DrawLine(current, right);
+                }
 
-                if (x == gridSize - 1) Gizmos.DrawLine(bottomRight, topRight); // Bord droit
-                if (y == gridSize - 1) Gizmos.DrawLine(topLeft, topRight);     // Bord supérieur
+                // Ligne verticale (vers le haut)
+                if (y < gridY)
+                {
+                    Vector3 top = gridCells[x, y + 1].position + Vector3.up * gridHeight;
+                    Gizmos.DrawLine(current, top);
+                }
+
+                // Bordure droite
+                if (x == gridX && y < gridY)
+                {
+                    Vector3 top = gridCells[x, y + 1].position + Vector3.up * gridHeight;
+                    Gizmos.DrawLine(current, top);
+                }
+
+                // Bordure supérieure
+                if (y == gridY && x < gridX)
+                {
+                    Vector3 right = gridCells[x + 1, y].position + Vector3.up * gridHeight;
+                    Gizmos.DrawLine(current, right);
+                }
             }
         }
     }
