@@ -3,6 +3,15 @@ using UnityEditor;
 
 public enum TerrainSizeType { Petit, Moyen, Grand }
 
+[System.Serializable]
+public class Biome
+{
+    public string name;                // Nom du biome (ex: "Plaine", "Montagne") 
+    [Range(0f, 1f)] public float minHeight;  // Hauteur minimale du biome
+    [Range(0f, 1f)] public float maxHeight;  // Hauteur maximale du biome
+    public Color color;                // Couleur associée
+}
+
 [ExecuteInEditMode]
 public class TerrainGenerator : MonoBehaviour
 {
@@ -12,13 +21,12 @@ public class TerrainGenerator : MonoBehaviour
     public int depth = 20;
     [Range(1f, 100f)] public float scale = 20f;
 
+    [Header("Biome Settings")]
+    public Biome[] biomes;
+
     [Header("Noise Offsets")]
     public float offsetX = 100f;
     public float offsetY = 100f;
-
-    [Header("Thickness Settings")]
-    public float thickness = 10f;
-    public Material thicknessMaterial;
 
     [Header("Grid Settings")]
     public float cellSize = 5f; // Taille fixe des carrés
@@ -26,14 +34,12 @@ public class TerrainGenerator : MonoBehaviour
     public Color gridColor = Color.black;
 
     private Terrain terrain;
-    private GameObject thicknessMeshObj;
     private GridCell[,] gridCells;
     private int width = 0;
 
     void OnValidate()
     {
         if (!terrain) terrain = GetComponent<Terrain>();
-        width = GetWidthFromType(terrainSize);
     }
 
     private int GetWidthFromType(TerrainSizeType type)
@@ -57,9 +63,10 @@ public class TerrainGenerator : MonoBehaviour
     public void GenerateTerrain()
     {
         if (!terrain) terrain = GetComponent<Terrain>();
+        width = GetWidthFromType(terrainSize);
         terrain.terrainData = GenerateTerrainData(terrain.terrainData);
-        GenerateThicknessMesh();
         GenerateLogicalGrid();
+        ApplyBiomeColors();
     }
 
     TerrainData GenerateTerrainData(TerrainData terrainData)
@@ -86,47 +93,62 @@ public class TerrainGenerator : MonoBehaviour
         return heights;
     }
 
-    void GenerateThicknessMesh()
+    void ApplyBiomeColors()
     {
-        if (thicknessMeshObj) DestroyImmediate(thicknessMeshObj);
+        if (gridCells == null) return;
 
-        thicknessMeshObj = new GameObject("TerrainThickness");
-        thicknessMeshObj.transform.parent = transform;
-        thicknessMeshObj.transform.localPosition = Vector3.zero;
+        // Récupérer la résolution complète du terrain
+        int widthResolution = terrain.terrainData.heightmapResolution;
+        Texture2D texture = new Texture2D(widthResolution, widthResolution);
 
-        MeshFilter mf = thicknessMeshObj.AddComponent<MeshFilter>();
-        MeshRenderer mr = thicknessMeshObj.AddComponent<MeshRenderer>();
+        // Parcours chaque pixel de la texture
+        for (int x = 0; x < widthResolution; x++)
+        {
+            for (int y = 0; y < widthResolution; y++)
+            {
+                // Convertir les coordonnées de la texture en coordonnées du terrain
+                float worldX = (x / (float)widthResolution) * terrain.terrainData.size.x;
+                float worldZ = (y / (float)widthResolution) * terrain.terrainData.size.z;
 
-        mr.material = thicknessMaterial ? thicknessMaterial : new Material(Shader.Find("Standard"));
-        mf.mesh = CreateThicknessMesh();
+                // Récupérer la hauteur du terrain à ces coordonnées
+                float terrainHeight = terrain.terrainData.GetHeight(
+                    Mathf.RoundToInt(worldX),
+                    Mathf.RoundToInt(worldZ)
+                );
+
+                // Normaliser la hauteur entre 0 et 1
+                float normalizedHeight = terrainHeight / terrain.terrainData.size.y;
+
+                // Appliquer la couleur basée sur la hauteur du terrain
+                Color biomeColor = GetBiomeColor(normalizedHeight);
+                texture.SetPixel(x, y, biomeColor);
+            }
+        }
+
+        // Appliquer les changements sur la texture
+        texture.Apply();
+
+        // Créer un TerrainLayer et assigner la texture à ce terrain
+        TerrainLayer layer = new TerrainLayer
+        {
+            diffuseTexture = texture,
+            tileSize = new Vector2(terrain.terrainData.size.x, terrain.terrainData.size.z)
+        };
+
+        // Applique le TerrainLayer au terrain
+        terrain.terrainData.terrainLayers = new TerrainLayer[] { layer };
     }
 
-    Mesh CreateThicknessMesh()
+    Color GetBiomeColor(float heightValue)
     {
-        float w = width;
-        float d = width;
-        float h = thickness;
-
-        Vector3[] vertices = {
-            new Vector3(0, -h, 0), new Vector3(w, -h, 0), new Vector3(w, -h, d), new Vector3(0, -h, d), // bottom
-            new Vector3(0, 0, 0), new Vector3(w, 0, 0), new Vector3(w, 0, d), new Vector3(0, 0, d)      // top
-        };
-
-        int[] triangles = {
-            0, 1, 2, 0, 2, 3, // bottom
-            0, 4, 5, 0, 5, 1, // left
-            1, 5, 6, 1, 6, 2, // front
-            2, 6, 7, 2, 7, 3, // right
-            3, 7, 4, 3, 4, 0, // back
-            4, 5, 6, 4, 6, 7  // top
-        };
-
-        Mesh mesh = new Mesh();
-        mesh.vertices = vertices;
-        mesh.triangles = triangles;
-        mesh.RecalculateNormals();
-
-        return mesh;
+        foreach (Biome biome in biomes)
+        {
+            if (heightValue >= biome.minHeight && heightValue <= biome.maxHeight)
+            {
+                return biome.color;
+            }
+        }
+        return Color.magenta; // Si aucun biome n'est trouvé (debug visuel)
     }
 
     void GenerateLogicalGrid()
