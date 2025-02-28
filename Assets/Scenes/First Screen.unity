@@ -389,6 +389,7 @@ GameObject:
   - component: {fileID: 541734036}
   - component: {fileID: 541734035}
   - component: {fileID: 541734034}
+  - component: {fileID: 541734038}
   m_Layer: 0
   m_Name: Terrain
   m_TagString: Untagged
@@ -403,15 +404,15 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 541734033}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6d435863156d3704c842847d65831940, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  terrainSize: 2
-  detailLevel: 82
-  depth: 50
-  scale: 15.2
+  terrainSize: 1
+  detailLevel: 33
+  depth: 5
+  scale: 22.1
   biomes:
   - name: "Oc\xE9an"
     minHeight: 0
@@ -434,9 +435,9 @@ MonoBehaviour:
     maxHeight: 1
     color: {r: 0.8490566, g: 0.8392262, b: 0.81301177, a: 1}
   offsetX: 0
-  offsetY: 3
-  cellSize: 5
-  gridHeight: 0.2
+  offsetY: 0
+  cellSize: 2
+  gridHeight: 1
   gridColor: {r: 0.113385536, g: 0.13339968, b: 0.26415092, a: 1}
 --- !u!154 &541734035
 TerrainCollider:
@@ -513,6 +514,29 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &541734038
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 541734033}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6e432a7e005ff6245acf7bec6b58c5bd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  terrainSize: 1
+  detailLevel: 50
+  cellSize: 5
+  scale: 20
+  offsetX: 100
+  offsetY: 100
+  biomes:
+  - name: Test
+    minHeight: 0
+    maxHeight: 0
+    color: {r: 1, g: 0, b: 0, a: 1}
 --- !u!1 &832575517
 GameObject:
   m_ObjectHideFlags: 0

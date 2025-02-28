@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEditor;
+using System;
 
 public enum TerrainSizeType { Petit, Moyen, Grand }
 
@@ -76,67 +77,86 @@ public class TerrainGenerator : MonoBehaviour
         terrainData.SetHeights(0, 0, GenerateHeights());
         return terrainData;
     }
-
-    // float[,] GenerateHeights()
-    // {
-    //     int resolution = Mathf.Max(33, Mathf.ClosestPowerOfTwo(width) + 1);
-    //     float[,] heights = new float[resolution, resolution];
-    //     for (int x = 0; x < resolution; x++)
-    //     {
-    //         for (int y = 0; y < resolution; y++)
-    //         {
-    //             float xCoord = (float)x / width * scale + offsetX;
-    //             float yCoord = (float)y / width * scale + offsetY;
-    //             heights[x, y] = Mathf.PerlinNoise(xCoord, yCoord);
-    //         }
-    //     }
-    //     return heights;
-    // }
+    
     float[,] GenerateHeights()
     {
-        int resolution = Mathf.Max(33, Mathf.ClosestPowerOfTwo(width) + 1);
+        int resolution = terrain.terrainData.heightmapResolution;
         float[,] heights = new float[resolution, resolution];
 
-        // Paramètres pour chaque type de terrain
-        float baseHeightStrength = 0.35f; // Terrain global uniforme
-        float lakeHeight = 0.2f;         // Hauteur pour lacs et rivières
-        float mountainHeightStrength = 0.5f; // Forces des montagnes miniatures
-        float mountainDetailStrength = 0.3f; // Détails des montagnes
-        float waterThreshold = 0.2f;     // Seuil pour l'eau/lacs (valeurs basses pour lacs)
-        float mountainThreshold = 0.6f;  // Seuil pour les montagnes (valeurs plus élevées)
+        // Calcule le nombre de cellules pour remplir la map au mieux
+        int gridX = Mathf.RoundToInt(width / cellSize);
+        int gridY = Mathf.RoundToInt(width / cellSize);
 
-        // Génération du terrain uniforme
-        for (int x = 0; x < resolution; x++)
+        float adjustedCellSizeX = width / (float)gridX;
+        float adjustedCellSizeY = width / (float)gridY;
+
+        int cellSizeX = Mathf.RoundToInt(adjustedCellSizeX);
+        int cellSizeY = Mathf.RoundToInt(adjustedCellSizeY);
+
+        float[,] biomeMap = new float[gridY, gridX];
+
+        // Génération du bruit de Perlin pour les biomes
+        for (int y = 0; y < gridY; y++)
         {
-            for (int y = 0; y < resolution; y++)
+            for (int x = 0; x < gridX; x++)
             {
-                // Coordonnées pour PerlinNoise global
-                float xCoord = (float)x / resolution * scale + offsetX;
-                float yCoord = (float)y / resolution * scale + offsetY;
+                float xCoord = (float)x / gridX * scale + offsetX;
+                float yCoord = (float)y / gridY * scale + offsetY;
+                biomeMap[y, x] = Mathf.PerlinNoise(xCoord, yCoord);
+            }
+        }
 
-                // Bruit de base pour terrain uniforme (plaines)
-                float baseHeight = Mathf.PerlinNoise(xCoord, yCoord) * baseHeightStrength;
+        // Remplissage des hauteurs par biome
+        for (int y = 0; y < gridY; y++)
+        {
+            for (int x = 0; x < gridX; x++)
+            {
+                float biomeValue = biomeMap[y, x];
 
-                // Créer des lacs (les zones avec une hauteur basse)
-                if (baseHeight < waterThreshold)
-                {
-                    baseHeight = lakeHeight; // Hauteur constante pour les lacs
+                float baseHeight;
+                float noiseFactor = 0.01f; // Valeur par défaut
+
+                if (biomeValue < 0.2f)      
+                { 
+                    baseHeight = 0.03f; // Océan plat
+                    noiseFactor = 0.005f; // Bruit très faible
+                }
+                else if (biomeValue < 0.5f) 
+                { 
+                    baseHeight = 0.15f; // Plaines
+                    noiseFactor = 0.01f; // Très léger relief
+                }
+                else if (biomeValue < 0.8f) 
+                { 
+                    baseHeight = 0.35f; // Collines
+                    noiseFactor = 0.02f; // Un peu plus de relief
+                }
+                else                        
+                { 
+                    baseHeight = 0.5f; // Montagnes
+                    noiseFactor = 0.1f; // Beaucoup de détails
                 }
 
-                // Ajouter des montagnes miniatures dans certaines zones
-                if (baseHeight > mountainThreshold)
+                for (int i = 0; i < cellSizeX; i++)
                 {
-                    // Ajout de détails aux montagnes
-                    float mountainDetail = Mathf.PerlinNoise(xCoord * 10f, yCoord * 10f) * mountainDetailStrength;
-                    baseHeight += mountainDetail;
-                    baseHeight = Mathf.Pow(baseHeight, 2); // Accentuation de la forme montagneuse
+                    for (int j = 0; j < cellSizeY; j++)
+                    {
+                        int worldX = Mathf.RoundToInt(x * cellSizeX) + i;
+                        int worldY = Mathf.RoundToInt(y * cellSizeY) + j;
+
+                        if (worldX >= resolution || worldY >= resolution) continue;
+
+                        float localNoise = Mathf.PerlinNoise(worldX * 0.01f, worldY * 0.01f) * noiseFactor;
+
+                        if (baseHeight > 0.4f) // Montagnes : plus de détails
+                        {
+                            float peakFactor = Mathf.PerlinNoise(worldX * 0.2f, worldY * 0.2f) * 0.2f;
+                            baseHeight += peakFactor;
+                        }
+
+                        heights[worldX, worldY] = Mathf.Clamp01(baseHeight + localNoise);
+                    }
                 }
-
-                // Assurer que la hauteur reste dans la plage [0, 1]
-                baseHeight = Mathf.Clamp01(baseHeight);
-
-                // Assignation de la hauteur à la cellule
-                heights[x, y] = baseHeight;
             }
         }
 
