@@ -389,7 +389,6 @@ GameObject:
   - component: {fileID: 541734036}
   - component: {fileID: 541734035}
   - component: {fileID: 541734034}
-  - component: {fileID: 541734038}
   m_Layer: 0
   m_Name: Terrain
   m_TagString: Untagged
@@ -404,40 +403,32 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 541734033}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6d435863156d3704c842847d65831940, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   terrainSize: 1
-  detailLevel: 33
-  depth: 5
-  scale: 22.1
+  detailLevel: 12
+  depth: 10
+  scale: 4.2
   biomes:
   - name: "Oc\xE9an"
     minHeight: 0
-    maxHeight: 0.02
+    maxHeight: 0.3
     color: {r: 0.018687248, g: 0, b: 1, a: 0}
-  - name: Plage
-    minHeight: 0.02
-    maxHeight: 0.1999
-    color: {r: 1, g: 0.8163534, b: 0, a: 1}
   - name: Plaine
-    minHeight: 0.1999
-    maxHeight: 0.2
+    minHeight: 0.3
+    maxHeight: 0.7
     color: {r: 0, g: 1, b: 0.14346027, a: 1}
   - name: Montagne
-    minHeight: 0.2
-    maxHeight: 0.9
-    color: {r: 0.5283019, g: 0.48560828, b: 0.38625848, a: 1}
-  - name: Neige
-    minHeight: 0.9
+    minHeight: 0.7
     maxHeight: 1
-    color: {r: 0.8490566, g: 0.8392262, b: 0.81301177, a: 1}
+    color: {r: 0.5283019, g: 0.48560828, b: 0.38625848, a: 1}
   offsetX: 0
   offsetY: 0
-  cellSize: 2
-  gridHeight: 1
+  cellSize: 5
+  gridHeight: 0.1
   gridColor: {r: 0.113385536, g: 0.13339968, b: 0.26415092, a: 1}
 --- !u!154 &541734035
 TerrainCollider:
@@ -514,29 +505,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &541734038
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 541734033}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6e432a7e005ff6245acf7bec6b58c5bd, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  terrainSize: 1
-  detailLevel: 50
-  cellSize: 5
-  scale: 20
-  offsetX: 100
-  offsetY: 100
-  biomes:
-  - name: Test
-    minHeight: 0
-    maxHeight: 0
-    color: {r: 1, g: 0, b: 0, a: 1}
 --- !u!1 &832575517
 GameObject:
   m_ObjectHideFlags: 0
