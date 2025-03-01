@@ -5,12 +5,21 @@ using System;
 public enum TerrainSizeType { Petit, Moyen, Grand }
 
 [System.Serializable]
+public class BiomeParam
+{
+    public string name;                // Nom du biome (ex: "Plaine", "Montagne") 
+    [Range(0f, 1f)] public float minHeight;  // Hauteur minimale du biome
+    [Range(0f, 1f)] public float biomeHeight;
+    public Color color;                // Couleur associée
+    [Range(0f, 1f)] public float noiseFactor;
+}
 public class Biome
 {
     public string name;                // Nom du biome (ex: "Plaine", "Montagne") 
     [Range(0f, 1f)] public float minHeight;  // Hauteur minimale du biome
-    [Range(0f, 1f)] public float maxHeight;  // Hauteur maximale du biome
     public Color color;                // Couleur associée
+    [Range(0f, 1f)] public float noiseFactor;
+    public float biomeHeight;
 }
 
 [ExecuteInEditMode]
@@ -20,27 +29,31 @@ public class TerrainGenerator : MonoBehaviour
     public TerrainSizeType terrainSize = TerrainSizeType.Moyen;
     [Range(1, 100)] public int detailLevel = 50;
     public int depth = 20;
-    [Range(1f, 100f)] public float scale = 20f;
 
     [Header("Biome Settings")]
-    public Biome[] biomes;
-
-    [Header("Noise Offsets")]
-    public float offsetX = 100f;
-    public float offsetY = 100f;
+    public BiomeParam[] biomes;
 
     [Header("Grid Settings")]
     public float cellSize = 5f; // Taille fixe des carrés
     public float gridHeight = 1f;
     public Color gridColor = Color.black;
 
+    [Header("Noise Settings")]
+    [Range(1f, 7f)] public float scale = 2f; // Taille fixe des carrés
+    [Range(-100, 100)] public int offset = 0;
+
     private Terrain terrain;
     private GridCell[,] gridCells;
     private int width = 0;
+    private Biome[,] biomeCells;
 
     void OnValidate()
     {
         if (!terrain) terrain = GetComponent<Terrain>();
+        width = GetWidthFromType(terrainSize);
+        terrain.terrainData = GenerateTerrainData(terrain.terrainData);
+        GenerateLogicalGrid();
+        ApplyBiomeColors();
     }
 
     private int GetWidthFromType(TerrainSizeType type)
@@ -74,11 +87,12 @@ public class TerrainGenerator : MonoBehaviour
     {
         terrainData.heightmapResolution = width + 1;
         terrainData.size = new Vector3(width, depth, width);
-        terrainData.SetHeights(0, 0, GenerateHeights());
+        terrainData.SetHeights(0, 0, GenerateHeights(terrainData));
+        // GenerateHeights(terrainData);
         return terrainData;
     }
     
-    float[,] GenerateHeights()
+    float[,] GenerateHeights(TerrainData terrainData)
     {
         int resolution = terrain.terrainData.heightmapResolution;
         float[,] heights = new float[resolution, resolution];
@@ -87,138 +101,114 @@ public class TerrainGenerator : MonoBehaviour
         int gridX = Mathf.RoundToInt(width / cellSize);
         int gridY = Mathf.RoundToInt(width / cellSize);
 
-        float adjustedCellSizeX = width / (float)gridX;
-        float adjustedCellSizeY = width / (float)gridY;
+        // float adjustedCellSizeX = width / (float)gridX;
+        // float adjustedCellSizeY = width / (float)gridY;
 
-        int cellSizeX = Mathf.RoundToInt(adjustedCellSizeX);
-        int cellSizeY = Mathf.RoundToInt(adjustedCellSizeY);
+        // int cellSizeX = Mathf.RoundToInt(adjustedCellSizeX);
+        // int cellSizeY = Mathf.RoundToInt(adjustedCellSizeY);
+
+        float gridXOverResolution = resolution / (float)gridX;
+        float gridYOverResolution = resolution / (float)gridY;
 
         float[,] biomeMap = new float[gridY, gridX];
+
+        // float scale = UnityEngine.Random.Range(1f, 3f);
+        // int offset = UnityEngine.Random.Range(-100, 100);
 
         // Génération du bruit de Perlin pour les biomes
         for (int y = 0; y < gridY; y++)
         {
             for (int x = 0; x < gridX; x++)
             {
-                float xCoord = (float)x / gridX * scale + offsetX;
-                float yCoord = (float)y / gridY * scale + offsetY;
+                float xCoord = (float)x / gridX * scale + offset;
+                float yCoord = (float)y / gridY * scale + offset;
                 biomeMap[y, x] = Mathf.PerlinNoise(xCoord, yCoord);
-            }
-        }
-
-        // Remplissage des hauteurs par biome
-        for (int y = 0; y < gridY; y++)
-        {
-            for (int x = 0; x < gridX; x++)
-            {
                 float biomeValue = biomeMap[y, x];
+                ConstructBiomeCells(y, x, biomeValue);
 
-                float baseHeight;
-                float noiseFactor = 0.01f; // Valeur par défaut
-
-                if (biomeValue < 0.2f)      
-                { 
-                    baseHeight = 0.03f; // Océan plat
-                    noiseFactor = 0.005f; // Bruit très faible
-                }
-                else if (biomeValue < 0.5f) 
-                { 
-                    baseHeight = 0.15f; // Plaines
-                    noiseFactor = 0.01f; // Très léger relief
-                }
-                else if (biomeValue < 0.8f) 
-                { 
-                    baseHeight = 0.35f; // Collines
-                    noiseFactor = 0.02f; // Un peu plus de relief
-                }
-                else                        
-                { 
-                    baseHeight = 0.5f; // Montagnes
-                    noiseFactor = 0.1f; // Beaucoup de détails
-                }
-
-                for (int i = 0; i < cellSizeX; i++)
+                // Remplir le tableau avec la hauteur souhaitée
+                for (int i = Mathf.RoundToInt(gridXOverResolution * x); i < Mathf.RoundToInt(gridXOverResolution * (x + 1)); i++)
                 {
-                    for (int j = 0; j < cellSizeY; j++)
+                    for (int j = Mathf.RoundToInt(gridYOverResolution * y); j < Mathf.RoundToInt(gridYOverResolution * (y + 1)); j++)
                     {
-                        int worldX = Mathf.RoundToInt(x * cellSizeX) + i;
-                        int worldY = Mathf.RoundToInt(y * cellSizeY) + j;
-
-                        if (worldX >= resolution || worldY >= resolution) continue;
-
-                        float localNoise = Mathf.PerlinNoise(worldX * 0.01f, worldY * 0.01f) * noiseFactor;
-
-                        if (baseHeight > 0.4f) // Montagnes : plus de détails
-                        {
-                            float peakFactor = Mathf.PerlinNoise(worldX * 0.2f, worldY * 0.2f) * 0.2f;
-                            baseHeight += peakFactor;
-                        }
-
-                        heights[worldX, worldY] = Mathf.Clamp01(baseHeight + localNoise);
+                        heights[i, j] = Mathf.Clamp01(biomeCells[y, x].biomeHeight);
                     }
                 }
             }
         }
-
         return heights;
     }
 
     void ApplyBiomeColors()
     {
-        if (gridCells == null) return;
+        if (gridCells == null || biomeCells == null) return;
 
         // Récupérer la résolution complète du terrain
-        int widthResolution = terrain.terrainData.heightmapResolution;
-        Texture2D texture = new Texture2D(widthResolution, widthResolution);
+        int resolution = terrain.terrainData.heightmapResolution;
+        Texture2D texture = new Texture2D(resolution, resolution);
 
-        // Parcours chaque pixel de la texture
-        for (int x = 0; x < widthResolution; x++)
+        // Calcule le nombre de cellules pour remplir la map au mieux
+        int gridX = Mathf.RoundToInt(width / cellSize);
+        int gridY = Mathf.RoundToInt(width / cellSize);
+
+        float gridXOverResolution = resolution / (float)gridX;
+        float gridYOverResolution = resolution / (float)gridY;
+
+        for (int y = 0; y < gridY; y++)
         {
-            for (int y = 0; y < widthResolution; y++)
+            for (int x = 0; x < gridX; x++)
             {
-                // Convertir les coordonnées de la texture en coordonnées du terrain
-                float worldX = (x / (float)widthResolution) * terrain.terrainData.size.x;
-                float worldZ = (y / (float)widthResolution) * terrain.terrainData.size.z;
-
-                // Récupérer la hauteur du terrain à ces coordonnées
-                float terrainHeight = terrain.terrainData.GetHeight(
-                    Mathf.RoundToInt(worldX),
-                    Mathf.RoundToInt(worldZ)
-                );
-
-                // Normaliser la hauteur entre 0 et 1
-                float normalizedHeight = terrainHeight / terrain.terrainData.size.y;
-
-                // Appliquer la couleur basée sur la hauteur du terrain
-                Color biomeColor = GetBiomeColor(normalizedHeight);
-                texture.SetPixel(x, y, biomeColor);
+                // Récupérer la couleur du biome correspondant dans biomeCells
+                Color biomeColor = biomeCells[x, y].color;
+                // Remplir le tableau avec la hauteur souhaitée
+                for (int i = Mathf.RoundToInt(gridXOverResolution * x); i < Mathf.RoundToInt(gridXOverResolution * (x + 1)); i++)
+                {
+                    for (int j = Mathf.RoundToInt(gridYOverResolution * y); j < Mathf.RoundToInt(gridYOverResolution * (y + 1)); j++)
+                    {
+                        texture.SetPixel(i, j, biomeColor);
+                    }
+                }
             }
         }
-
         // Appliquer les changements sur la texture
         texture.Apply();
 
-        // Créer un TerrainLayer et assigner la texture à ce terrain
+        // Créer un TerrainLayer et assigner la texture au terrain
         TerrainLayer layer = new TerrainLayer
         {
             diffuseTexture = texture,
             tileSize = new Vector2(terrain.terrainData.size.x, terrain.terrainData.size.z)
         };
 
-        // Applique le TerrainLayer au terrain
+        // Appliquer le TerrainLayer au terrain
         terrain.terrainData.terrainLayers = new TerrainLayer[] { layer };
     }
 
-    Color GetBiomeColor(float heightValue)
+    void ConstructBiomeCells(int biomeCellX, int BiomeCellY, float heightValue)
     {
-        foreach (Biome biome in biomes)
+        if (biomeCells == null)
         {
-            if (heightValue >= biome.minHeight && heightValue <= biome.maxHeight)
+            biomeCells = new Biome[width, width];
+            // Initialiser chaque cellule avec un biome par défaut
+            for (int x = 0; x < width; x++)
             {
-                return biome.color;
+                for (int y = 0; y < width; y++)
+                {
+                    biomeCells[x, y] = new Biome(); // Crée une nouvelle instance par défaut
+                }
             }
         }
-        return Color.magenta; // Si aucun biome n'est trouvé (debug visuel)
+        foreach (BiomeParam biome in biomes)
+        {
+            if (heightValue >= biome.minHeight)
+            {
+                biomeCells[biomeCellX, BiomeCellY].name = biome.name;
+                biomeCells[biomeCellX, BiomeCellY].minHeight = biome.minHeight;
+                biomeCells[biomeCellX, BiomeCellY].color = biome.color;
+                biomeCells[biomeCellX, BiomeCellY].biomeHeight = biome.biomeHeight;
+                biomeCells[biomeCellX, BiomeCellY].noiseFactor = biome.noiseFactor;
+            }
+        }
     }
 
     void GenerateLogicalGrid()
