@@ -7,19 +7,21 @@ public enum TerrainSizeType { Petit, Moyen, Grand }
 [System.Serializable]
 public class BiomeParam
 {
-    public string name;                // Nom du biome (ex: "Plaine", "Montagne") 
+    public string name;                // Nom du biome (ex: "Plaine", "Montagne")
     [Range(0f, 1f)] public float minHeight;  // Hauteur minimale du biome
     [Range(0f, 1f)] public float biomeHeight;
     public Color color;                // Couleur associée
-    [Range(0f, 1f)] public float noiseFactor;
+    [Range(0f, 0.5f)] public float localScale = 0.1f; // Taille fixe des carrés
+    [Range(0f, 0.5f)] public float extraLocalScale = 0.1f; // Taille fixe des carrés
 }
 public class Biome
 {
-    public string name;                // Nom du biome (ex: "Plaine", "Montagne") 
-    [Range(0f, 1f)] public float minHeight;  // Hauteur minimale du biome
+    public string name;                // Nom du biome (ex: "Plaine", "Montagne")
+    public float minHeight;  // Hauteur minimale du biome
     public Color color;                // Couleur associée
-    [Range(0f, 1f)] public float noiseFactor;
     public float biomeHeight;
+    public float localScale = 0.1f; // Taille fixe des carrés
+    public float extraLocalScale = 0.1f; // Taille fixe des carrés
 }
 
 [ExecuteInEditMode]
@@ -42,6 +44,9 @@ public class TerrainGenerator : MonoBehaviour
     [Range(1f, 7f)] public float scale = 2f; // Taille fixe des carrés
     [Range(-100, 100)] public int offset = 0;
 
+    [Header("Textures")]
+    public TerrainLayer[] terrainLayers;
+
     private Terrain terrain;
     private GridCell[,] gridCells;
     private int width = 0;
@@ -53,7 +58,8 @@ public class TerrainGenerator : MonoBehaviour
         width = GetWidthFromType(terrainSize);
         terrain.terrainData = GenerateTerrainData(terrain.terrainData);
         GenerateLogicalGrid();
-        ApplyBiomeColors();
+        ApplyBiomeTextures();
+        // ApplyBiomeColors();
     }
 
     private int GetWidthFromType(TerrainSizeType type)
@@ -80,7 +86,8 @@ public class TerrainGenerator : MonoBehaviour
         width = GetWidthFromType(terrainSize);
         terrain.terrainData = GenerateTerrainData(terrain.terrainData);
         GenerateLogicalGrid();
-        ApplyBiomeColors();
+        ApplyBiomeTextures();
+        // ApplyBiomeColors();
     }
 
     TerrainData GenerateTerrainData(TerrainData terrainData)
@@ -91,7 +98,7 @@ public class TerrainGenerator : MonoBehaviour
         // GenerateHeights(terrainData);
         return terrainData;
     }
-    
+
     float[,] GenerateHeights(TerrainData terrainData)
     {
         int resolution = terrain.terrainData.heightmapResolution;
@@ -126,12 +133,60 @@ public class TerrainGenerator : MonoBehaviour
                 float biomeValue = biomeMap[y, x];
                 ConstructBiomeCells(y, x, biomeValue);
 
+                // Centre de la cellule actuelle
+                float centerX = (gridXOverResolution * (x + 0.5f));
+                float centerY = (gridYOverResolution * (y + 0.5f));
+
                 // Remplir le tableau avec la hauteur souhaitée
                 for (int i = Mathf.RoundToInt(gridXOverResolution * x); i < Mathf.RoundToInt(gridXOverResolution * (x + 1)); i++)
                 {
                     for (int j = Mathf.RoundToInt(gridYOverResolution * y); j < Mathf.RoundToInt(gridYOverResolution * (y + 1)); j++)
                     {
-                        heights[i, j] = Mathf.Clamp01(biomeCells[y, x].biomeHeight);
+                        // ------------------------ Interpolation avec les cellules voisines ------------------------
+                        float tx = (i - gridXOverResolution * x) / gridXOverResolution;
+                        float ty = (j - gridYOverResolution * y) / gridYOverResolution;
+
+                        float h00 = biomeCells[y, x].biomeHeight;
+                        float h10 = (x + 1 < gridX) ? biomeCells[y, x + 1].biomeHeight : h00;
+                        float h01 = (y + 1 < gridY) ? biomeCells[y + 1, x].biomeHeight : h00;
+                        float h11 = (x + 1 < gridX && y + 1 < gridY) ? biomeCells[y + 1, x + 1].biomeHeight : h00;
+
+                        // Bilinear interpolation
+                        float interpolatedHeight = Mathf.Lerp(
+                            Mathf.Lerp(h00, h10, tx),
+                            Mathf.Lerp(h01, h11, tx),
+                            ty
+                        );
+                        // -------------------------------------------------------------------------------------------
+
+                        // ------------------------ ajout détail ------------------------
+                        float perlinX = (i + offset) * scale * 0.1f;  // Ajustement pour éviter des valeurs trop brusques
+                        float perlinY = (j + offset) * scale * 0.1f;
+                        float noise = Mathf.PerlinNoise(perlinX, perlinY) * biomeCells[y, x].localScale;  // Modulation par noiseFactor
+
+                        interpolatedHeight += noise;  // Ajout du bruit de Perlin
+                        // ---------------------------------------------------------------
+
+                        // ------------------------ ajout extra détail au centre de la case ------------------------
+                        // Distance normalisée du point au centre de la cellule (0 au centre, ~1 sur les bords)
+                        float distToCenterX = Mathf.Abs(i - centerX) / (gridXOverResolution * 0.5f);
+                        float distToCenterY = Mathf.Abs(j - centerY) / (gridYOverResolution * 0.5f);
+                        float distToCenter = Mathf.Sqrt(distToCenterX * distToCenterX + distToCenterY * distToCenterY);
+
+                        // Appliquer une courbe pour lisser l'effet (ex: cosinus ou 1 - (x²))
+                        float attenuation = Mathf.Clamp01(1f - distToCenter * distToCenter); // Plus fort au centre
+
+                        // Second Perlin Noise pour encore plus de détail
+                        float perlinX2 = (i + offset) * scale * 0.2f;
+                        float perlinY2 = (j + offset) * scale * 0.2f;
+                        float extraDetail = Mathf.PerlinNoise(perlinX2, perlinY2) * biomeCells[y, x].extraLocalScale * attenuation;
+
+                        // Ajouter cet effet au terrain
+                        interpolatedHeight += extraDetail;
+                        // -----------------------------------------------------------------------------------------
+
+                        heights[i, j] = Mathf.Clamp01(interpolatedHeight);
+                        // heights[i, j] = Mathf.Clamp01(biomeCells[y, x].biomeHeight);
                     }
                 }
             }
@@ -183,6 +238,78 @@ public class TerrainGenerator : MonoBehaviour
         // Appliquer le TerrainLayer au terrain
         terrain.terrainData.terrainLayers = new TerrainLayer[] { layer };
     }
+    void ApplyBiomeTextures()
+    {
+        if (terrainLayers == null || terrainLayers.Length == 0)
+        {
+            Debug.LogError("Aucune texture assignée !");
+            return;
+        }
+
+        TerrainData terrainData = terrain.terrainData;
+        terrain.terrainData.terrainLayers = terrainLayers;
+        int resolution = terrainData.alphamapResolution;
+        float[,,] splatmapData = new float[resolution, resolution, terrainLayers.Length];
+
+        for (int y = 0; y < resolution; y++)
+        {
+            for (int x = 0; x < resolution; x++)
+            {
+                float normX = (float)x / (resolution - 1);
+                float normY = (float)y / (resolution - 1);
+
+                float height = terrainData.GetHeight(
+                    Mathf.RoundToInt(normY * (terrainData.heightmapResolution - 1)),
+                    Mathf.RoundToInt(normX * (terrainData.heightmapResolution - 1))
+                ) / depth;
+
+                // Trouver le biome correspondant
+                string biomeName = GetBiomeForHeight(height);
+                if (biomeName == null) continue;
+
+                // Appliquer la texture du biome
+                for (int i = 0; i < terrainLayers.Length; i++)
+                {
+                    splatmapData[x, y, i] = (biomeName == terrainLayers[i].name) ? 1f : 0f;
+                }
+            }
+        }
+
+        terrainData.SetAlphamaps(0, 0, splatmapData);
+    }
+
+    // Fonction qui interpole les poids entre les biomes
+    float[] GetBiomeWeights(float height)
+    {
+        float[] weights = new float[terrainLayers.Length];
+
+        for (int i = 0; i < biomes.Length; i++)
+        {
+            BiomeParam biome = biomes[i];
+
+            // Influence du biome en fonction de la hauteur
+            float distance = Mathf.Abs(height - biome.minHeight);
+            float influence = Mathf.Clamp01(1f - (distance / 0.1f)); // 0.1 = zone de transition
+
+            weights[i] = influence;
+        }
+
+        return weights;
+    }
+
+    string GetBiomeForHeight(float height)
+    {
+        string name = null;
+        foreach (BiomeParam biome in biomes)
+        {
+            if (height >= biome.biomeHeight)
+            {
+                name = biome.name;
+            }
+        }
+        if (name != null) return name;
+        else return null;
+    }
 
     void ConstructBiomeCells(int biomeCellX, int BiomeCellY, float heightValue)
     {
@@ -206,7 +333,8 @@ public class TerrainGenerator : MonoBehaviour
                 biomeCells[biomeCellX, BiomeCellY].minHeight = biome.minHeight;
                 biomeCells[biomeCellX, BiomeCellY].color = biome.color;
                 biomeCells[biomeCellX, BiomeCellY].biomeHeight = biome.biomeHeight;
-                biomeCells[biomeCellX, BiomeCellY].noiseFactor = biome.noiseFactor;
+                biomeCells[biomeCellX, BiomeCellY].localScale = biome.localScale;
+                biomeCells[biomeCellX, BiomeCellY].extraLocalScale = biome.extraLocalScale;
             }
         }
     }
@@ -246,9 +374,11 @@ public class TerrainGenerator : MonoBehaviour
 
     void OnDrawGizmos()
     {
-        if (gridCells == null) return;
+        if (gridCells == null || terrain == null) return;
 
         Gizmos.color = gridColor;
+        TerrainData terrainData = terrain.terrainData;
+        int resolution = terrainData.heightmapResolution - 1;
 
         int gridX = gridCells.GetLength(0) - 1;
         int gridY = gridCells.GetLength(1) - 1;
@@ -257,37 +387,37 @@ public class TerrainGenerator : MonoBehaviour
         {
             for (int y = 0; y <= gridY; y++)
             {
-                Vector3 current = gridCells[x, y].position + Vector3.up * gridHeight;
+                Vector3 current = GetTerrainPoint(gridCells[x, y].position, terrainData, resolution);
 
                 // Ligne horizontale (vers la droite)
                 if (x < gridX)
                 {
-                    Vector3 right = gridCells[x + 1, y].position + Vector3.up * gridHeight;
+                    Vector3 right = GetTerrainPoint(gridCells[x + 1, y].position, terrainData, resolution);
                     Gizmos.DrawLine(current, right);
                 }
 
                 // Ligne verticale (vers le haut)
                 if (y < gridY)
                 {
-                    Vector3 top = gridCells[x, y + 1].position + Vector3.up * gridHeight;
+                    Vector3 top = GetTerrainPoint(gridCells[x, y + 1].position, terrainData, resolution);
                     Gizmos.DrawLine(current, top);
-                }
-
-                // Bordure droite
-                if (x == gridX && y < gridY)
-                {
-                    Vector3 top = gridCells[x, y + 1].position + Vector3.up * gridHeight;
-                    Gizmos.DrawLine(current, top);
-                }
-
-                // Bordure supérieure
-                if (y == gridY && x < gridX)
-                {
-                    Vector3 right = gridCells[x + 1, y].position + Vector3.up * gridHeight;
-                    Gizmos.DrawLine(current, right);
                 }
             }
         }
+    }
+
+    // Récupère un point ajusté à la hauteur du terrain
+    Vector3 GetTerrainPoint(Vector3 position, TerrainData terrainData, int resolution)
+    {
+        float normalizedX = position.x / terrainData.size.x;
+        float normalizedZ = position.z / terrainData.size.z;
+
+        float height = terrainData.GetHeight(
+            Mathf.RoundToInt(normalizedX * resolution),
+            Mathf.RoundToInt(normalizedZ * resolution)
+        );
+
+        return new Vector3(position.x, height + gridHeight, position.z);
     }
 
     public class GridCell
