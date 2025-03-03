@@ -408,9 +408,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6d435863156d3704c842847d65831940, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  terrainSize: 1
-  detailLevel: 100
-  depth: 10
+  terrainSize: 2
+  detailLevel: 52
+  depth: 20
   biomes:
   - name: Ocean
     minHeight: 0
@@ -419,33 +419,35 @@ MonoBehaviour:
     localScale: 0
     extraLocalScale: 0
   - name: Plaine
-    minHeight: 0.199
-    biomeHeight: 0.126
+    minHeight: 0.327
+    biomeHeight: 0.221
     color: {r: 0.33285868, g: 0.8301887, b: 0.40502024, a: 1}
-    localScale: 0.039
-    extraLocalScale: 0.049
+    localScale: 0.058
+    extraLocalScale: 0.013
   - name: Montagne
     minHeight: 0.594
-    biomeHeight: 0.315
+    biomeHeight: 0.155
     color: {r: 0.5283019, g: 0.48560828, b: 0.38625848, a: 1}
-    localScale: 0.145
-    extraLocalScale: 0.147
+    localScale: 0.242
+    extraLocalScale: 0.116
   - name: Neige
     minHeight: 0.788
-    biomeHeight: 0.511
+    biomeHeight: 0.465
     color: {r: 1, g: 1, b: 1, a: 0.41960785}
-    localScale: 0.185
-    extraLocalScale: 0.2
-  cellSize: 5
+    localScale: 0.226
+    extraLocalScale: 0.144
+  cellSize: 10
   gridHeight: 0.15
   gridColor: {r: 0.13207549, g: 0.1277145, b: 0.1277145, a: 0.3764706}
-  scale: 5.09
-  offset: 30
+  scale: 4.26
+  offset: -2
   terrainLayers:
   - {fileID: 8574412962073106934, guid: cec3d07c4fbc87245bce89e999f87762, type: 2}
   - {fileID: 8574412962073106934, guid: db602826f3b701640a05fe1875f0e284, type: 2}
   - {fileID: 8574412962073106934, guid: aa97d06318ba44647ab6201df57ba238, type: 2}
   - {fileID: 8574412962073106934, guid: fc04da73f9b480e4986555d16cf774a5, type: 2}
+  borderSize: 0.077
+  logBase: 1.42
 --- !u!154 &541734035
 TerrainCollider:
   m_ObjectHideFlags: 0

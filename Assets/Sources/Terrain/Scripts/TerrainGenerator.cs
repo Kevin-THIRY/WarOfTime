@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEditor;
 using System;
+using System.Collections.Generic;
 
 public enum TerrainSizeType { Petit, Moyen, Grand }
 
@@ -46,6 +47,8 @@ public class TerrainGenerator : MonoBehaviour
 
     [Header("Textures")]
     public TerrainLayer[] terrainLayers;
+    [Range(0f, 0.5f)] public float borderSize = 0.1f;
+    [Range(0.01f, 5f)] public float logBase = 2.5f;
 
     private Terrain terrain;
     private GridCell[,] gridCells;
@@ -238,6 +241,13 @@ public class TerrainGenerator : MonoBehaviour
         // Appliquer le TerrainLayer au terrain
         terrain.terrainData.terrainLayers = new TerrainLayer[] { layer };
     }
+
+    float LogarithmicBlend(float distance, float maxDistance, float baseLog = 2f)
+    {
+        float normalizedDist = Mathf.Clamp01(distance / maxDistance);
+        return 1f - (Mathf.Log(normalizedDist * (baseLog - 1) + 1, baseLog));
+    }
+
     void ApplyBiomeTextures()
     {
         if (terrainLayers == null || terrainLayers.Length == 0)
@@ -248,67 +258,106 @@ public class TerrainGenerator : MonoBehaviour
 
         TerrainData terrainData = terrain.terrainData;
         terrain.terrainData.terrainLayers = terrainLayers;
-        int resolution = terrainData.alphamapResolution;
-        float[,,] splatmapData = new float[resolution, resolution, terrainLayers.Length];
+        int textureResolution = terrainData.alphamapResolution;
+        float[,,] splatmapData = new float[textureResolution, textureResolution, terrainLayers.Length];
 
-        for (int y = 0; y < resolution; y++)
+        // Calcule le nombre de cellules pour remplir la map au mieux
+        int gridX = Mathf.RoundToInt(width / cellSize);
+        int gridY = Mathf.RoundToInt(width / cellSize);
+
+        float gridXOverResolution = textureResolution / (float)gridX;
+        float gridYOverResolution = textureResolution / (float)gridY;
+
+        for (int y = 0; y < gridY; y++)
         {
-            for (int x = 0; x < resolution; x++)
+            for (int x = 0; x < gridX; x++)
             {
-                float normX = (float)x / (resolution - 1);
-                float normY = (float)y / (resolution - 1);
+                // Récupérer la couleur du biome correspondant dans biomeCells
+                string biomeName = biomeCells[y, x].name;
 
-                float height = terrainData.GetHeight(
-                    Mathf.RoundToInt(normY * (terrainData.heightmapResolution - 1)),
-                    Mathf.RoundToInt(normX * (terrainData.heightmapResolution - 1))
-                ) / depth;
+                // Récupérer les biomes des cellules adjacentes
+                string biomeLeft = (x > 0) ? biomeCells[y, x - 1].name : biomeName;
+                string biomeRight = (x < gridX - 1) ? biomeCells[y, x + 1].name : biomeName;
+                string biomeTop = (y < gridY - 1) ? biomeCells[y + 1, x].name : biomeName;
+                string biomeBottom = (y > 0) ? biomeCells[y - 1, x].name : biomeName;
 
-                // Trouver le biome correspondant
-                string biomeName = GetBiomeForHeight(height);
-                if (biomeName == null) continue;
+                string biomeTopLeft = (x > 0 && y < gridY - 1) ? biomeCells[y + 1, x - 1].name : biomeName;
+                string biomeTopRight = (x < gridX - 1 && y < gridY - 1) ? biomeCells[y + 1, x + 1].name : biomeName;
+                string biomeBottomLeft = (x > 0 && y > 0) ? biomeCells[y - 1, x - 1].name : biomeName;
+                string biomeBottomRight = (x < gridX - 1 && y > 0) ? biomeCells[y - 1, x + 1].name : biomeName;
 
-                // Appliquer la texture du biome
-                for (int i = 0; i < terrainLayers.Length; i++)
+                // Remplir le tableau avec la hauteur souhaitée
+                for (int i = Mathf.RoundToInt(gridXOverResolution * x); i < Mathf.RoundToInt(gridXOverResolution * (x + 1)); i++)
                 {
-                    splatmapData[x, y, i] = (biomeName == terrainLayers[i].name) ? 1f : 0f;
+                    for (int j = Mathf.RoundToInt(gridYOverResolution * y); j < Mathf.RoundToInt(gridYOverResolution * (y + 1)); j++)
+                    {
+                        if (borderSize != 0)
+                        {
+                            float relativeX = (i - Mathf.RoundToInt(gridXOverResolution * x)) / (float)(Mathf.RoundToInt(gridXOverResolution * (x + 1)) - Mathf.RoundToInt(gridXOverResolution * x));
+                            float relativeY = (j - Mathf.RoundToInt(gridYOverResolution * y)) / (float)(Mathf.RoundToInt(gridYOverResolution * (y + 1)) - Mathf.RoundToInt(gridYOverResolution * y));
+
+                            // Trouver la distance la plus proche à un bord
+                            float distLeft = relativeX;
+                            float distRight = 1f - relativeX;
+                            float distTop = 1f - relativeY;
+                            float distBottom = relativeY;
+
+                            // Distance à chaque coin (normée entre 0 et 1)
+                            float distTopLeft = Mathf.Sqrt(distLeft * distLeft + distTop * distTop);
+                            float distTopRight = Mathf.Sqrt(distRight * distRight + distTop * distTop);
+                            float distBottomLeft = Mathf.Sqrt(distLeft * distLeft + distBottom * distBottom);
+                            float distBottomRight = Mathf.Sqrt(distRight * distRight + distBottom * distBottom);
+
+                            // Application de la transition logarithmique
+                            float weightCenter = 1f;
+                            float weightLeft = LogarithmicBlend(distLeft, borderSize, logBase);
+                            float weightRight = LogarithmicBlend(distRight, borderSize, logBase);
+                            float weightTop = LogarithmicBlend(distTop, borderSize, logBase);
+                            float weightBottom = LogarithmicBlend(distBottom, borderSize, logBase);
+
+                            float weightTopLeft = LogarithmicBlend(distTopLeft, borderSize, logBase);
+                            float weightTopRight = LogarithmicBlend(distTopRight, borderSize, logBase);
+                            float weightBottomLeft = LogarithmicBlend(distBottomLeft, borderSize, logBase);
+                            float weightBottomRight = LogarithmicBlend(distBottomRight, borderSize, logBase);
+
+                            // Appliquer les poids aux textures
+                            for (int k = 0; k < terrainLayers.Length; k++)
+                            {
+                                string textureName = terrainLayers[k].name;
+
+                                if (textureName == biomeName)
+                                    splatmapData[i, j, k] += weightCenter;
+                                if (textureName == biomeLeft)
+                                    splatmapData[i, j, k] += weightLeft;
+                                if (textureName == biomeRight)
+                                    splatmapData[i, j, k] += weightRight;
+                                if (textureName == biomeTop)
+                                    splatmapData[i, j, k] += weightTop;
+                                if (textureName == biomeBottom)
+                                    splatmapData[i, j, k] += weightBottom;
+                                if (textureName == biomeTopLeft)
+                                splatmapData[i, j, k] += weightTopLeft;
+                                if (textureName == biomeTopRight)
+                                    splatmapData[i, j, k] += weightTopRight;
+                                if (textureName == biomeBottomLeft)
+                                    splatmapData[i, j, k] += weightBottomLeft;
+                                if (textureName == biomeBottomRight)
+                                    splatmapData[i, j, k] += weightBottomRight;
+                            }
+                        }
+                        else
+                        {
+                            // Appliquer la texture du biome
+                            for (int k = 0; k < terrainLayers.Length; k++)
+                            {
+                                splatmapData[i, j, k] = (biomeName == terrainLayers[k].name) ? 1f : 0f;
+                            }
+                        }
+                    }
                 }
             }
         }
-
         terrainData.SetAlphamaps(0, 0, splatmapData);
-    }
-
-    // Fonction qui interpole les poids entre les biomes
-    float[] GetBiomeWeights(float height)
-    {
-        float[] weights = new float[terrainLayers.Length];
-
-        for (int i = 0; i < biomes.Length; i++)
-        {
-            BiomeParam biome = biomes[i];
-
-            // Influence du biome en fonction de la hauteur
-            float distance = Mathf.Abs(height - biome.minHeight);
-            float influence = Mathf.Clamp01(1f - (distance / 0.1f)); // 0.1 = zone de transition
-
-            weights[i] = influence;
-        }
-
-        return weights;
-    }
-
-    string GetBiomeForHeight(float height)
-    {
-        string name = null;
-        foreach (BiomeParam biome in biomes)
-        {
-            if (height >= biome.biomeHeight)
-            {
-                name = biome.name;
-            }
-        }
-        if (name != null) return name;
-        else return null;
     }
 
     void ConstructBiomeCells(int biomeCellX, int BiomeCellY, float heightValue)
