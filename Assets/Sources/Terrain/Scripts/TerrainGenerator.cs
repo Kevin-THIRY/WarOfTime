@@ -50,6 +50,9 @@ public class TerrainGenerator : MonoBehaviour
     [Range(0f, 0.5f)] public float borderSize = 0.1f;
     [Range(0.01f, 5f)] public float logBase = 2.5f;
 
+    [Header("Water Material")]
+    public Material waterMaterial = null;
+
     private Terrain terrain;
     private GridCell[,] gridCells;
     private int width = 0;
@@ -61,8 +64,8 @@ public class TerrainGenerator : MonoBehaviour
         width = GetWidthFromType(terrainSize);
         terrain.terrainData = GenerateTerrainData(terrain.terrainData);
         GenerateLogicalGrid();
-        ApplyBiomeTextures();
-        // ApplyBiomeColors();
+        // ApplyBiomeTextures();
+        ApplyBiomeColors();
     }
 
     private int GetWidthFromType(TerrainSizeType type)
@@ -89,8 +92,15 @@ public class TerrainGenerator : MonoBehaviour
         width = GetWidthFromType(terrainSize);
         terrain.terrainData = GenerateTerrainData(terrain.terrainData);
         GenerateLogicalGrid();
+        // ApplyBiomeTextures();
+        ApplyBiomeColors();
+    }
+
+    public void ApplyTextures()
+    {
         ApplyBiomeTextures();
-        // ApplyBiomeColors();
+        CreateGroundBlock();
+        
     }
 
     TerrainData GenerateTerrainData(TerrainData terrainData)
@@ -98,7 +108,6 @@ public class TerrainGenerator : MonoBehaviour
         terrainData.heightmapResolution = width + 1;
         terrainData.size = new Vector3(width, depth, width);
         terrainData.SetHeights(0, 0, GenerateHeights(terrainData));
-        // GenerateHeights(terrainData);
         return terrainData;
     }
 
@@ -200,6 +209,7 @@ public class TerrainGenerator : MonoBehaviour
     void ApplyBiomeColors()
     {
         if (gridCells == null || biomeCells == null) return;
+        terrain.terrainData.terrainLayers = new TerrainLayer[0];
 
         // Récupérer la résolution complète du terrain
         int resolution = terrain.terrainData.heightmapResolution;
@@ -330,9 +340,9 @@ public class TerrainGenerator : MonoBehaviour
                                 if (textureName == biomeLeft)
                                     splatmapData[i, j, k] += weightLeft;
                                 if (textureName == biomeRight)
-                                    splatmapData[i, j, k] += weightRight;
+                                    splatmapData[i, j, k] += 1 - weightRight;
                                 if (textureName == biomeTop)
-                                    splatmapData[i, j, k] += weightTop;
+                                    splatmapData[i, j, k] += 1 - weightTop;
                                 if (textureName == biomeBottom)
                                     splatmapData[i, j, k] += weightBottom;
                                 if (textureName == biomeTopLeft)
@@ -455,6 +465,116 @@ public class TerrainGenerator : MonoBehaviour
         }
     }
 
+    void CreateGroundBlock()
+    {
+        // Création du GameObject
+        string waterObjectName = "Water";
+        float minHeight = depth * (biomes[0].biomeHeight + biomes[1].biomeHeight) / 2;
+
+        // Vérifier si l'objet existe déjà
+        Transform existingBlock = transform.Find(waterObjectName);
+        if (existingBlock != null)
+        {
+            existingBlock.position = new Vector3(0, minHeight, 0);
+            return;
+        }
+        // Création du GameObject
+        GameObject groundBlock = new GameObject(waterObjectName);
+        groundBlock.transform.parent = transform; // Assigner le parent
+        groundBlock.transform.localPosition = new Vector3(0, minHeight, 0);
+        
+        // Ajout du MeshFilter et du MeshRenderer
+        MeshFilter meshFilter = groundBlock.AddComponent<MeshFilter>();
+        MeshRenderer meshRenderer = groundBlock.AddComponent<MeshRenderer>();
+        
+        // Définition des sommets du bloc (un simple plan avec 4 sommets)
+        Vector3[] vertices = new Vector3[]
+        {
+            new Vector3(0, minHeight, 0),
+            new Vector3(width, minHeight, 0),
+            new Vector3(0, minHeight, width),
+            new Vector3(width, minHeight, width)
+        };
+
+        // Définition des triangles (2 triangles pour un quad)
+        int[] triangles = new int[]
+        {
+            0, 2, 1, // Premier triangle
+            2, 3, 1  // Deuxième triangle
+        };
+
+        // Définition des UVs pour le mapping de texture
+        Vector2[] uvs = new Vector2[]
+        {
+            new Vector2(0, 0),
+            new Vector2(1, 0),
+            new Vector2(0, 1),
+            new Vector2(1, 1)
+        };
+
+        // Création du mesh
+        Mesh mesh = new Mesh();
+        mesh.vertices = vertices;
+        mesh.triangles = triangles;
+        mesh.uv = uvs;
+        mesh.RecalculateNormals();
+
+        // Application du mesh
+        meshFilter.mesh = mesh;
+        
+        // Application du Material
+        meshRenderer.material = waterMaterial;
+    }
+
+    void GenerateTreesOnPlains(Terrain terrain, string biomeName, int treesPerCell, float minSpacing, GameObject treePrefab)
+    {
+        TerrainData terrainData = terrain.terrainData;
+        
+        // Récupérer la résolution et la taille du terrain
+        int terrainWidth = Mathf.RoundToInt(terrainData.size.x);
+        int terrainLength = Mathf.RoundToInt(terrainData.size.z);
+        float cellSize = terrainWidth / biomeCells.GetLength(0); // Taille d'une cellule
+
+        List<TreeInstance> trees = new List<TreeInstance>();
+
+        for (int y = 0; y < biomeCells.GetLength(1); y++)
+        {
+            for (int x = 0; x < biomeCells.GetLength(0); x++)
+            {
+                if (biomeCells[y, x].name == biomeName) // Vérifier si la cellule est une plaine
+                {
+                    for (int i = 0; i < treesPerCell; i++)
+                    {
+                        // Position aléatoire dans la cellule
+                        float randomX = UnityEngine.Random.Range(x * cellSize, (x + 1) * cellSize);
+                        float randomZ = UnityEngine.Random.Range(y * cellSize, (y + 1) * cellSize);
+                        
+                        // Récupérer la hauteur du terrain à cette position
+                        float height = terrain.SampleHeight(new Vector3(randomX, 0, randomZ));
+                        Vector3 worldPosition = new Vector3(randomX, height, randomZ);
+                        
+                        // Ajouter un arbre à l'instance du terrain
+                        TreeInstance tree = new TreeInstance
+                        {
+                            position = new Vector3(worldPosition.x / terrainWidth, worldPosition.y / terrainData.size.y, worldPosition.z / terrainLength),
+                            prototypeIndex = 0, // L'index du type d'arbre défini dans le terrain
+                            widthScale = UnityEngine.Random.Range(0.8f, 1.2f),
+                            heightScale = UnityEngine.Random.Range(0.8f, 1.2f),
+                            color = Color.white,
+                            lightmapColor = Color.white
+                        };
+
+                        trees.Add(tree);
+                    }
+                }
+            }
+        }
+
+        // Appliquer la liste d'arbres au terrain
+        terrainData.treeInstances = trees.ToArray();
+    }
+
+
     // Récupère un point ajusté à la hauteur du terrain
     Vector3 GetTerrainPoint(Vector3 position, TerrainData terrainData, int resolution)
     {
@@ -491,6 +611,10 @@ public class TerrainGeneratorEditor : Editor
         if (GUILayout.Button("Générer la map"))
         {
             generator.GenerateTerrain();
+        }
+        if (GUILayout.Button("Générer les textures"))
+        {
+            generator.ApplyTextures();
         }
     }
 }
