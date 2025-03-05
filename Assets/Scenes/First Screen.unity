@@ -580,25 +580,25 @@ MonoBehaviour:
   - name: Ocean
     minHeight: 0
     biomeHeight: 0
-    color: {r: 0.12927197, g: 0.7830189, b: 0.7579364, a: 1}
+    color: {r: 0.766, g: 0.61280006, b: 0, a: 0}
     localScale: 0
     extraLocalScale: 0
   - name: Plaine
     minHeight: 0.377
     biomeHeight: 0.209
-    color: {r: 0.33285868, g: 0.8301887, b: 0.40502024, a: 1}
+    color: {r: 0, g: 0.589, b: 0.083480276, a: 0}
     localScale: 0.053
     extraLocalScale: 0
   - name: Montagne
     minHeight: 0.555
     biomeHeight: 0.321
-    color: {r: 0.5283019, g: 0.48560828, b: 0.38625848, a: 1}
+    color: {r: 0.638, g: 0.44832426, b: 0, a: 0}
     localScale: 0.128
     extraLocalScale: 0.064
   - name: Neige
     minHeight: 0.739
-    biomeHeight: 0.537
-    color: {r: 1, g: 1, b: 1, a: 0.41960785}
+    biomeHeight: 0.394
+    color: {r: 1, g: 1, b: 1, a: 0}
     localScale: 0.214
     extraLocalScale: 0.244
   cellSize: 5

@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEditor;
 using System;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 
 public enum TerrainSizeType { Petit, Moyen, Grand }
 
@@ -38,7 +39,6 @@ public class TerrainGenerator : MonoBehaviour
 
     [Header("Grid Settings")]
     public float cellSize = 5f; // Taille fixe des carrés
-    public float gridHeight = 1f;
     public Color gridColor = Color.black;
 
     [Header("Noise Settings")]
@@ -370,7 +370,7 @@ public class TerrainGenerator : MonoBehaviour
         terrainData.SetAlphamaps(0, 0, splatmapData);
     }
 
-    void ConstructBiomeCells(int biomeCellX, int BiomeCellY, float heightValue)
+    void ConstructBiomeCells(int biomeCellX, int biomeCellY, float heightValue)
     {
         if (biomeCells == null)
         {
@@ -388,12 +388,12 @@ public class TerrainGenerator : MonoBehaviour
         {
             if (heightValue >= biome.minHeight)
             {
-                biomeCells[biomeCellX, BiomeCellY].name = biome.name;
-                biomeCells[biomeCellX, BiomeCellY].minHeight = biome.minHeight;
-                biomeCells[biomeCellX, BiomeCellY].color = biome.color;
-                biomeCells[biomeCellX, BiomeCellY].biomeHeight = biome.biomeHeight;
-                biomeCells[biomeCellX, BiomeCellY].localScale = biome.localScale;
-                biomeCells[biomeCellX, BiomeCellY].extraLocalScale = biome.extraLocalScale;
+                biomeCells[biomeCellX, biomeCellY].name = biome.name;
+                biomeCells[biomeCellX, biomeCellY].minHeight = biome.minHeight;
+                biomeCells[biomeCellX, biomeCellY].color = biome.color;
+                biomeCells[biomeCellX, biomeCellY].biomeHeight = biome.biomeHeight;
+                biomeCells[biomeCellX, biomeCellY].localScale = biome.localScale;
+                biomeCells[biomeCellX, biomeCellY].extraLocalScale = biome.extraLocalScale;
             }
         }
     }
@@ -427,41 +427,79 @@ public class TerrainGenerator : MonoBehaviour
                 );
 
                 gridCells[x, y] = new GridCell(new Vector3(worldX, terrainHeight, worldZ));
+                gridCells[x, y].biomeName = biomeCells[x, y].name;
             }
         }
     }
-
     void OnDrawGizmos()
     {
         if (gridCells == null || terrain == null) return;
 
         Gizmos.color = gridColor;
         TerrainData terrainData = terrain.terrainData;
-        int resolution = terrainData.heightmapResolution - 1;
-
+        Vector3 terrainPosition = terrain.transform.position;
+        
         int gridX = gridCells.GetLength(0) - 1;
         int gridY = gridCells.GetLength(1) - 1;
+        
+        int segmentCount = 15; // Nombre de segments pour lisser les lignes
+        float minWaterHeight = depth * (biomes[0].biomeHeight + biomes[1].biomeHeight) / 2;
 
         for (int x = 0; x <= gridX; x++)
         {
             for (int y = 0; y <= gridY; y++)
             {
-                Vector3 current = GetTerrainPoint(gridCells[x, y].position, terrainData, resolution);
+                Vector3 start = gridCells[x, y].position;
+                start.y = terrain.SampleHeight(start) + terrainPosition.y + 0.05f;
+
+                // Vérifier si le point est sous l'eau
+                if (start.y < minWaterHeight) continue;
 
                 // Ligne horizontale (vers la droite)
                 if (x < gridX)
                 {
-                    Vector3 right = GetTerrainPoint(gridCells[x + 1, y].position, terrainData, resolution);
-                    Gizmos.DrawLine(current, right);
+                    Vector3 end = gridCells[x + 1, y].position;
+                    end.y = terrain.SampleHeight(end) + terrainPosition.y + 0.05f;
+
+                    if (end.y >= minWaterHeight)
+                        DrawCurvedLine(start, end, segmentCount, minWaterHeight);
+                    // DrawCurvedLine(start, end, segmentCount);
                 }
 
                 // Ligne verticale (vers le haut)
                 if (y < gridY)
                 {
-                    Vector3 top = GetTerrainPoint(gridCells[x, y + 1].position, terrainData, resolution);
-                    Gizmos.DrawLine(current, top);
+                    Vector3 end = gridCells[x, y + 1].position;
+                    end.y = terrain.SampleHeight(end) + terrainPosition.y + 0.05f;
+                    
+                    if (end.y >= minWaterHeight)
+                        DrawCurvedLine(start, end, segmentCount, minWaterHeight);
+                    // DrawCurvedLine(start, end, segmentCount);
                 }
             }
+        }
+    }
+
+    /// <summary>
+    /// Trace une ligne courbée entre deux points en échantillonnant le terrain
+    /// </summary>
+    void DrawCurvedLine(Vector3 start, Vector3 end, int segments, float minWaterHeight)
+    {
+        Vector3 previousPoint = start;
+
+        for (int i = 1; i <= segments; i++)
+        {
+            float t = i / (float)segments; // Interpolation entre 0 et 1
+            Vector3 point = Vector3.Lerp(start, end, t);
+
+            // Ajuster la hauteur pour suivre la forme du terrain
+            point.y = terrain.SampleHeight(point) + terrain.transform.position.y + 0.05f;
+
+            // Vérifier si le point est sous l'eau, ne pas tracer la ligne
+            if (point.y < minWaterHeight) return;
+
+            Gizmos.DrawLine(previousPoint, point);
+            previousPoint = point;
         }
     }
 
@@ -469,19 +507,19 @@ public class TerrainGenerator : MonoBehaviour
     {
         // Création du GameObject
         string waterObjectName = "Water";
-        float minHeight = depth * (biomes[0].biomeHeight + biomes[1].biomeHeight) / 2;
+        float minWaterHeight = depth * (biomes[0].biomeHeight + biomes[1].biomeHeight) / 2;
 
         // Vérifier si l'objet existe déjà
         Transform existingBlock = transform.Find(waterObjectName);
         if (existingBlock != null)
         {
-            existingBlock.position = new Vector3(0, minHeight, 0);
+            existingBlock.position = new Vector3(0, minWaterHeight, 0);
             return;
         }
         // Création du GameObject
         GameObject groundBlock = new GameObject(waterObjectName);
         groundBlock.transform.parent = transform; // Assigner le parent
-        groundBlock.transform.localPosition = new Vector3(0, minHeight, 0);
+        groundBlock.transform.localPosition = new Vector3(0, minWaterHeight, 0);
         
         // Ajout du MeshFilter et du MeshRenderer
         MeshFilter meshFilter = groundBlock.AddComponent<MeshFilter>();
@@ -490,10 +528,10 @@ public class TerrainGenerator : MonoBehaviour
         // Définition des sommets du bloc (un simple plan avec 4 sommets)
         Vector3[] vertices = new Vector3[]
         {
-            new Vector3(0, minHeight, 0),
-            new Vector3(width, minHeight, 0),
-            new Vector3(0, minHeight, width),
-            new Vector3(width, minHeight, width)
+            new Vector3(0, minWaterHeight, 0),
+            new Vector3(width, minWaterHeight, 0),
+            new Vector3(0, minWaterHeight, width),
+            new Vector3(width, minWaterHeight, width)
         };
 
         // Définition des triangles (2 triangles pour un quad)
@@ -574,30 +612,21 @@ public class TerrainGenerator : MonoBehaviour
         terrainData.treeInstances = trees.ToArray();
     }
 
-
-    // Récupère un point ajusté à la hauteur du terrain
-    Vector3 GetTerrainPoint(Vector3 position, TerrainData terrainData, int resolution)
-    {
-        float normalizedX = position.x / terrainData.size.x;
-        float normalizedZ = position.z / terrainData.size.z;
-
-        float height = terrainData.GetHeight(
-            Mathf.RoundToInt(normalizedX * resolution),
-            Mathf.RoundToInt(normalizedZ * resolution)
-        );
-
-        return new Vector3(position.x, height + gridHeight, position.z);
-    }
-
     public class GridCell
     {
         public Vector3 position;
+        public ResourcesType resourceType;
+        public string biomeName;
 
         public GridCell(Vector3 position)
         {
             this.position = position;
         }
     }
+
+    #region Getter
+    public GridCell[,] GetGridCells() { return gridCells; }
+    #endregion
 }
 
 [CustomEditor(typeof(TerrainGenerator))]
