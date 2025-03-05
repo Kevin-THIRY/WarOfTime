@@ -584,14 +584,14 @@ MonoBehaviour:
     localScale: 0
     extraLocalScale: 0
   - name: Plaine
-    minHeight: 0.377
+    minHeight: 0.36
     biomeHeight: 0.209
     color: {r: 0, g: 0.589, b: 0.083480276, a: 0}
     localScale: 0.053
     extraLocalScale: 0
   - name: Montagne
     minHeight: 0.555
-    biomeHeight: 0.321
+    biomeHeight: 0.366
     color: {r: 0.638, g: 0.44832426, b: 0, a: 0}
     localScale: 0.128
     extraLocalScale: 0.064
@@ -602,8 +602,7 @@ MonoBehaviour:
     localScale: 0.214
     extraLocalScale: 0.244
   cellSize: 5
-  gridHeight: 0.15
-  gridColor: {r: 0.13207549, g: 0.1277145, b: 0.1277145, a: 0.3764706}
+  gridColor: {r: 0.29799998, g: 0.29799998, b: 0.29799998, a: 0.3764706}
   scale: 4.48
   offset: 27
   terrainLayers:
