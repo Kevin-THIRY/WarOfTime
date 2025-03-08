@@ -15,11 +15,5 @@ public class ResourcesGeneratorEditor : Editor
         {
             myTarget.AddTreesToGrid();
         }
-
-        // Ajouter un bouton pour supprimer tous les arbres
-        if (GUILayout.Button("Delete All Trees"))
-        {
-            myTarget.DeleteAllTrees();
-        }
     }
 }

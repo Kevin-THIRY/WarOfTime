@@ -704,10 +704,10 @@ MonoBehaviour:
   treePrefab: {fileID: 5935278547815300987, guid: e05ae677c7b3bc546bd36b488586fb0c, type: 3}
   farmPrefab: {fileID: 0}
   minePrefab: {fileID: 0}
-  treeSize: 0.2
-  treeCount: 2
-  treeRotationMin: 0
-  treeRotationMax: 360
+  minTreeSize: 0.123
+  maxTreeSize: 0.257
+  treesPerCell: 16
+  centerBias: 0.261
 --- !u!1 &832575517
 GameObject:
   m_ObjectHideFlags: 0
