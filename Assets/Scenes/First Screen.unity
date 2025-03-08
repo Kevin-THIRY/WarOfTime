@@ -554,6 +554,7 @@ GameObject:
   - component: {fileID: 541734036}
   - component: {fileID: 541734035}
   - component: {fileID: 541734034}
+  - component: {fileID: 541734038}
   m_Layer: 0
   m_Name: Terrain
   m_TagString: Untagged
@@ -577,41 +578,40 @@ MonoBehaviour:
   detailLevel: 56
   depth: 10
   biomes:
-  - name: Ocean
+  - name: 0
     minHeight: 0
     biomeHeight: 0
     color: {r: 0.766, g: 0.61280006, b: 0, a: 0}
+    terrainLayer: {fileID: 8574412962073106934, guid: cec3d07c4fbc87245bce89e999f87762, type: 2}
     localScale: 0
     extraLocalScale: 0
-  - name: Plaine
+  - name: 1
     minHeight: 0.36
     biomeHeight: 0.209
     color: {r: 0, g: 0.589, b: 0.083480276, a: 0}
+    terrainLayer: {fileID: 8574412962073106934, guid: db602826f3b701640a05fe1875f0e284, type: 2}
     localScale: 0.053
     extraLocalScale: 0
-  - name: Montagne
-    minHeight: 0.555
+  - name: 2
+    minHeight: 0.549
     biomeHeight: 0.366
     color: {r: 0.638, g: 0.44832426, b: 0, a: 0}
+    terrainLayer: {fileID: 8574412962073106934, guid: aa97d06318ba44647ab6201df57ba238, type: 2}
     localScale: 0.128
-    extraLocalScale: 0.064
-  - name: Neige
-    minHeight: 0.739
+    extraLocalScale: 0.131
+  - name: 3
+    minHeight: 0.717
     biomeHeight: 0.394
     color: {r: 1, g: 1, b: 1, a: 0}
+    terrainLayer: {fileID: 8574412962073106934, guid: fc04da73f9b480e4986555d16cf774a5, type: 2}
     localScale: 0.214
     extraLocalScale: 0.244
   cellSize: 5
   gridColor: {r: 0.29799998, g: 0.29799998, b: 0.29799998, a: 0.3764706}
   scale: 4.48
   offset: 27
-  terrainLayers:
-  - {fileID: 8574412962073106934, guid: cec3d07c4fbc87245bce89e999f87762, type: 2}
-  - {fileID: 8574412962073106934, guid: db602826f3b701640a05fe1875f0e284, type: 2}
-  - {fileID: 8574412962073106934, guid: aa97d06318ba44647ab6201df57ba238, type: 2}
-  - {fileID: 8574412962073106934, guid: fc04da73f9b480e4986555d16cf774a5, type: 2}
-  borderSize: 0.019
-  logBase: 1.42
+  borderSize: 0
+  logBase: 4.95
   waterMaterial: {fileID: 2100000, guid: 249db720271e7da44a5df1248ea5050b, type: 2}
 --- !u!154 &541734035
 TerrainCollider:
@@ -689,6 +689,25 @@ Transform:
   - {fileID: 1711526711}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &541734038
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 541734033}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 36a99324d5f84544797acf07115f2c72, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  treePrefab: {fileID: 5935278547815300987, guid: e05ae677c7b3bc546bd36b488586fb0c, type: 3}
+  farmPrefab: {fileID: 0}
+  minePrefab: {fileID: 0}
+  treeSize: 0.2
+  treeCount: 2
+  treeRotationMin: 0
+  treeRotationMax: 360
 --- !u!1 &832575517
 GameObject:
   m_ObjectHideFlags: 0

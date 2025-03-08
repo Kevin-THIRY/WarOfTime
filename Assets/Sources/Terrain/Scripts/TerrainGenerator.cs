@@ -2,25 +2,29 @@ using UnityEngine;
 using UnityEditor;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Unity.VisualScripting;
 
 public enum TerrainSizeType { Petit, Moyen, Grand }
+public enum BiomeName { Water, Plains, Mountains, Snow }
 
 [System.Serializable]
 public class BiomeParam
 {
-    public string name;                // Nom du biome (ex: "Plaine", "Montagne")
+    public BiomeName name;                // Nom du biome (ex: "Plaine", "Montagne")
     [Range(0f, 1f)] public float minHeight;  // Hauteur minimale du biome
     [Range(0f, 1f)] public float biomeHeight;
     public Color color;                // Couleur associée
+    public TerrainLayer terrainLayer; // Texture associé
     [Range(0f, 0.5f)] public float localScale = 0.1f; // Taille fixe des carrés
     [Range(0f, 0.5f)] public float extraLocalScale = 0.1f; // Taille fixe des carrés
 }
 public class Biome
 {
-    public string name;                // Nom du biome (ex: "Plaine", "Montagne")
+    public BiomeName name;                // Nom du biome (ex: "Plaine", "Montagne")
     public float minHeight;  // Hauteur minimale du biome
     public Color color;                // Couleur associée
+    public TerrainLayer terrainLayer; // Texture associé
     public float biomeHeight;
     public float localScale = 0.1f; // Taille fixe des carrés
     public float extraLocalScale = 0.1f; // Taille fixe des carrés
@@ -46,7 +50,6 @@ public class TerrainGenerator : MonoBehaviour
     [Range(-100, 100)] public int offset = 0;
 
     [Header("Textures")]
-    public TerrainLayer[] terrainLayers;
     [Range(0f, 0.5f)] public float borderSize = 0.1f;
     [Range(0.01f, 5f)] public float logBase = 2.5f;
 
@@ -260,6 +263,20 @@ public class TerrainGenerator : MonoBehaviour
 
     void ApplyBiomeTextures()
     {
+        // Transformer en collection 1D avant Distinct()
+        HashSet<TerrainLayer> uniqueTerrainLayers = new HashSet<TerrainLayer>();
+        int gridX = Mathf.RoundToInt(width / cellSize);
+        int gridY = Mathf.RoundToInt(width / cellSize);
+        for (int y = 0; y < gridY; y++)
+        {
+            for (int x = 0; x < gridX; x++)
+            {
+                uniqueTerrainLayers.Add(biomeCells[y,x].terrainLayer); // HashSet supprime les doublons automatiquement
+            }
+        }
+        // Convertir en tableau
+        TerrainLayer[] terrainLayers = uniqueTerrainLayers.ToArray();
+                                                 
         if (terrainLayers == null || terrainLayers.Length == 0)
         {
             Debug.LogError("Aucune texture assignée !");
@@ -271,10 +288,6 @@ public class TerrainGenerator : MonoBehaviour
         int textureResolution = terrainData.alphamapResolution;
         float[,,] splatmapData = new float[textureResolution, textureResolution, terrainLayers.Length];
 
-        // Calcule le nombre de cellules pour remplir la map au mieux
-        int gridX = Mathf.RoundToInt(width / cellSize);
-        int gridY = Mathf.RoundToInt(width / cellSize);
-
         float gridXOverResolution = textureResolution / (float)gridX;
         float gridYOverResolution = textureResolution / (float)gridY;
 
@@ -283,18 +296,18 @@ public class TerrainGenerator : MonoBehaviour
             for (int x = 0; x < gridX; x++)
             {
                 // Récupérer la couleur du biome correspondant dans biomeCells
-                string biomeName = biomeCells[y, x].name;
+                TerrainLayer terrainLayer = biomeCells[y, x].terrainLayer;
 
                 // Récupérer les biomes des cellules adjacentes
-                string biomeLeft = (x > 0) ? biomeCells[y, x - 1].name : biomeName;
-                string biomeRight = (x < gridX - 1) ? biomeCells[y, x + 1].name : biomeName;
-                string biomeTop = (y < gridY - 1) ? biomeCells[y + 1, x].name : biomeName;
-                string biomeBottom = (y > 0) ? biomeCells[y - 1, x].name : biomeName;
+                TerrainLayer biomeLeft = (x > 0) ? biomeCells[y, x - 1].terrainLayer : terrainLayer;
+                TerrainLayer biomeRight = (x < gridX - 1) ? biomeCells[y, x + 1].terrainLayer : terrainLayer;
+                TerrainLayer biomeTop = (y < gridY - 1) ? biomeCells[y + 1, x].terrainLayer : terrainLayer;
+                TerrainLayer biomeBottom = (y > 0) ? biomeCells[y - 1, x].terrainLayer : terrainLayer;
 
-                string biomeTopLeft = (x > 0 && y < gridY - 1) ? biomeCells[y + 1, x - 1].name : biomeName;
-                string biomeTopRight = (x < gridX - 1 && y < gridY - 1) ? biomeCells[y + 1, x + 1].name : biomeName;
-                string biomeBottomLeft = (x > 0 && y > 0) ? biomeCells[y - 1, x - 1].name : biomeName;
-                string biomeBottomRight = (x < gridX - 1 && y > 0) ? biomeCells[y - 1, x + 1].name : biomeName;
+                TerrainLayer biomeTopLeft = (x > 0 && y < gridY - 1) ? biomeCells[y + 1, x - 1].terrainLayer : terrainLayer;
+                TerrainLayer biomeTopRight = (x < gridX - 1 && y < gridY - 1) ? biomeCells[y + 1, x + 1].terrainLayer : terrainLayer;
+                TerrainLayer biomeBottomLeft = (x > 0 && y > 0) ? biomeCells[y - 1, x - 1].terrainLayer : terrainLayer;
+                TerrainLayer biomeBottomRight = (x < gridX - 1 && y > 0) ? biomeCells[y - 1, x + 1].terrainLayer : terrainLayer;
 
                 // Remplir le tableau avec la hauteur souhaitée
                 for (int i = Mathf.RoundToInt(gridXOverResolution * x); i < Mathf.RoundToInt(gridXOverResolution * (x + 1)); i++)
@@ -333,25 +346,23 @@ public class TerrainGenerator : MonoBehaviour
                             // Appliquer les poids aux textures
                             for (int k = 0; k < terrainLayers.Length; k++)
                             {
-                                string textureName = terrainLayers[k].name;
-
-                                if (textureName == biomeName)
+                                if (terrainLayers[k] == terrainLayer)
                                     splatmapData[i, j, k] += weightCenter;
-                                if (textureName == biomeLeft)
+                                if (terrainLayers[k] == biomeLeft)
                                     splatmapData[i, j, k] += weightLeft;
-                                if (textureName == biomeRight)
+                                if (terrainLayers[k] == biomeRight)
                                     splatmapData[i, j, k] += 1 - weightRight;
-                                if (textureName == biomeTop)
+                                if (terrainLayers[k] == biomeTop)
                                     splatmapData[i, j, k] += 1 - weightTop;
-                                if (textureName == biomeBottom)
+                                if (terrainLayers[k] == biomeBottom)
                                     splatmapData[i, j, k] += weightBottom;
-                                if (textureName == biomeTopLeft)
-                                splatmapData[i, j, k] += weightTopLeft;
-                                if (textureName == biomeTopRight)
+                                if (terrainLayers[k] == biomeTopLeft)
+                                    splatmapData[i, j, k] += weightTopLeft;
+                                if (terrainLayers[k] == biomeTopRight)
                                     splatmapData[i, j, k] += weightTopRight;
-                                if (textureName == biomeBottomLeft)
+                                if (terrainLayers[k] == biomeBottomLeft)
                                     splatmapData[i, j, k] += weightBottomLeft;
-                                if (textureName == biomeBottomRight)
+                                if (terrainLayers[k] == biomeBottomRight)
                                     splatmapData[i, j, k] += weightBottomRight;
                             }
                         }
@@ -360,7 +371,7 @@ public class TerrainGenerator : MonoBehaviour
                             // Appliquer la texture du biome
                             for (int k = 0; k < terrainLayers.Length; k++)
                             {
-                                splatmapData[i, j, k] = (biomeName == terrainLayers[k].name) ? 1f : 0f;
+                                splatmapData[i, j, k] = (terrainLayer == terrainLayers[k]) ? 1f : 0f;
                             }
                         }
                     }
@@ -391,6 +402,7 @@ public class TerrainGenerator : MonoBehaviour
                 biomeCells[biomeCellX, biomeCellY].name = biome.name;
                 biomeCells[biomeCellX, biomeCellY].minHeight = biome.minHeight;
                 biomeCells[biomeCellX, biomeCellY].color = biome.color;
+                biomeCells[biomeCellX, biomeCellY].terrainLayer = biome.terrainLayer;
                 biomeCells[biomeCellX, biomeCellY].biomeHeight = biome.biomeHeight;
                 biomeCells[biomeCellX, biomeCellY].localScale = biome.localScale;
                 biomeCells[biomeCellX, biomeCellY].extraLocalScale = biome.extraLocalScale;
@@ -564,7 +576,7 @@ public class TerrainGenerator : MonoBehaviour
         meshRenderer.material = waterMaterial;
     }
 
-    void GenerateTreesOnPlains(Terrain terrain, string biomeName, int treesPerCell, float minSpacing, GameObject treePrefab)
+    void GenerateTreesOnPlains(Terrain terrain, BiomeName biomeName, int treesPerCell, float minSpacing, GameObject treePrefab)
     {
         TerrainData terrainData = terrain.terrainData;
         
@@ -616,7 +628,7 @@ public class TerrainGenerator : MonoBehaviour
     {
         public Vector3 position;
         public ResourcesType resourceType;
-        public string biomeName;
+        public BiomeName biomeName;
 
         public GridCell(Vector3 position)
         {
@@ -627,23 +639,4 @@ public class TerrainGenerator : MonoBehaviour
     #region Getter
     public GridCell[,] GetGridCells() { return gridCells; }
     #endregion
-}
-
-[CustomEditor(typeof(TerrainGenerator))]
-public class TerrainGeneratorEditor : Editor
-{
-    public override void OnInspectorGUI()
-    {
-        DrawDefaultInspector();
-
-        TerrainGenerator generator = (TerrainGenerator)target;
-        if (GUILayout.Button("Générer la map"))
-        {
-            generator.GenerateTerrain();
-        }
-        if (GUILayout.Button("Générer les textures"))
-        {
-            generator.ApplyTextures();
-        }
-    }
 }
