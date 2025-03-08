@@ -138,12 +138,12 @@ public class ResourcesGenerator : MonoBehaviour
 
         int resolution = terrainData.heightmapResolution;
 
-        float gridXOverResolution = resolution / ((float)gridX + 1);
-        float gridYOverResolution = resolution / ((float)gridY + 1);
+        float gridXOverResolution = resolution / ((float)gridX - 1);
+        float gridYOverResolution = resolution / ((float)gridY - 1);
 
-        for (int x = 0; x < gridX; x++)
+        for (int x = 0; x < gridX - 1; x++)
         {
-            for (int y = 0; y < gridY; y++)
+            for (int y = 0; y < gridY - 1; y++)
             {
                 // Centre de la cellule
                 float centerX = (gridXOverResolution * (x + 0.5f)) / resolution;
