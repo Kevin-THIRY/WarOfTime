@@ -6,7 +6,7 @@ using System.Linq;
 using Unity.VisualScripting;
 
 public enum TerrainSizeType { Petit, Moyen, Grand }
-public enum BiomeName { Water, Plains, Mountains, Snow }
+public enum BiomeName { Water, Plains, Mountains, Snow, Sand }
 
 [System.Serializable]
 public class BiomeParam
@@ -450,8 +450,7 @@ public class TerrainGenerator : MonoBehaviour
                     Mathf.RoundToInt(normalizedZ * (terrainData.heightmapResolution - 1))
                 );
 
-                gridCells[x, y] = new GridCell(new Vector3(worldX, terrainHeight, worldZ));
-                gridCells[x, y].biomeName = biomeCells[x, y].name;
+                gridCells[x, y] = new GridCell(new Vector3(worldX, terrainHeight, worldZ), biomeCells[x, y].name);
             }
         }
     }
@@ -590,13 +589,19 @@ public class TerrainGenerator : MonoBehaviour
 
     public class GridCell
     {
-        public Vector3 position;
+        public readonly Vector3 position;
         public ResourcesType resourceType;
-        public BiomeName biomeName;
+        public readonly BiomeName biomeName;
 
-        public GridCell(Vector3 position)
+        public GridCell(Vector3 position, BiomeName biomeName)
         {
             this.position = position;
+            this.biomeName = biomeName;
+        }
+
+        public void ResetResource()
+        {
+            resourceType = ResourcesType.Null;
         }
     }
 

@@ -701,13 +701,35 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 36a99324d5f84544797acf07115f2c72, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  treePrefab: {fileID: 5935278547815300987, guid: e05ae677c7b3bc546bd36b488586fb0c, type: 3}
-  farmPrefab: {fileID: 0}
-  minePrefab: {fileID: 0}
-  minTreeSize: 0.05
-  maxTreeSize: 0.157
-  treesPerCell: 85
-  centerBias: 0.755
+  resources:
+  - resourcesType: 2
+    prefab: {fileID: 5935278547815300987, guid: e05ae677c7b3bc546bd36b488586fb0c, type: 3}
+    density: 0.11
+    minSize: 0.1
+    maxSize: 0.5
+    elementPerCell: 47
+    radius: 0.7
+  - resourcesType: 3
+    prefab: {fileID: 4140774597986965270, guid: 58cd8dc8c2359174baa15aa31e302c8b, type: 3}
+    density: 0.076
+    minSize: 2
+    maxSize: 3
+    elementPerCell: 34
+    radius: 0.75
+  - resourcesType: 1
+    prefab: {fileID: 6739804228592001243, guid: 6cdd667aa0034cd4dadc8d58a65fb098, type: 3}
+    density: 0.121
+    minSize: 2
+    maxSize: 3
+    elementPerCell: 24
+    radius: 0.433
+  - resourcesType: 4
+    prefab: {fileID: 2804321427668277467, guid: 0f3d14a9a6b2ceb469c15d151552a614, type: 3}
+    density: 0.121
+    minSize: 0.5
+    maxSize: 1
+    elementPerCell: 24
+    radius: 0.433
 --- !u!1 &832575517
 GameObject:
   m_ObjectHideFlags: 0

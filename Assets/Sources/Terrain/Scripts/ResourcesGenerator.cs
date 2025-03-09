@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-public enum ResourcesType { Farm, Wood, Mines }
+public enum ResourcesType { Null, Farm, Wood, GoldMines, IronMines }
 
 
 public class BiomeResourceMapping
@@ -11,8 +11,8 @@ public class BiomeResourceMapping
     private static readonly Dictionary<BiomeName, List<ResourcesType>> biomeResources = new Dictionary<BiomeName, List<ResourcesType>>()
     {
         { BiomeName.Water, new List<ResourcesType> { } },
-        { BiomeName.Plains, new List<ResourcesType> { ResourcesType.Wood, ResourcesType.Farm } },
-        { BiomeName.Mountains, new List<ResourcesType> { ResourcesType.Mines } },
+        { BiomeName.Plains, new List<ResourcesType> { ResourcesType.Wood, ResourcesType.Farm, ResourcesType.GoldMines } },
+        { BiomeName.Mountains, new List<ResourcesType> { ResourcesType.IronMines } },
         { BiomeName.Snow, new List<ResourcesType> { } }
     };
 
@@ -30,38 +30,58 @@ public class BiomeResourceMapping
 }
 
 [System.Serializable]
+public class ResourcesClass
+{
+    public ResourcesType resourcesType;
+    public GameObject prefab;
+    [Range(0f, 1f)] public float density = 0.1f; // Taille fixe des carrés
+    [SerializeField] public float minSize = 0.1f;   // Taille min des arbres
+    [SerializeField] public float maxSize = 0.3f;   // Taille max des arbres
+    [Range(1, 100)] [SerializeField] public int elementPerCell = 10;     // Nombre d'arbres par cellule
+    [Range(0f, 1f)] [SerializeField] public float radius = 0.5f;     // Rayon autour du centre
+    [NonSerialized] public int index;
+}
+
 [ExecuteInEditMode]
 public class ResourcesGenerator : MonoBehaviour
 {
-    [SerializeField] private GameObject treePrefab;
-    [SerializeField] private GameObject farmPrefab;
-    [SerializeField] private GameObject minePrefab;
-
-    [Range(0.05f, 0.3f)] [SerializeField] private float minTreeSize = 0.1f;   // Taille min des arbres
-    [Range(0.1f, 0.5f)] [SerializeField] private float maxTreeSize = 0.3f;   // Taille max des arbres
-    [Range(1, 100)] [SerializeField] private int treesPerCell = 10;     // Nombre d'arbres par cellule
-    [Range(0f, 1f)] [SerializeField] private float centerBias = 0.5f;     // Rayon autour du centre
+    [SerializeField] private ResourcesClass[] resources;
 
     private TerrainGenerator terrainGenerator;
     private Terrain terrain;
+    private TerrainGenerator.GridCell[,] gridCells;
+    private List<TreeInstance> trees;
 
     void OnValidate()
     {
         terrainGenerator = GetComponent<TerrainGenerator>();
         terrain = GetComponent<Terrain>();
-        AddTreePrototype(treePrefab);
-        AddTreesToGrid(ResourcesType.Wood);
+        gridCells = terrainGenerator.GetGridCells();
+        ResetResourcesFromGrid(gridCells);
+        if (terrain) terrain.terrainData.treePrototypes = new TreePrototype[0];
+        foreach (var resource in resources) AddTreePrototype(resource);
+        foreach (var resource in resources) AddResourcesToGrid(resource);
     }
 
     public void GenerateResources()
     {
         terrainGenerator = GetComponent<TerrainGenerator>();
         terrain = GetComponent<Terrain>();
-        AddTreePrototype(treePrefab);
-        AddTreesToGrid(ResourcesType.Wood);
+        gridCells = terrainGenerator.GetGridCells();
+        ResetResourcesFromGrid(gridCells);
+        if (terrain) terrain.terrainData.treePrototypes = new TreePrototype[0];
+        foreach (var resource in resources) AddTreePrototype(resource);
+        foreach (var resource in resources) AddResourcesToGrid(resource);
     }
 
-    private void AddTreesToGrid(ResourcesType resourcesType)
+    private void ResetResourcesFromGrid(TerrainGenerator.GridCell[,] gridCells)
+    {
+        foreach (var cell in gridCells) cell.ResetResource();
+        terrain.terrainData.treeInstances = new TreeInstance[0];
+        trees = new List<TreeInstance>();
+    }
+
+    private void AddResourcesToGrid(ResourcesClass resource)
     {
         if (terrainGenerator == null)
         {
@@ -69,28 +89,24 @@ public class ResourcesGenerator : MonoBehaviour
             return;
         }
 
-        TerrainGenerator.GridCell[,] gridCells = terrainGenerator.GetGridCells();
         if (gridCells == null)
         {
             Debug.LogError("GridCells non initialisé !");
             return;
         }
 
-        terrain.terrainData.treeInstances = new TreeInstance[0];
-
-        List<BiomeName> biomes = BiomeResourceMapping.GetBiomesForResource(resourcesType);
+        List<BiomeName> biomes = BiomeResourceMapping.GetBiomesForResource(resource.resourcesType);
 
         int gridX = gridCells.GetLength(0) - 1;
         int gridY = gridCells.GetLength(1) - 1;
         TerrainData terrainData = terrain.terrainData;
-        List<TreeInstance> trees = new List<TreeInstance>();
 
         int resolution = terrainData.heightmapResolution;
 
         float gridXOverResolution = resolution / ((float)gridX);
         float gridYOverResolution = resolution / ((float)gridY);
 
-        float maxRadius = Mathf.Min(gridXOverResolution, gridYOverResolution) * centerBias / (resolution * 2);
+        float maxRadius = Mathf.Min(gridXOverResolution, gridYOverResolution) * resource.radius / (resolution * 2);
 
         for (int x = 0; x < gridX; x++)
         {
@@ -98,16 +114,17 @@ public class ResourcesGenerator : MonoBehaviour
             {
                 foreach (BiomeName biome in biomes)
                 {
-                    if (gridCells[x, y].biomeName == biome)
+                    if (gridCells[x, y].biomeName == biome && UnityEngine.Random.Range(0f, 1f) > 1 - resource.density && gridCells[x, y].resourceType == ResourcesType.Null)
                     {
+                        gridCells[x, y].resourceType = resource.resourcesType;
                         // Centre de la cellule
                         float centerX = (x * gridXOverResolution + (gridXOverResolution / 2)) / resolution;
                         float centerZ = (y * gridYOverResolution + (gridYOverResolution / 2)) / resolution;
 
-                        for (int t = 0; t < treesPerCell; t++)
+                        for (int t = 0; t < resource.elementPerCell; t++)
                         {
                             float angle = UnityEngine.Random.Range(0f, Mathf.PI * 2);
-                            float radius = UnityEngine.Random.Range(0f, maxRadius); // Rayon limité par centerBias
+                            float radius = UnityEngine.Random.Range(0f, maxRadius); // Rayon limité par radius
                             float offsetX = Mathf.Cos(angle) * radius;
                             float offsetZ = Mathf.Sin(angle) * radius;
 
@@ -120,8 +137,8 @@ public class ResourcesGenerator : MonoBehaviour
 
                             TreeInstance tree = new TreeInstance();
                             tree.position = new Vector3(randomX, normY, randomZ);
-                            tree.prototypeIndex = UnityEngine.Random.Range(0, terrainData.treePrototypes.Length);
-                            float scale = UnityEngine.Random.Range(minTreeSize, maxTreeSize);
+                            tree.prototypeIndex = resource.index;
+                            float scale = UnityEngine.Random.Range(resource.minSize, resource.maxSize);
                             tree.widthScale = scale;
                             tree.heightScale = scale;
                             tree.color = Color.white;
@@ -138,7 +155,7 @@ public class ResourcesGenerator : MonoBehaviour
     }
 
     // Fonction pour supprimer tous les arbres instanciés
-    private void AddTreePrototype(GameObject newTreePrefab)
+    private void AddTreePrototype(ResourcesClass resource)
     {
         // Récupère les prototypes existants
         TreePrototype[] currentPrototypes = terrain.terrainData.treePrototypes;
@@ -146,8 +163,10 @@ public class ResourcesGenerator : MonoBehaviour
         // Vérifie si le prototype existe déjà
         foreach (var prototype in currentPrototypes)
         {
-            if (prototype.prefab == newTreePrefab) return;
+            if (prototype.prefab == resource.prefab) return;
         }
+
+        resource.index = Array.FindIndex(resources, r => r.resourcesType == resource.resourcesType);
 
         // Crée un nouveau tableau avec un prototype supplémentaire
         TreePrototype[] newPrototypes = new TreePrototype[currentPrototypes.Length + 1];
@@ -158,9 +177,9 @@ public class ResourcesGenerator : MonoBehaviour
             newPrototypes[i] = currentPrototypes[i];
         }
 
-        // Ajoute le nouveau prototype d'arbre
+        // Ajoute le nouveau prototype
         newPrototypes[currentPrototypes.Length] = new TreePrototype();
-        newPrototypes[currentPrototypes.Length].prefab = newTreePrefab;
+        newPrototypes[currentPrototypes.Length].prefab = resource.prefab;
 
         // Assigne le nouveau tableau à terrainData.treePrototypes
         terrain.terrainData.treePrototypes = newPrototypes;
