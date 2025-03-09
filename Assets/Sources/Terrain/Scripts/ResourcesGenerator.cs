@@ -1,8 +1,33 @@
 using UnityEngine;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 public enum ResourcesType { Farm, Wood, Mines }
+
+
+public class BiomeResourceMapping
+{
+    private static readonly Dictionary<BiomeName, List<ResourcesType>> biomeResources = new Dictionary<BiomeName, List<ResourcesType>>()
+    {
+        { BiomeName.Water, new List<ResourcesType> { } },
+        { BiomeName.Plains, new List<ResourcesType> { ResourcesType.Wood, ResourcesType.Farm } },
+        { BiomeName.Mountains, new List<ResourcesType> { ResourcesType.Mines } },
+        { BiomeName.Snow, new List<ResourcesType> { } }
+    };
+
+    public static bool IsResourceInBiome(ResourcesType resource, BiomeName biome)
+    {
+        return biomeResources.ContainsKey(biome) && biomeResources[biome].Contains(resource);
+    }
+    public static List<BiomeName> GetBiomesForResource(ResourcesType resource)
+    {
+        return biomeResources
+            .Where(kvp => kvp.Value.Contains(resource))
+            .Select(kvp => kvp.Key)
+            .ToList();
+    }
+}
 
 [System.Serializable]
 [ExecuteInEditMode]
@@ -14,8 +39,8 @@ public class ResourcesGenerator : MonoBehaviour
 
     [Range(0.05f, 0.3f)] [SerializeField] private float minTreeSize = 0.1f;   // Taille min des arbres
     [Range(0.1f, 0.5f)] [SerializeField] private float maxTreeSize = 0.3f;   // Taille max des arbres
-    [Range(1, 30)] [SerializeField] private int treesPerCell = 10;     // Nombre d'arbres par cellule
-    [Range(0f, 1f)] [SerializeField] private float centerBias = 0.5f;     // Nombre d'arbres par cellule
+    [Range(1, 100)] [SerializeField] private int treesPerCell = 10;     // Nombre d'arbres par cellule
+    [Range(0f, 1f)] [SerializeField] private float centerBias = 0.5f;     // Rayon autour du centre
 
     private TerrainGenerator terrainGenerator;
     private Terrain terrain;
@@ -25,96 +50,18 @@ public class ResourcesGenerator : MonoBehaviour
         terrainGenerator = GetComponent<TerrainGenerator>();
         terrain = GetComponent<Terrain>();
         AddTreePrototype(treePrefab);
-        AddTreesToGrid();
+        AddTreesToGrid(ResourcesType.Wood);
     }
 
-    // public void AddTreesToGrid()
-    // {
-    //     if (terrainGenerator == null)
-    //     {
-    //         Debug.LogError("TerrainGenerator manquant !");
-    //         return;
-    //     }
+    public void GenerateResources()
+    {
+        terrainGenerator = GetComponent<TerrainGenerator>();
+        terrain = GetComponent<Terrain>();
+        AddTreePrototype(treePrefab);
+        AddTreesToGrid(ResourcesType.Wood);
+    }
 
-    //     TerrainGenerator.GridCell[,] gridCells = terrainGenerator.GetGridCells();
-    //     if (gridCells == null)
-    //     {
-    //         Debug.LogError("GridCells non initialisé !");
-    //         return;
-    //     }
-
-    //     terrain.terrainData.treeInstances = new TreeInstance[0]; // Supprime les anciens arbres
-    //     TerrainData terrainData = terrain.terrainData;
-    //     List<TreeInstance> trees = new List<TreeInstance>();
-
-    //     int gridX = gridCells.GetLength(0);
-    //     int gridY = gridCells.GetLength(1);
-
-    //     float terrainWidth = terrainData.size.x;
-    //     float terrainHeight = terrainData.size.z;
-    //     int heightmapResolution = terrainData.heightmapResolution; // Résolution de la heightmap
-
-    //     float cellWidth = terrainWidth / gridX;
-    //     float cellHeight = terrainHeight / gridY;
-
-    //     int resolution = terrainData.heightmapResolution;
-
-    //     float gridXOverResolution = resolution / (float)gridX;
-    //     float gridYOverResolution = resolution / (float)gridY;
-
-    //     Debug.Log(resolution);
-    //     Debug.Log(gridX);
-    //     Debug.Log(gridY);
-    //     Debug.Log(gridXOverResolution);
-    //     Debug.Log(gridYOverResolution);
-
-    //     for (int x = 0; x < gridX; x++)
-    //     {
-    //         for (int y = 0; y < gridY; y++)
-    //         {
-    //             Debug.Log("X : " + x);
-    //             Debug.Log("Y : " + y);
-    //             float worldX = Mathf.RoundToInt(gridXOverResolution * (x + 0.5f));
-    //             float worldZ = Mathf.RoundToInt(gridYOverResolution * (y + 0.5f));
-    //             Debug.Log("Center X : " + worldX);
-    //             Debug.Log("Center Y : " + worldZ);
-    //             // Position réelle du centre de la cellule en unités monde
-    //             // float worldX = (x + 0.5f) * cellWidth;
-    //             // float worldZ = (y + 0.5f) * cellHeight;
-
-    //             // Convertir en indices heightmap
-    //             int heightX = Mathf.RoundToInt((worldX / terrainWidth) * heightmapResolution);
-    //             int heightZ = Mathf.RoundToInt((worldZ / terrainHeight) * heightmapResolution);
-
-    //             // Récupérer la hauteur du terrain (assurer qu'on ne dépasse pas les limites)
-    //             heightX = Mathf.Clamp(heightX, 0, heightmapResolution - 1);
-    //             heightZ = Mathf.Clamp(heightZ, 0, heightmapResolution - 1);
-    //             float worldY = terrainData.GetHeight(heightX, heightZ);
-
-    //             // Normaliser les positions pour TreeInstance
-    //             float normX = Mathf.InverseLerp(0, resolution, worldX);
-    //             float normZ = Mathf.InverseLerp(0, resolution, worldZ);
-    //             // float normX = worldX / terrainWidth;
-    //             // float normZ = worldZ / terrainHeight;
-    //             float normY = worldY / terrainData.size.y;
-
-    //             TreeInstance tree = new TreeInstance();
-    //             tree.position = new Vector3(normX, normY, normZ);
-    //             tree.prototypeIndex = UnityEngine.Random.Range(0, terrainData.treePrototypes.Length);
-    //             tree.widthScale = 0.2f; // Taille fixe
-    //             tree.heightScale = 0.2f;
-    //             tree.color = Color.white;
-    //             tree.lightmapColor = Color.white;
-
-    //             trees.Add(tree);
-    //         }
-    //     }
-
-    //     terrainData.treeInstances = trees.ToArray();
-    // }
-
-
-    public void AddTreesToGrid()
+    private void AddTreesToGrid(ResourcesType resourcesType)
     {
         if (terrainGenerator == null)
         {
@@ -131,50 +78,58 @@ public class ResourcesGenerator : MonoBehaviour
 
         terrain.terrainData.treeInstances = new TreeInstance[0];
 
-        int gridX = gridCells.GetLength(0);
-        int gridY = gridCells.GetLength(1);
+        List<BiomeName> biomes = BiomeResourceMapping.GetBiomesForResource(resourcesType);
+
+        int gridX = gridCells.GetLength(0) - 1;
+        int gridY = gridCells.GetLength(1) - 1;
         TerrainData terrainData = terrain.terrainData;
         List<TreeInstance> trees = new List<TreeInstance>();
 
         int resolution = terrainData.heightmapResolution;
 
-        float gridXOverResolution = resolution / ((float)gridX - 1);
-        float gridYOverResolution = resolution / ((float)gridY - 1);
+        float gridXOverResolution = resolution / ((float)gridX);
+        float gridYOverResolution = resolution / ((float)gridY);
 
-        for (int x = 0; x < gridX - 1; x++)
+        float maxRadius = Mathf.Min(gridXOverResolution, gridYOverResolution) * centerBias / (resolution * 2);
+
+        for (int x = 0; x < gridX; x++)
         {
-            for (int y = 0; y < gridY - 1; y++)
+            for (int y = 0; y < gridY; y++)
             {
-                // Centre de la cellule
-                float centerX = (gridXOverResolution * (x + 0.5f)) / resolution;
-                float centerZ = (gridYOverResolution * (y + 0.5f)) / resolution;
-
-                for (int t = 0; t < treesPerCell; t++)
+                foreach (BiomeName biome in biomes)
                 {
-                    // Position aléatoire dans la cellule avec un biais vers le centre
-                    // float randomX = (gridXOverResolution * x + UnityEngine.Random.Range(0f, gridXOverResolution)) / resolution;
-                    // float randomZ = (gridYOverResolution * y + UnityEngine.Random.Range(0f, gridYOverResolution)) / resolution;
-                    float randomX = (x * gridXOverResolution + (gridXOverResolution / 2)) / resolution;
-                    float randomZ = (y * gridYOverResolution + (gridYOverResolution / 2)) / resolution;
+                    if (gridCells[x, y].biomeName == biome)
+                    {
+                        // Centre de la cellule
+                        float centerX = (x * gridXOverResolution + (gridXOverResolution / 2)) / resolution;
+                        float centerZ = (y * gridYOverResolution + (gridYOverResolution / 2)) / resolution;
 
-                    // // Vérifie la distance par rapport au centre
-                    // float distanceToCenter = Vector2.Distance(new Vector2(randomX, randomZ), new Vector2(centerX, centerZ));
-                    // if (distanceToCenter > centerBias) continue; // Ignore si trop loin du centre
+                        for (int t = 0; t < treesPerCell; t++)
+                        {
+                            float angle = UnityEngine.Random.Range(0f, Mathf.PI * 2);
+                            float radius = UnityEngine.Random.Range(0f, maxRadius); // Rayon limité par centerBias
+                            float offsetX = Mathf.Cos(angle) * radius;
+                            float offsetZ = Mathf.Sin(angle) * radius;
 
-                    // Calcul de la hauteur du terrain
-                    float normY = terrainData.GetHeight((int)(randomX * resolution), (int)(randomZ * resolution)) / terrainData.size.y;
+                            // Position dans la cellule avec une zone autour du centre
+                            float randomX = centerX + offsetX;
+                            float randomZ = centerZ + offsetZ;
 
-                    TreeInstance tree = new TreeInstance();
-                    tree.position = new Vector3(randomX, normY, randomZ);
-                    tree.prototypeIndex = UnityEngine.Random.Range(0, terrainData.treePrototypes.Length);
-                    // float scale = UnityEngine.Random.Range(minTreeSize, maxTreeSize);
-                    float scale = 0.2f;
-                    tree.widthScale = scale;
-                    tree.heightScale = scale;
-                    tree.color = Color.white;
-                    tree.lightmapColor = Color.white;
+                            // Calcul de la hauteur du terrain
+                            float normY = terrainData.GetHeight((int)(randomX * resolution), (int)(randomZ * resolution)) / terrainData.size.y;
 
-                    trees.Add(tree);
+                            TreeInstance tree = new TreeInstance();
+                            tree.position = new Vector3(randomX, normY, randomZ);
+                            tree.prototypeIndex = UnityEngine.Random.Range(0, terrainData.treePrototypes.Length);
+                            float scale = UnityEngine.Random.Range(minTreeSize, maxTreeSize);
+                            tree.widthScale = scale;
+                            tree.heightScale = scale;
+                            tree.color = Color.white;
+                            tree.lightmapColor = Color.white;
+
+                            trees.Add(tree);
+                        }
+                    }
                 }
             }
         }
@@ -209,12 +164,5 @@ public class ResourcesGenerator : MonoBehaviour
 
         // Assigne le nouveau tableau à terrainData.treePrototypes
         terrain.terrainData.treePrototypes = newPrototypes;
-    }
-
-    // Fonction pour ajouter des arbres au terrain avec un bouton dans l'éditeur Unity
-    [ContextMenu("Add Trees to Grid")]
-    private void AddTreesContextMenu()
-    {
-        AddTreesToGrid();
     }
 }

@@ -580,32 +580,32 @@ MonoBehaviour:
   biomes:
   - name: 0
     minHeight: 0
-    biomeHeight: 0
+    biomeHeight: 0.1
     color: {r: 0.766, g: 0.61280006, b: 0, a: 0}
     terrainLayer: {fileID: 8574412962073106934, guid: cec3d07c4fbc87245bce89e999f87762, type: 2}
     localScale: 0
     extraLocalScale: 0
   - name: 1
-    minHeight: 0.36
-    biomeHeight: 0.209
+    minHeight: 0.293
+    biomeHeight: 0.249
     color: {r: 0, g: 0.589, b: 0.083480276, a: 0}
     terrainLayer: {fileID: 8574412962073106934, guid: db602826f3b701640a05fe1875f0e284, type: 2}
-    localScale: 0.053
-    extraLocalScale: 0
+    localScale: 0.077
+    extraLocalScale: 0.01
   - name: 2
     minHeight: 0.549
-    biomeHeight: 0.366
+    biomeHeight: 0.355
     color: {r: 0.638, g: 0.44832426, b: 0, a: 0}
     terrainLayer: {fileID: 8574412962073106934, guid: aa97d06318ba44647ab6201df57ba238, type: 2}
-    localScale: 0.128
-    extraLocalScale: 0.131
+    localScale: 0.189
+    extraLocalScale: 0.301
   - name: 3
     minHeight: 0.717
-    biomeHeight: 0.394
+    biomeHeight: 0.761
     color: {r: 1, g: 1, b: 1, a: 0}
     terrainLayer: {fileID: 8574412962073106934, guid: fc04da73f9b480e4986555d16cf774a5, type: 2}
-    localScale: 0.214
-    extraLocalScale: 0.244
+    localScale: 0.189
+    extraLocalScale: 0.5
   cellSize: 5
   gridColor: {r: 0.29799998, g: 0.29799998, b: 0.29799998, a: 0.3764706}
   scale: 4.48
@@ -704,10 +704,10 @@ MonoBehaviour:
   treePrefab: {fileID: 5935278547815300987, guid: e05ae677c7b3bc546bd36b488586fb0c, type: 3}
   farmPrefab: {fileID: 0}
   minePrefab: {fileID: 0}
-  minTreeSize: 0.123
-  maxTreeSize: 0.257
-  treesPerCell: 16
-  centerBias: 0.261
+  minTreeSize: 0.05
+  maxTreeSize: 0.157
+  treesPerCell: 85
+  centerBias: 0.755
 --- !u!1 &832575517
 GameObject:
   m_ObjectHideFlags: 0
@@ -784,7 +784,7 @@ Transform:
   m_GameObject: {fileID: 1711526710}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 1.0450001, z: 0}
+  m_LocalPosition: {x: 0, y: 1.745, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

@@ -13,7 +13,7 @@ public class ResourcesGeneratorEditor : Editor
         // Ajouter un bouton pour ajouter des arbres
         if (GUILayout.Button("Add Trees to Grid"))
         {
-            myTarget.AddTreesToGrid();
+            myTarget.GenerateResources();
         }
     }
 }

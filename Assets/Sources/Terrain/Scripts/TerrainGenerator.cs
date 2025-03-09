@@ -152,6 +152,21 @@ public class TerrainGenerator : MonoBehaviour
                 float centerX = (gridXOverResolution * (x + 0.5f));
                 float centerY = (gridYOverResolution * (y + 0.5f));
 
+                float cyx   = biomeCells[y, x].biomeHeight;
+                float cyxm  = (x - 1 > 0) ? biomeCells[y, x - 1].biomeHeight : cyx;
+                float cymx  = (y - 1 > 0) ? biomeCells[y - 1, x].biomeHeight : cyx;
+                float cymxm = (x - 1 > 0 && y - 1 > 0) ? biomeCells[y - 1, x - 1].biomeHeight : cyx;
+                float cyxp  = (x + 1 < gridX) ? biomeCells[y, x + 1].biomeHeight : cyx;
+                float cypx  = (y + 1 < gridY) ? biomeCells[y + 1, x].biomeHeight : cyx;
+                float cypxp = (x + 1 < gridX && y + 1 < gridY) ? biomeCells[y + 1, x + 1].biomeHeight : cyx;
+                float cymxp = (x + 1 < gridX && y - 1 > 0) ? biomeCells[y - 1, x + 1].biomeHeight : cyx;
+                float cypxm = (x - 1 > 0 && y + 1 < gridY) ? biomeCells[y + 1, x - 1].biomeHeight : cyx;
+
+                float h00 = (cyx + cymxm + cymx + cyxm) / 4;
+                float h01 = (cyx + cypxm + cypx + cyxm) / 4;
+                float h10 = (cyx + cyxp + cymx + cymxp) / 4;
+                float h11 = (cyx + cyxp + cypx + cypxp) / 4;
+
                 // Remplir le tableau avec la hauteur souhaitée
                 for (int i = Mathf.RoundToInt(gridXOverResolution * x); i < Mathf.RoundToInt(gridXOverResolution * (x + 1)); i++)
                 {
@@ -161,17 +176,14 @@ public class TerrainGenerator : MonoBehaviour
                         float tx = (i - gridXOverResolution * x) / gridXOverResolution;
                         float ty = (j - gridYOverResolution * y) / gridYOverResolution;
 
-                        float h00 = biomeCells[y, x].biomeHeight;
-                        float h10 = (x + 1 < gridX) ? biomeCells[y, x + 1].biomeHeight : h00;
-                        float h01 = (y + 1 < gridY) ? biomeCells[y + 1, x].biomeHeight : h00;
-                        float h11 = (x + 1 < gridX && y + 1 < gridY) ? biomeCells[y + 1, x + 1].biomeHeight : h00;
-
                         // Bilinear interpolation
+                        float avgH = (h00 + h10 + h01 + h11) * 0.25f;
                         float interpolatedHeight = Mathf.Lerp(
                             Mathf.Lerp(h00, h10, tx),
                             Mathf.Lerp(h01, h11, tx),
                             ty
-                        );
+                        ) * 0.75f + avgH * 0.25f; // Ajoute un lissage pour homogénéiser
+                        interpolatedHeight = (interpolatedHeight * 0.9f) + (avgH * 0.1f);
                         // -------------------------------------------------------------------------------------------
 
                         // ------------------------ ajout détail ------------------------
@@ -574,54 +586,6 @@ public class TerrainGenerator : MonoBehaviour
         
         // Application du Material
         meshRenderer.material = waterMaterial;
-    }
-
-    void GenerateTreesOnPlains(Terrain terrain, BiomeName biomeName, int treesPerCell, float minSpacing, GameObject treePrefab)
-    {
-        TerrainData terrainData = terrain.terrainData;
-        
-        // Récupérer la résolution et la taille du terrain
-        int terrainWidth = Mathf.RoundToInt(terrainData.size.x);
-        int terrainLength = Mathf.RoundToInt(terrainData.size.z);
-        float cellSize = terrainWidth / biomeCells.GetLength(0); // Taille d'une cellule
-
-        List<TreeInstance> trees = new List<TreeInstance>();
-
-        for (int y = 0; y < biomeCells.GetLength(1); y++)
-        {
-            for (int x = 0; x < biomeCells.GetLength(0); x++)
-            {
-                if (biomeCells[y, x].name == biomeName) // Vérifier si la cellule est une plaine
-                {
-                    for (int i = 0; i < treesPerCell; i++)
-                    {
-                        // Position aléatoire dans la cellule
-                        float randomX = UnityEngine.Random.Range(x * cellSize, (x + 1) * cellSize);
-                        float randomZ = UnityEngine.Random.Range(y * cellSize, (y + 1) * cellSize);
-                        
-                        // Récupérer la hauteur du terrain à cette position
-                        float height = terrain.SampleHeight(new Vector3(randomX, 0, randomZ));
-                        Vector3 worldPosition = new Vector3(randomX, height, randomZ);
-                        
-                        // Ajouter un arbre à l'instance du terrain
-                        TreeInstance tree = new TreeInstance
-                        {
-                            position = new Vector3(worldPosition.x / terrainWidth, worldPosition.y / terrainData.size.y, worldPosition.z / terrainLength),
-                            prototypeIndex = 0, // L'index du type d'arbre défini dans le terrain
-                            widthScale = UnityEngine.Random.Range(0.8f, 1.2f),
-                            heightScale = UnityEngine.Random.Range(0.8f, 1.2f),
-                            color = Color.white,
-                            lightmapColor = Color.white
-                        };
-
-                        trees.Add(tree);
-                    }
-                }
-            }
-        }
-
-        // Appliquer la liste d'arbres au terrain
-        terrainData.treeInstances = trees.ToArray();
     }
 
     public class GridCell
