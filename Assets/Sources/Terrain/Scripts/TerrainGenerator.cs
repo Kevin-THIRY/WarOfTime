@@ -66,6 +66,11 @@ public class TerrainGenerator : MonoBehaviour
     private Biome[,] biomeCells;
     public static GameObject fogInstance;
 
+    void Start()
+    {
+        GenerateTerrain();
+    }
+
     void OnValidate()
     {
         if (!terrain) terrain = GetComponent<Terrain>();
