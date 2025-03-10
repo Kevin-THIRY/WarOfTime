@@ -68,6 +68,8 @@
     <Compile Include="Assets\Sources\Terrain\Scripts\TerrainGenerator.cs" />
     <Compile Include="Assets\Sources\Terrain\Scripts\ResourcesGenerator.cs" />
     <Compile Include="Assets\TutorialInfo\Scripts\Readme.cs" />
+    <Compile Include="Assets\Sources\FogOfWar\Scripts\FogOfWar.cs" />
+    <Compile Include="Assets\Sources\Mesh Optimizer\Scripts\OptimizeMesh.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Sources\Terrain\Lowpoly_Environments\Sources\Shaders\PT_Water_Shader_WebGl.shader" />
@@ -1251,6 +1253,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="Whinarn.UnityMeshSimplifier.Runtime.csproj" />
+    <ProjectReference Include="Whinarn.UnityMeshSimplifier.Editor.csproj" />
   </ItemGroup>
   <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
   <ItemGroup>

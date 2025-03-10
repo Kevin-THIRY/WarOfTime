@@ -56,10 +56,15 @@ public class TerrainGenerator : MonoBehaviour
     [Header("Water Material")]
     public Material waterMaterial = null;
 
+    [Header("Fog Of War")]
+    [SerializeField] private GameObject fogPrefab;
+    [SerializeField] private bool displayFogOfWar = false;
+
     private Terrain terrain;
     private GridCell[,] gridCells;
     private int width = 0;
     private Biome[,] biomeCells;
+    public static GameObject fogInstance;
 
     void OnValidate()
     {
@@ -69,6 +74,12 @@ public class TerrainGenerator : MonoBehaviour
         GenerateLogicalGrid();
         // ApplyBiomeTextures();
         ApplyBiomeColors();
+
+        if (fogPrefab != null)
+        {
+            fogPrefab.SetActive(displayFogOfWar);
+            EditorUtility.SetDirty(fogPrefab);
+        }
     }
 
     private int GetWidthFromType(TerrainSizeType type)
@@ -87,6 +98,15 @@ public class TerrainGenerator : MonoBehaviour
         }
         // Interpolation en fonction du detailLevel (0% → min, 100% → max)
         return Mathf.RoundToInt(Mathf.Lerp(min, max, detailLevel / 100f));
+    }
+
+    public void GenerateFogOfWar()
+    {
+        if (fogInstance == null) fogInstance = Instantiate(fogPrefab, transform.position, Quaternion.identity, transform);
+        fogInstance.GetComponentInChildren<FogOfWar>().SetResolution(width);
+        fogInstance.GetComponentInChildren<FogOfWar>().SetHeight(depth * biomes[biomes.Length - 1].biomeHeight);
+        fogInstance.GetComponentInChildren<FogOfWar>().CreateFogBlock();
+        // fogInstance.GetComponent<FogOfWar>().RevealArea(player.transform.position, 10f);
     }
 
     public void GenerateTerrain()
@@ -592,6 +612,7 @@ public class TerrainGenerator : MonoBehaviour
         public readonly Vector3 position;
         public ResourcesType resourceType;
         public readonly BiomeName biomeName;
+        public FogState fogState = FogState.Hidden;
 
         public GridCell(Vector3 position, BiomeName biomeName)
         {

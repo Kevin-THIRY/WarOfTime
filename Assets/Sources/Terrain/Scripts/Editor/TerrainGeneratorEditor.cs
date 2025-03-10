@@ -17,5 +17,10 @@ public class TerrainGeneratorEditor : Editor
         {
             generator.ApplyTextures();
         }
+        // Ajouter un bouton pour ajouter des arbres
+        if (GUILayout.Button("Add Fog of War"))
+        {
+            generator.GenerateFogOfWar();
+        }
     }
 }

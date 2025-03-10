@@ -68,6 +68,7 @@
     <Compile Include="Assets\Sources\Terrain\Scripts\Editor\ResourcesGeneratorEditor.cs" />
     <Compile Include="Assets\Sources\Terrain\Scripts\Editor\TerrainGeneratorEditor.cs" />
     <Compile Include="Assets\TutorialInfo\Scripts\Editor\ReadmeEditor.cs" />
+    <Compile Include="Assets\Sources\FogOfWar\Scripts\Editor\LogOfWarEditor.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="UnityEngine">
@@ -1301,6 +1302,8 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="Assembly-CSharp.csproj" />
+    <ProjectReference Include="Whinarn.UnityMeshSimplifier.Runtime.csproj" />
+    <ProjectReference Include="Whinarn.UnityMeshSimplifier.Editor.csproj" />
   </ItemGroup>
   <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
   <ItemGroup>

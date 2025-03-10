@@ -2,6 +2,7 @@ using UnityEngine;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.Mathematics;
 
 public enum ResourcesType { Null, Farm, Wood, GoldMines, IronMines }
 
@@ -114,7 +115,7 @@ public class ResourcesGenerator : MonoBehaviour
             {
                 foreach (BiomeName biome in biomes)
                 {
-                    if (gridCells[x, y].biomeName == biome && UnityEngine.Random.Range(0f, 1f) > 1 - resource.density && gridCells[x, y].resourceType == ResourcesType.Null)
+                    if (gridCells[x, y].biomeName == biome && UnityEngine.Random.Range(0f, 1f) > 1 - resource.density && IsFreeAround(x, y, gridX, gridY))
                     {
                         gridCells[x, y].resourceType = resource.resourcesType;
                         // Centre de la cellule
@@ -152,6 +153,25 @@ public class ResourcesGenerator : MonoBehaviour
         }
 
         terrainData.treeInstances = trees.ToArray();
+    }
+
+    private bool IsFreeAround(int x, int y, int gridX, int gridY)
+    {
+        ResourcesType cyx   = gridCells[x, y].resourceType;
+        ResourcesType cyxm  = (x - 1 > 0) ? gridCells[x - 1, y].resourceType : cyx;
+        ResourcesType cymx  = (y - 1 > 0) ? gridCells[x, y - 1].resourceType : cyx;
+        ResourcesType cymxm = (x - 1 > 0 && y - 1 > 0) ? gridCells[x - 1, y - 1].resourceType : cyx;
+        ResourcesType cyxp  = (x + 1 < gridX) ? gridCells[x + 1, y].resourceType : cyx;
+        ResourcesType cypx  = (y + 1 < gridY) ? gridCells[x, y + 1].resourceType : cyx;
+        ResourcesType cypxp = (x + 1 < gridX && y + 1 < gridY) ? gridCells[x + 1, y + 1].resourceType : cyx;
+        ResourcesType cymxp = (x + 1 < gridX && y - 1 > 0) ? gridCells[x + 1, y - 1].resourceType : cyx;
+        ResourcesType cypxm = (x - 1 > 0 && y + 1 < gridY) ? gridCells[x- 1, y + 1].resourceType : cyx;
+
+        if (cyx == ResourcesType.Null && cyxm == ResourcesType.Null && cymx == ResourcesType.Null && cymxm == ResourcesType.Null &&
+            cyxp == ResourcesType.Null && cypx == ResourcesType.Null && cypxp == ResourcesType.Null &&
+            cymxp == ResourcesType.Null && cypxm == ResourcesType.Null)
+            { return true; }
+        else return false;
     }
 
     // Fonction pour supprimer tous les arbres instanciés
