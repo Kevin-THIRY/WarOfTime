@@ -81,4 +81,8 @@ public class CameraFollow : MonoBehaviour
         float step = CameraMoveSpeed * Time.fixedDeltaTime;
         transform.position = Vector3.MoveTowards(transform.position, target.position, step);
     }
+
+    #region Getter
+    public GameObject GetCameraFollowObj() { return CameraFollowObj; }
+    #endregion
 }

@@ -153,11 +153,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1265678071121026675, guid: 7fbb67d16f59b764198b5848fe5cf8e7, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 8.5
+      value: 10.7
       objectReference: {fileID: 0}
     - target: {fileID: 1265678071121026675, guid: 7fbb67d16f59b764198b5848fe5cf8e7, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 24.29
+      value: 12.74
       objectReference: {fileID: 0}
     - target: {fileID: 1265678071121026675, guid: 7fbb67d16f59b764198b5848fe5cf8e7, type: 3}
       propertyPath: m_LocalRotation.w
@@ -201,13 +201,34 @@ PrefabInstance:
       objectReference: {fileID: 566546368}
     - target: {fileID: 7928794777686538743, guid: 7fbb67d16f59b764198b5848fe5cf8e7, type: 3}
       propertyPath: maxDistance
-      value: 10
+      value: 70
+      objectReference: {fileID: 0}
+    - target: {fileID: 8524703630745371549, guid: 7fbb67d16f59b764198b5848fe5cf8e7, type: 3}
+      propertyPath: radius
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 8524703630745371549, guid: 7fbb67d16f59b764198b5848fe5cf8e7, type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8524703630745371549, guid: 7fbb67d16f59b764198b5848fe5cf8e7, type: 3}
+      propertyPath: forOfWarPlane
+      value: 
+      objectReference: {fileID: 1142552692}
+    - target: {fileID: 8524703630745371549, guid: 7fbb67d16f59b764198b5848fe5cf8e7, type: 3}
+      propertyPath: fogLayer.m_Bits
+      value: 64
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 7fbb67d16f59b764198b5848fe5cf8e7, type: 3}
+--- !u!4 &279991314 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 1265678071121026675, guid: 7fbb67d16f59b764198b5848fe5cf8e7, type: 3}
+  m_PrefabInstance: {fileID: 279991313}
+  m_PrefabAsset: {fileID: 0}
 --- !u!43 &305515896
 Mesh:
   m_ObjectHideFlags: 0
@@ -729,6 +750,7 @@ GameObject:
   - component: {fileID: 758485466}
   - component: {fileID: 758485465}
   - component: {fileID: 758485464}
+  - component: {fileID: 758485469}
   m_Layer: 0
   m_Name: Cube
   m_TagString: Untagged
@@ -761,7 +783,7 @@ Rigidbody:
   m_UseGravity: 1
   m_IsKinematic: 0
   m_Interpolate: 0
-  m_Constraints: 0
+  m_Constraints: 112
   m_CollisionDetection: 0
 --- !u!65 &758485465
 BoxCollider:
@@ -847,12 +869,32 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 90.742516, y: 5.81, z: 21.409071}
-  m_LocalScale: {x: 3.34, y: 1, z: 3.90195}
+  m_LocalScale: {x: 5, y: 1, z: 5}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 566546369}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &758485469
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 758485463}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 01ee22022ac4bbd4d9f4d280410a8892, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  walk_speed: 10
+  dash_speed: 2
+  dash_time: 0.5
+  jump_speed: 10
+  gravity_on_base_plan: 1
+  coolDown_dash: 2
+  tf_cam: {fileID: 279991314}
+  in_out_space_state: 1
 --- !u!1 &832575517
 GameObject:
   m_ObjectHideFlags: 0
@@ -963,7 +1005,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &945434503
 Transform:
   m_ObjectHideFlags: 0
