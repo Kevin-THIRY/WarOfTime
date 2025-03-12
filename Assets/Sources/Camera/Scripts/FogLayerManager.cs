@@ -23,18 +23,15 @@ public class FogLayerManager : MonoBehaviour
     {
         Ray r = new Ray(transform.position, player.position - transform.position);
         RaycastHit hit;
-        Debug.DrawLine(r.origin, player.position, Color.green, 0.1f);
-        if (Physics.Raycast(r, out hit, 10000, fogLayer, QueryTriggerInteraction.Collide))
+        if (Physics.Raycast(r, out hit, 1000, fogLayer, QueryTriggerInteraction.Collide))
         {
-            Debug.Log("Yo");
-            Debug.DrawLine(r.origin, hit.point, Color.green, 0.1f);
             for (int i = 0; i < vertices.Length; i++)
             {
                 Vector3 v = forOfWarPlane.transform.TransformPoint(vertices[i]);
                 float dist = Vector3.SqrMagnitude(v - hit.point);
                 if (dist < radiusSqr)
                 {
-                    float alpha = Mathf.Min(colors[i].a, dist/radiusSqr);
+                    float alpha = Mathf.Lerp(colors[i].a, 0f, 1f - (dist / radiusSqr));
                     colors[i].a = alpha;
                 }
             }
@@ -50,13 +47,14 @@ public class FogLayerManager : MonoBehaviour
         colors = new Color[vertices.Length];
         for (int i = 0; i < colors.Length; i++)
         {
-            colors[i] = new Color(0, 0, 0, 1);;
+            colors[i] = new Color(0, 0, 0, 1);
         }
         UpdateColor();
     }
 
     private void UpdateColor()
     {
+        forOfWarPlane.GetComponent<MeshRenderer>().material.enableInstancing = true;
         mesh.colors = colors;
     }
 }
