@@ -60,11 +60,15 @@ public class TerrainGenerator : MonoBehaviour
     [SerializeField] private GameObject fogPrefab;
     [SerializeField] private bool displayFogOfWar = false;
 
+    [Header("Highlight")]
+    [SerializeField] private GameObject highlightPrefab;
+
     private Terrain terrain;
     private GridCell[,] gridCells;
     private int width = 0;
     private Biome[,] biomeCells;
     public static GameObject fogInstance;
+    public static GameObject highlightInstance;
 
     void Start()
     {
@@ -111,7 +115,14 @@ public class TerrainGenerator : MonoBehaviour
         fogInstance.GetComponentInChildren<FogOfWar>().SetResolution(width);
         fogInstance.GetComponentInChildren<FogOfWar>().SetHeight(depth * biomes[biomes.Length - 1].biomeHeight);
         fogInstance.GetComponentInChildren<FogOfWar>().CreateFogBlock();
-        // fogInstance.GetComponent<FogOfWar>().RevealArea(player.transform.position, 10f);
+    }
+
+    public void GenerateHighlightMap()
+    {
+        if (highlightInstance == null) highlightInstance = Instantiate(highlightPrefab, transform.position, Quaternion.identity, transform);
+        highlightInstance.GetComponentInChildren<MouseShaderController>().SetResolution(terrain.terrainData.heightmapResolution);
+        highlightInstance.GetComponentInChildren<MouseShaderController>().SetHeight(depth * biomes[0].biomeHeight);
+        highlightInstance.GetComponentInChildren<MouseShaderController>().CreateHighlightBlock(new Vector3(terrain.terrainData.size.x, terrain.terrainData.size.y, terrain.terrainData.size.z), terrain.terrainData.GetHeights(0, 0, terrain.terrainData.heightmapResolution, terrain.terrainData.heightmapResolution));
     }
 
     public void GenerateTerrain()

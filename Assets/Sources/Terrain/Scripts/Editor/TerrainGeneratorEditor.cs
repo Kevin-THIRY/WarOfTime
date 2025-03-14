@@ -22,5 +22,9 @@ public class TerrainGeneratorEditor : Editor
         {
             generator.GenerateFogOfWar();
         }
+        if (GUILayout.Button("Add Highlight Map"))
+        {
+            generator.GenerateHighlightMap();
+        }
     }
 }
