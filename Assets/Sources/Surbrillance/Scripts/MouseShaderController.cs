@@ -5,23 +5,39 @@ public class MouseShaderController : MonoBehaviour
     [SerializeField] private Material highlightMaterial;
     private Camera cam;
     private int resolution;
-    private float height;
+    private TerrainGenerator.GridCell[,] gridCells;
 
     void Start()
     {
         cam = Camera.main;
+        gridCells = GetComponentInParent<TerrainGenerator>().GetGridCells();
     }
 
-    void Update()
+    void FixedUpdate()
     {
         if (highlightMaterial == null || cam == null) return;
+
+        highlightMaterial.SetFloat("_GridLenght", GetComponentInParent<TerrainGenerator>().GetCellSize());
 
         Ray ray = cam.ScreenPointToRay(Input.mousePosition);
         int layerMask = LayerMask.GetMask("MouseDetection");
         if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, layerMask))
         {
-            Vector3 adjustedPosition = hit.point + hit.normal; // Décale légèrement
-            highlightMaterial.SetVector("_MousePosition", adjustedPosition);
+            Vector2 mousePos2D = new Vector2(hit.point.x + hit.normal.x, hit.point.z + hit.normal.z);
+            Vector2 center = Vector2.zero;
+            float minDist = float.MaxValue;
+
+            foreach (TerrainGenerator.GridCell cell in gridCells)
+            {
+                float dist = Vector2.Distance(mousePos2D, cell.center);
+                if (dist < minDist)
+                {
+                    minDist = dist;
+                    center = cell.center;
+                }
+            }
+            // Vector3 adjustedPosition = hit.point + hit.normal; // Décale légèrement
+            highlightMaterial.SetVector("_MousePosition", new Vector3(center.x, hit.point.y + hit.normal.y, center.y));
         }
         else
         {
@@ -124,6 +140,5 @@ public class MouseShaderController : MonoBehaviour
 
     #region Setter
     public void SetResolution(int res) { resolution = res; }
-    public void SetHeight(float highlightHeight) { height = highlightHeight; }
     #endregion
 }

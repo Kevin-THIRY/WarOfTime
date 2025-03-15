@@ -121,7 +121,6 @@ public class TerrainGenerator : MonoBehaviour
     {
         if (highlightInstance == null) highlightInstance = Instantiate(highlightPrefab, transform.position, Quaternion.identity, transform);
         highlightInstance.GetComponentInChildren<MouseShaderController>().SetResolution(terrain.terrainData.heightmapResolution);
-        highlightInstance.GetComponentInChildren<MouseShaderController>().SetHeight(depth * biomes[0].biomeHeight);
         highlightInstance.GetComponentInChildren<MouseShaderController>().CreateHighlightBlock(new Vector3(terrain.terrainData.size.x, terrain.terrainData.size.y, terrain.terrainData.size.z), terrain.terrainData.GetHeights(0, 0, terrain.terrainData.heightmapResolution, terrain.terrainData.heightmapResolution));
     }
 
@@ -489,6 +488,21 @@ public class TerrainGenerator : MonoBehaviour
                 gridCells[x, y] = new GridCell(new Vector3(worldX, terrainHeight, worldZ), biomeCells[x, y].name);
             }
         }
+
+
+        // Generate Center
+        gridX = gridCells.GetLength(0) - 1;
+        gridY = gridCells.GetLength(1) - 1;
+
+        for (int x = 0; x < gridX; x++)
+        {
+            for (int y = 0; y < gridY; y++)
+            {
+                float centerX = x * adjustedCellSizeX + (adjustedCellSizeX / 2);
+                float centerZ = y * adjustedCellSizeX + (adjustedCellSizeX / 2);
+                gridCells[x, y].center = new Vector2(centerX, centerZ);
+            }
+        }
     }
     void OnDrawGizmos()
     {
@@ -627,8 +641,8 @@ public class TerrainGenerator : MonoBehaviour
     {
         public readonly Vector3 position;
         public ResourcesType resourceType;
+        public Vector2 center;
         public readonly BiomeName biomeName;
-        public FogState fogState = FogState.Hidden;
 
         public GridCell(Vector3 position, BiomeName biomeName)
         {
@@ -644,5 +658,6 @@ public class TerrainGenerator : MonoBehaviour
 
     #region Getter
     public GridCell[,] GetGridCells() { return gridCells; }
+    public float GetCellSize() { return cellSize; }
     #endregion
 }
