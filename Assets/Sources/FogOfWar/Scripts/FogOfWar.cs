@@ -3,7 +3,6 @@ using System;
 
 public enum FogState { Hidden, Revealed, Visible }
 
-[System.Serializable]
 [ExecuteInEditMode]
 public class FogOfWar : MonoBehaviour
 {
