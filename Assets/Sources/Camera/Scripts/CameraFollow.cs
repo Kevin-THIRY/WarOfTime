@@ -22,10 +22,6 @@ public class CameraFollow : MonoBehaviour
     private float finalInputZ;
     private float rotX = 0.0f;
     private float rotY = 0.0f;
-    private bool status_manager;
-    private float clampAngle_vert = 0;
-    private float temp_clampAngle_vert = 0;
-    private float elapsedTime = 0f;
 
     
     // Start is called before the first frame update
@@ -37,13 +33,6 @@ public class CameraFollow : MonoBehaviour
         rotY = rot.y;
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
-    }
-
-    private void FixedUpdate()
-    {
-        elapsedTime += Time.fixedDeltaTime;
-        float t = elapsedTime / transition_camera_smooth_vertical;
-        temp_clampAngle_vert = (int)Mathf.Lerp(clampAngle, clampAngle_vert, t);
     }
 
     private void Update()
@@ -60,10 +49,11 @@ public class CameraFollow : MonoBehaviour
         finalInputX = inputX + mouseX;
         finalInputZ = inputZ + mouseY;
         
-        rotY = finalInputX * inputSensitivity * Time.fixedDeltaTime;
+        // rotY = finalInputX * inputSensitivity * Time.fixedDeltaTime;
         rotX -= finalInputZ * inputSensitivity * Time.fixedDeltaTime;
 
-        // rotX = Mathf.Clamp(rotX, -temp_clampAngle_vert, temp_clampAngle_vert);
+        rotX = Mathf.Clamp(rotX, clampAngle, clampAngle);
+        // rotX = Mathf.Clamp(rotX, -clampAngle, clampAngle);
         
         Quaternion quat_local_target = Quaternion.FromToRotation(transform.up, CameraFollowObj.GetComponentInParent<Rigidbody>().transform.up) * transform.rotation;
 
