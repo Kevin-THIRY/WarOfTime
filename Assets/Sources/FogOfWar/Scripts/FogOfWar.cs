@@ -7,14 +7,8 @@ public enum FogState { Hidden, Revealed, Visible }
 public class FogOfWar : MonoBehaviour
 {
     [SerializeField] private Material fogMaterial;
-    private TerrainGenerator.GridCell[,] gridCells;
     private int resolution;
     private float height;
-
-    public void UpdateFogOfWar()
-    {
-        gridCells = GetComponentInParent<TerrainGenerator>().GetGridCells();
-    }
 
     public void CreateFogBlock()
     {

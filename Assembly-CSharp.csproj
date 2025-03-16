@@ -69,12 +69,13 @@
     <Compile Include="Assets\Sources\Surbrillance\Scripts\MouseShaderController.cs" />
     <Compile Include="Assets\Sources\Terrain\Scripts\ResourcesGenerator.cs" />
     <Compile Include="Assets\Sources\Camera\Scripts\CameraCollision.cs" />
-    <Compile Include="Assets\Sources\Camera\Scripts\FogLayerManager.cs" />
+    <Compile Include="Assets\Sources\Ai\AIMovementManager.cs" />
     <Compile Include="Assets\Sources\Camera\Scripts\CameraFollow.cs" />
     <Compile Include="Assets\TutorialInfo\Scripts\Readme.cs" />
     <Compile Include="Assets\Sources\FogOfWar\Scripts\FogOfWar.cs" />
     <Compile Include="Assets\Sources\Mesh Optimizer\Scripts\OptimizeMesh.cs" />
     <Compile Include="Assets\Sources\Player\Scripts\MovementManager.cs" />
+    <Compile Include="Assets\Sources\FogOfWar\Scripts\FogLayerManager.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Sources\Terrain\Lowpoly_Environments\Sources\Shaders\PT_Water_Shader_WebGl.shader" />
