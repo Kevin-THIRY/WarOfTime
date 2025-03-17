@@ -31,8 +31,8 @@ public class CameraFollow : MonoBehaviour
         Vector3 rot = transform.rotation.eulerAngles;
         rotX = rot.x;
         rotY = rot.y;
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
+        // Cursor.lockState = CursorLockMode.Locked;
+        // Cursor.visible = false;
     }
 
     private void Update()

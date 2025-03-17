@@ -73,6 +73,7 @@ public class TerrainGenerator : MonoBehaviour
     void Start()
     {
         GenerateTerrain();
+        // GeneratePlayer();
     }
 
     void OnValidate()
@@ -659,5 +660,6 @@ public class TerrainGenerator : MonoBehaviour
     #region Getter
     public GridCell[,] GetGridCells() { return gridCells; }
     public float GetCellSize() { return cellSize; }
+    public float GetWidth() { return width; }
     #endregion
 }

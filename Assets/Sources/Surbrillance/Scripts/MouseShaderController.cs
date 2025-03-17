@@ -6,11 +6,20 @@ public class MouseShaderController : MonoBehaviour
     private Camera cam;
     private int resolution;
     private TerrainGenerator.GridCell[,] gridCells;
+    private PlayerManager playerManager;
+    private bool clickedOnCell;
 
     void Start()
     {
+        clickedOnCell = false;
         cam = Camera.main;
         gridCells = GetComponentInParent<TerrainGenerator>().GetGridCells();
+    }
+
+    void Update()
+    {
+        if (Input.GetMouseButtonDown(0)) clickedOnCell = true;
+        else clickedOnCell = false;
     }
 
     void FixedUpdate()
@@ -24,20 +33,24 @@ public class MouseShaderController : MonoBehaviour
         if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, layerMask))
         {
             Vector2 mousePos2D = new Vector2(hit.point.x + hit.normal.x, hit.point.z + hit.normal.z);
-            Vector2 center = Vector2.zero;
+            TerrainGenerator.GridCell cell = new TerrainGenerator.GridCell(new Vector3(0, 0, 0), BiomeName.Water);
             float minDist = float.MaxValue;
 
-            foreach (TerrainGenerator.GridCell cell in gridCells)
+            foreach (TerrainGenerator.GridCell currentCell in gridCells)
             {
-                float dist = Vector2.Distance(mousePos2D, cell.center);
+                float dist = Vector2.Distance(mousePos2D, currentCell.center);
                 if (dist < minDist)
                 {
                     minDist = dist;
-                    center = cell.center;
+                    cell = currentCell;
                 }
             }
             // Vector3 adjustedPosition = hit.point + hit.normal; // Décale légèrement
-            highlightMaterial.SetVector("_MousePosition", new Vector3(center.x, hit.point.y + hit.normal.y, center.y));
+            highlightMaterial.SetVector("_MousePosition", new Vector3(cell.center.x, hit.point.y + hit.normal.y, cell.center.y));
+            if (playerManager != null && clickedOnCell)
+            {
+                playerManager.SetSelectedCell(cell);
+            }
         }
         else
         {
@@ -140,5 +153,6 @@ public class MouseShaderController : MonoBehaviour
 
     #region Setter
     public void SetResolution(int res) { resolution = res; }
+    public void SetPlayerManager(PlayerManager _playerManager) { playerManager = _playerManager; }
     #endregion
 }
