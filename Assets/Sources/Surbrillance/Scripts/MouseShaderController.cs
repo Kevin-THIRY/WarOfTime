@@ -33,7 +33,7 @@ public class MouseShaderController : MonoBehaviour
         if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, layerMask))
         {
             Vector2 mousePos2D = new Vector2(hit.point.x + hit.normal.x, hit.point.z + hit.normal.z);
-            TerrainGenerator.GridCell cell = new TerrainGenerator.GridCell(new Vector3(0, 0, 0), BiomeName.Water);
+            TerrainGenerator.GridCell cell = new TerrainGenerator.GridCell(new Vector3(0, 0, 0), new Vector2(0, 0), BiomeName.Water, 0);
             float minDist = float.MaxValue;
 
             foreach (TerrainGenerator.GridCell currentCell in gridCells)

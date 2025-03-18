@@ -18,6 +18,7 @@ public class BiomeParam
     public TerrainLayer terrainLayer; // Texture associé
     [Range(0f, 0.5f)] public float localScale = 0.1f; // Taille fixe des carrés
     [Range(0f, 0.5f)] public float extraLocalScale = 0.1f; // Taille fixe des carrés
+    [Range(1, 5)] public int cost = 1;
 }
 public class Biome
 {
@@ -28,6 +29,7 @@ public class Biome
     public float biomeHeight;
     public float localScale = 0.1f; // Taille fixe des carrés
     public float extraLocalScale = 0.1f; // Taille fixe des carrés
+    public int cost = 1;
 }
 
 [ExecuteInEditMode]
@@ -454,6 +456,7 @@ public class TerrainGenerator : MonoBehaviour
                 biomeCells[biomeCellX, biomeCellY].biomeHeight = biome.biomeHeight;
                 biomeCells[biomeCellX, biomeCellY].localScale = biome.localScale;
                 biomeCells[biomeCellX, biomeCellY].extraLocalScale = biome.extraLocalScale;
+                biomeCells[biomeCellX, biomeCellY].cost = biome.cost;
             }
         }
     }
@@ -486,7 +489,7 @@ public class TerrainGenerator : MonoBehaviour
                     Mathf.RoundToInt(normalizedZ * (terrainData.heightmapResolution - 1))
                 );
 
-                gridCells[x, y] = new GridCell(new Vector3(worldX, terrainHeight, worldZ), biomeCells[x, y].name);
+                gridCells[x, y] = new GridCell(new Vector3(worldX, terrainHeight, worldZ), new Vector2(x, y), biomeCells[x, y].name, biomeCells[x, y].cost);
             }
         }
 
@@ -641,14 +644,18 @@ public class TerrainGenerator : MonoBehaviour
     public class GridCell
     {
         public readonly Vector3 position;
+        public readonly Vector2 gridPosition;
+        public readonly int cost;
         public ResourcesType resourceType;
         public Vector2 center;
         public readonly BiomeName biomeName;
 
-        public GridCell(Vector3 position, BiomeName biomeName)
+        public GridCell(Vector3 position, Vector2 gridPosition, BiomeName biomeName, int cost)
         {
             this.position = position;
+            this.gridPosition = gridPosition;
             this.biomeName = biomeName;
+            this.cost = cost;
         }
 
         public void ResetResource()
