@@ -1,15 +1,20 @@
 using System.Linq;
 using UnityEngine;
 using System.Collections.Generic;
+using System.Collections;
+using System;
 
 public class Unit
 {
+    GameObject me;
+    public bool isMoving = false;
     public int id;
     public string name;
     public Vector2 gridPosition;
     private Queue<Vector2> pathQueue;
-    public Unit(int id, string name, Vector2 position)
+    public Unit(GameObject me, int id, string name, Vector2 position)
     {
+        this.me = me;
         this.id = id;
         this.name = name;
         this.gridPosition = position;
@@ -36,6 +41,33 @@ public class Unit
             Debug.Log($"Unité {name} déplacée en ({gridPosition.x}, {gridPosition.y})");
         }
     }
+
+    public IEnumerator Goto(List<Vector2> path, float speed, System.Action<bool> onComplete)
+    {
+        if (path == null || path.Count == 0) 
+        {
+            onComplete?.Invoke(false);
+            yield return null;
+        }
+        if (!isMoving)
+        {
+            isMoving = true;
+            foreach (Vector2 targetGridPos in path)
+            {
+                Vector3 targetWorldPos = PlayerManager.Instance.GetWorldPositionFromGridCoordinates((int)targetGridPos.x, (int)targetGridPos.y);
+                
+                while (Vector3.Distance(me.transform.position, targetWorldPos) > 0.1f)
+                {
+                    me.transform.position = Vector3.MoveTowards(me.transform.position, targetWorldPos, speed * Time.deltaTime);
+                    yield return null;
+                }
+                
+                gridPosition = targetGridPos; // Met à jour la position une fois arrivé
+            }
+            isMoving = false;
+            onComplete?.Invoke(true); // Succès
+        }
+    }
 }
 
 public class PlayerManager : MonoBehaviour
@@ -43,11 +75,20 @@ public class PlayerManager : MonoBehaviour
     [SerializeField] private MouseShaderController mouseShaderController;
     [SerializeField] private GameObject firstUnit;
     [SerializeField] private TerrainGenerator terrainGenerator;
+    [SerializeField] private LineRenderer lineRenderer;
     private int id;
     private TerrainGenerator.GridCell[,] gridCells;
     private TerrainGenerator.GridCell selectedCell;
     private Unit selectedUnit;
     private List<Unit> allUnitsOfThePlayer = new List<Unit>();
+    private List<Vector2> path;
+    public static PlayerManager Instance { get; private set; }
+
+    void Awake()
+    {
+        if (Instance == null) Instance = this;
+        else Destroy(gameObject);
+    }
 
     void Start()
     {
@@ -55,17 +96,39 @@ public class PlayerManager : MonoBehaviour
         gridCells = terrainGenerator.GetGridCells();
         mouseShaderController.SetPlayerManager(this);
         (int x, int y) = GetGridPositionFromWorldPosition(firstUnit.transform.position);
-        selectedUnit = new Unit(id++, firstUnit.name, new Vector2(x, y));
+        selectedUnit = new Unit(firstUnit, id++, firstUnit.name, new Vector2(x, y));
         allUnitsOfThePlayer.Add(selectedUnit);
     }
 
     void Update()
     {
         if (allUnitsOfThePlayer == null || selectedUnit == null || selectedCell == null) return;
-        if (selectedCell.gridPosition != selectedUnit.gridPosition)
+        if (!selectedUnit.isMoving && selectedCell.gridPosition != selectedUnit.gridPosition)
         {
-            List<Vector2> path = FindPath(selectedUnit.gridPosition, selectedCell.gridPosition);
-            selectedUnit.Goto(path);
+            path = FindPath(selectedUnit.gridPosition, selectedCell.gridPosition);
+            ShowPathLine(path);
+            // StartCoroutine(selectedUnit.Goto(path, 10));
+            StartCoroutine(selectedUnit.Goto(path, 10, (success) =>
+            {
+                if (success)
+                {
+                    Debug.Log("Déplacement terminé avec succès !");
+                }
+                else
+                {
+                    Debug.Log("Échec du déplacement.");
+                }
+            }));
+            // selectedUnit.Goto(path);
+        }
+    }
+
+    private void ShowPathLine(List<Vector2> path)
+    {
+        lineRenderer.positionCount = path.Count;
+        for (int i = 0; i < path.Count; i++)
+        {
+            lineRenderer.SetPosition(i, GetWorldPositionFromGridCoordinates((int)path[i].x, (int)path[i].y));
         }
     }
 
@@ -142,6 +205,14 @@ public class PlayerManager : MonoBehaviour
         int Y = Mathf.FloorToInt(Mathf.Clamp(z_position, 0, gridY - 1));
 
         return (X, Y);
+    }
+
+    public Vector3 GetWorldPositionFromGridCoordinates(int x, int y)
+    {
+        float worldPosX = gridCells[x, y].position.x;
+        float worldPosY = gridCells[x, y].position.y;
+        float worldPosZ = gridCells[x, y].position.z;
+        return new Vector3(worldPosX, worldPosY, worldPosZ);
     }
 
     #region Setter
