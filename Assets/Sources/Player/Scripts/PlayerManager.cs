@@ -54,7 +54,7 @@ public class Unit
             isMoving = true;
             foreach (Vector2 targetGridPos in path)
             {
-                Vector3 targetWorldPos = PlayerManager.Instance.GetWorldPositionFromGridCoordinates((int)targetGridPos.x, (int)targetGridPos.y);
+                Vector3 targetWorldPos = PlayerManager.Instance.GetWorldPositionFromGridCoordinates((int)targetGridPos.x, (int)targetGridPos.y, true);
                 
                 while (Vector3.Distance(me.transform.position, targetWorldPos) > 0.1f)
                 {
@@ -128,7 +128,7 @@ public class PlayerManager : MonoBehaviour
         lineRenderer.positionCount = path.Count;
         for (int i = 0; i < path.Count; i++)
         {
-            lineRenderer.SetPosition(i, GetWorldPositionFromGridCoordinates((int)path[i].x, (int)path[i].y));
+            lineRenderer.SetPosition(i, GetWorldPositionFromGridCoordinates((int)path[i].x, (int)path[i].y, true));
         }
     }
 
@@ -207,12 +207,22 @@ public class PlayerManager : MonoBehaviour
         return (X, Y);
     }
 
-    public Vector3 GetWorldPositionFromGridCoordinates(int x, int y)
+    public Vector3 GetWorldPositionFromGridCoordinates(int x, int y, bool getCenterPosition = false)
     {
-        float worldPosX = gridCells[x, y].position.x;
         float worldPosY = gridCells[x, y].position.y;
-        float worldPosZ = gridCells[x, y].position.z;
-        return new Vector3(worldPosX, worldPosY, worldPosZ);
+
+        if (getCenterPosition) 
+        {
+            float worldPosX = gridCells[x, y].center.x;
+            float worldPosZ = gridCells[x, y].center.y;
+            return new Vector3(worldPosX, worldPosY, worldPosZ);
+        }
+        else
+        {
+            float worldPosX = gridCells[x, y].position.x;
+            float worldPosZ = gridCells[x, y].position.z;
+            return new Vector3(worldPosX, worldPosY, worldPosZ);
+        }
     }
 
     #region Setter
