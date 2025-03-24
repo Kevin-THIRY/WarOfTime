@@ -74,7 +74,7 @@ public class TerrainGenerator : MonoBehaviour
 
     void Start()
     {
-        GenerateTerrain();
+        // GenerateTerrain();
         // GeneratePlayer();
     }
 

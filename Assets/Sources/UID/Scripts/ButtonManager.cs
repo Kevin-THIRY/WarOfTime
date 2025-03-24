@@ -13,7 +13,10 @@ public enum ButtonFunction{
 	ClosePanel,
 	OpenPanel,
 	CreatePanelAndOpenNextToMe,
-	DeletePanel
+	DeletePanel,
+	AddPlayer,
+	AddBot,
+	Test
 }
 
 public class ButtonManager : MonoBehaviour
@@ -64,7 +67,10 @@ public class ButtonManager : MonoBehaviour
 			{ ButtonFunction.ClosePanel, new Action(ClosePanel) },
 			{ ButtonFunction.OpenPanel, new Action(OpenPanel) },
 			{ ButtonFunction.CreatePanelAndOpenNextToMe, new Action<GameObject, Vector2Int>(CreatePanelAndOpenNextToMe) },
-			{ ButtonFunction.DeletePanel, new Action<GameObject>(DeletePanel) }
+			{ ButtonFunction.DeletePanel, new Action<GameObject>(DeletePanel) },
+			{ ButtonFunction.AddPlayer, new Action(AddPlayer) },
+			{ ButtonFunction.AddBot, new Action(AddBot) },
+			{ ButtonFunction.Test, new Action(Test) }
         };
     }
 
@@ -264,6 +270,24 @@ public class ButtonManager : MonoBehaviour
 	private void DeletePanel(GameObject canvasObject)
 	{
 		controller.DeletePanel(canvasObject);
+	}
+
+	private void AddPlayer()
+	{
+		GameData.playerList.Add(new PlayerOption { Name = "Joueur" + GameData.playerList.Count, Color = Color.blue });
+	}
+
+	private void AddBot()
+	{
+		GameData.botList.Add(new BotOption { botDifficulty = BotDifficulty.Easy });
+	}
+
+	private void Test()
+	{
+		foreach (var player in GameData.playerList)
+		{
+			Debug.Log("Joueur : " + player.Name + ", Couleur : " + player.Color);
+		}
 	}
 
 	#region Getter
