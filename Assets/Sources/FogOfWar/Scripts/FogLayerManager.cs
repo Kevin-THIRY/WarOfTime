@@ -23,6 +23,7 @@ public class FogLayerManager : MonoBehaviour
         // Ray r = new Ray(transform.position, Vector3.up);
         Ray r = new Ray(transform.position + Vector3.up * forOfWarPlane.transform.position.y * 2f, Vector3.down);
         RaycastHit hit;
+        // Debug.DrawRay(transform.position + Vector3.up * forOfWarPlane.transform.position.y * 2f, Vector3.down, Color.red, 2);
         if (Physics.Raycast(r, out hit, 10, fogLayer, QueryTriggerInteraction.Collide))
         {
             for (int i = 0; i < vertices.Length; i++)
@@ -56,4 +57,7 @@ public class FogLayerManager : MonoBehaviour
         forOfWarPlane.GetComponent<MeshRenderer>().material.enableInstancing = true;
         mesh.colors = colors;
     }
+
+    public void SetLayer(LayerMask layer) { fogLayer = layer; }
+    public void SetFogPlayer(GameObject _forOfWarPlane) { forOfWarPlane = _forOfWarPlane; }
 }

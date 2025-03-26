@@ -227,6 +227,8 @@ public class PlayerManager : MonoBehaviour
 
     #region Setter
     public void SetSelectedCell(TerrainGenerator.GridCell _cell) { selectedCell = _cell; }
+    public void SetTerrainGenerator(TerrainGenerator _terrainGenerator) { terrainGenerator = _terrainGenerator; }
+    public void SetMouseShaderController(MouseShaderController _mouseShaderController) { mouseShaderController = _mouseShaderController; }
     public void AddUnit(Unit _unit) { allUnitsOfThePlayer.Append(_unit); }
     #endregion
 }

@@ -120,6 +120,13 @@ public class TerrainGenerator : MonoBehaviour
         fogInstance.GetComponentInChildren<FogOfWar>().CreateFogBlock();
     }
 
+    public void GenerateFogPlayer(GameObject fogOfWarPlayer)
+    {
+        fogOfWarPlayer.GetComponentInChildren<FogOfWar>().SetResolution(width);
+        fogOfWarPlayer.GetComponentInChildren<FogOfWar>().SetHeight(depth * biomes[biomes.Length - 1].biomeHeight);
+        fogOfWarPlayer.GetComponentInChildren<FogOfWar>().CreateFogBlock();
+    }
+
     public void GenerateHighlightMap()
     {
         if (highlightInstance == null) highlightInstance = Instantiate(highlightPrefab, transform.position, Quaternion.identity, transform);
@@ -668,5 +675,6 @@ public class TerrainGenerator : MonoBehaviour
     public GridCell[,] GetGridCells() { return gridCells; }
     public float GetCellSize() { return cellSize; }
     public float GetWidth() { return width; }
+    public float GetMinHeight() { return depth * biomes[biomes.Length - 1].biomeHeight; }
     #endregion
 }
