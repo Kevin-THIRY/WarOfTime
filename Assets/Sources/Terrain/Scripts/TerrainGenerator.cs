@@ -131,7 +131,17 @@ public class TerrainGenerator : MonoBehaviour
     {
         if (highlightInstance == null) highlightInstance = Instantiate(highlightPrefab, transform.position, Quaternion.identity, transform);
         highlightInstance.GetComponentInChildren<MouseShaderController>().SetResolution(terrain.terrainData.heightmapResolution);
+        highlightInstance.GetComponentInChildren<MouseShaderController>().SetCellSize(cellSize);
+        highlightInstance.GetComponentInChildren<MouseShaderController>().SetGridCell(gridCells);
         highlightInstance.GetComponentInChildren<MouseShaderController>().CreateHighlightBlock(new Vector3(terrain.terrainData.size.x, terrain.terrainData.size.y, terrain.terrainData.size.z), terrain.terrainData.GetHeights(0, 0, terrain.terrainData.heightmapResolution, terrain.terrainData.heightmapResolution));
+    }
+
+    public void GenerateHighlightPlayer(GameObject highlightPlayer)
+    {
+        highlightPlayer.GetComponentInChildren<MouseShaderController>().SetResolution(terrain.terrainData.heightmapResolution);
+        highlightPlayer.GetComponentInChildren<MouseShaderController>().SetCellSize(cellSize);
+        highlightPlayer.GetComponentInChildren<MouseShaderController>().SetGridCell(gridCells);
+        highlightPlayer.GetComponentInChildren<MouseShaderController>().CreateHighlightBlock(new Vector3(terrain.terrainData.size.x, terrain.terrainData.size.y, terrain.terrainData.size.z), terrain.terrainData.GetHeights(0, 0, terrain.terrainData.heightmapResolution, terrain.terrainData.heightmapResolution));
     }
 
     public void GenerateTerrain()

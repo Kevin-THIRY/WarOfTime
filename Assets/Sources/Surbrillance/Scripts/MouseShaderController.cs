@@ -3,6 +3,7 @@ using UnityEngine;
 public class MouseShaderController : MonoBehaviour
 {
     [SerializeField] private Material highlightMaterial;
+    private float cellSize;
     private Camera cam;
     private int resolution;
     private TerrainGenerator.GridCell[,] gridCells;
@@ -13,7 +14,6 @@ public class MouseShaderController : MonoBehaviour
     {
         clickedOnCell = false;
         cam = Camera.main;
-        gridCells = GetComponentInParent<TerrainGenerator>().GetGridCells();
     }
 
     void Update()
@@ -26,7 +26,7 @@ public class MouseShaderController : MonoBehaviour
     {
         if (highlightMaterial == null || cam == null) return;
 
-        highlightMaterial.SetFloat("_GridLenght", GetComponentInParent<TerrainGenerator>().GetCellSize());
+        highlightMaterial.SetFloat("_GridLenght", cellSize);
 
         Ray ray = cam.ScreenPointToRay(Input.mousePosition);
         int layerMask = LayerMask.GetMask("MouseDetection");
@@ -72,13 +72,13 @@ public class MouseShaderController : MonoBehaviour
             {
                 existingMeshFilter.mesh = GenerateMesh(sizeTerrain, heights);
             }
-            existingBlock.localPosition = new Vector3(0, 0, 0);
+            existingBlock.localPosition = new Vector3(0, 0.2f, 0);
             return;
         }
         // Création du GameObject
         GameObject groundBlock = new GameObject(highlightObjectName);
         groundBlock.transform.parent = transform; // Assigner le parent
-        groundBlock.transform.localPosition = new Vector3(0, 0, 0);
+        groundBlock.transform.localPosition = new Vector3(0, 0.2f, 0);
         groundBlock.layer = 7;
         
         // Ajout du MeshFilter et du MeshRenderer
@@ -153,6 +153,8 @@ public class MouseShaderController : MonoBehaviour
 
     #region Setter
     public void SetResolution(int res) { resolution = res; }
+    public void SetCellSize(float _cellSize) { cellSize = _cellSize; }
+    public void SetGridCell(TerrainGenerator.GridCell[,] _gridCells) { gridCells = _gridCells; }
     public void SetPlayerManager(PlayerManager _playerManager) { playerManager = _playerManager; }
     #endregion
 }
