@@ -491,53 +491,6 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1706929283}
   m_Mesh: {fileID: 308946249}
---- !u!1 &1787040132
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1787040134}
-  - component: {fileID: 1787040133}
-  m_Layer: 0
-  m_Name: SkeletonManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1787040133
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1787040132}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 55160250781379648a914ad2e19b1a56, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  playerPrefab: {fileID: 7481793171388030231, guid: 56d7554febe14cb4db3e2998c3c7a3ef, type: 3}
-  botPrefab: {fileID: 0}
-  terrain: {fileID: 1805728592}
---- !u!4 &1787040134
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1787040132}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 44.401337, y: 5.441719, z: 8.616007}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1805728592
 GameObject:
   m_ObjectHideFlags: 0
@@ -557,7 +510,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 2147483647
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &1805728593
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -633,7 +586,7 @@ MonoBehaviour:
     cost: 1
   - name: 2
     minHeight: 0.549
-    biomeHeight: 0.495
+    biomeHeight: 0.406
     color: {r: 0.638, g: 0.44832426, b: 0, a: 0}
     terrainLayer: {fileID: 8574412962073106934, guid: aa97d06318ba44647ab6201df57ba238, type: 2}
     localScale: 0.125
@@ -641,11 +594,11 @@ MonoBehaviour:
     cost: 2
   - name: 3
     minHeight: 0.717
-    biomeHeight: 0.761
+    biomeHeight: 0.526
     color: {r: 1, g: 1, b: 1, a: 0}
     terrainLayer: {fileID: 8574412962073106934, guid: fc04da73f9b480e4986555d16cf774a5, type: 2}
-    localScale: 0.189
-    extraLocalScale: 0.5
+    localScale: 0.118
+    extraLocalScale: 0.234
     cost: 4
   cellSize: 5
   gridColor: {r: 0.29799998, g: 0.29799998, b: 0.29799998, a: 0.3764706}
@@ -733,10 +686,59 @@ Transform:
   - {fileID: 1706929284}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &2129207618
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2129207620}
+  - component: {fileID: 2129207619}
+  m_Layer: 0
+  m_Name: SkeletonManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &2129207619
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2129207618}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 55160250781379648a914ad2e19b1a56, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  playerPrefab: {fileID: 7481793171388030231, guid: 56d7554febe14cb4db3e2998c3c7a3ef, type: 3}
+  botPrefab: {fileID: 0}
+  terrain: {fileID: 1805728592}
+  launch1Player: 1
+  nbPlayer: 3
+--- !u!4 &2129207620
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2129207618}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 44.401337, y: 5.441719, z: 8.616007}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
   - {fileID: 456799901}
   - {fileID: 1805728597}
-  - {fileID: 1787040134}
+  - {fileID: 2129207620}

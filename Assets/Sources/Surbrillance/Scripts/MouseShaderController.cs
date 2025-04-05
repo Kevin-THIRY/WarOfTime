@@ -1,3 +1,4 @@
+using System.Linq;
 using UnityEngine;
 
 public class MouseShaderController : MonoBehaviour
@@ -29,33 +30,70 @@ public class MouseShaderController : MonoBehaviour
         highlightMaterial.SetFloat("_GridLenght", cellSize);
 
         Ray ray = cam.ScreenPointToRay(Input.mousePosition);
-        int layerMask = LayerMask.GetMask("MouseDetection");
-        if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, layerMask))
-        {
-            Vector2 mousePos2D = new Vector2(hit.point.x + hit.normal.x, hit.point.z + hit.normal.z);
-            TerrainGenerator.GridCell cell = new TerrainGenerator.GridCell(new Vector3(0, 0, 0), new Vector2(0, 0), BiomeName.Water, 0);
-            float minDist = float.MaxValue;
+        // if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, LayerMask.GetMask(LayerMask.LayerToName(gameObject.layer))))
+        RaycastHit[] hits = Physics.RaycastAll(ray, Mathf.Infinity);
 
-            foreach (TerrainGenerator.GridCell currentCell in gridCells)
-            {
-                float dist = Vector2.Distance(mousePos2D, currentCell.center);
-                if (dist < minDist)
-                {
-                    minDist = dist;
-                    cell = currentCell;
-                }
-            }
-            // Vector3 adjustedPosition = hit.point + hit.normal; // Décale légèrement
-            highlightMaterial.SetVector("_MousePosition", new Vector3(cell.center.x, hit.point.y + hit.normal.y, cell.center.y));
-            if (playerManager != null && clickedOnCell)
-            {
-                playerManager.SetSelectedCell(cell);
-            }
-        }
-        else
+        // Trier les hits par distance si besoin
+        // Array.Sort(hits, (x, y) => x.distance.CompareTo(y.distance));
+
+        foreach (var hit in hits)
         {
-            highlightMaterial.SetVector("_MousePosition", new Vector4(-1000, -1000, -1000, -1));
+            // Vérifie si c'est un plan et si c'est celui que tu cherches
+            if (hit.collider.CompareTag("MouseDetection"))
+            {
+                Vector2 mousePos2D = new Vector2(hit.point.x + hit.normal.x, hit.point.z + hit.normal.z);
+                TerrainGenerator.GridCell cell = new TerrainGenerator.GridCell(new Vector3(0, 0, 0), new Vector2(0, 0), BiomeName.Water, 0);
+                float minDist = float.MaxValue;
+
+                foreach (TerrainGenerator.GridCell currentCell in gridCells)
+                {
+                    float dist = Vector2.Distance(mousePos2D, currentCell.center);
+                    if (dist < minDist)
+                    {
+                        minDist = dist;
+                        cell = currentCell;
+                    }
+                }
+                // Vector3 adjustedPosition = hit.point + hit.normal; // Décale légèrement
+                highlightMaterial.SetVector("_MousePosition", new Vector3(cell.center.x, hit.point.y + hit.normal.y, cell.center.y));
+                if (playerManager != null && clickedOnCell)
+                {
+                    playerManager.SetSelectedCell(cell);
+                }
+                break; // Si tu veux sortir dès que tu trouves le premier plan
+            }
         }
+        if (hits.Length == 0) highlightMaterial.SetVector("_MousePosition", new Vector4(-1000, -1000, -1000, -1));
+
+        // if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity))
+        // {
+        //     if (hit.collider.CompareTag("MouseDetection"))
+        //     {
+        //         Vector2 mousePos2D = new Vector2(hit.point.x + hit.normal.x, hit.point.z + hit.normal.z);
+        //         TerrainGenerator.GridCell cell = new TerrainGenerator.GridCell(new Vector3(0, 0, 0), new Vector2(0, 0), BiomeName.Water, 0);
+        //         float minDist = float.MaxValue;
+
+        //         foreach (TerrainGenerator.GridCell currentCell in gridCells)
+        //         {
+        //             float dist = Vector2.Distance(mousePos2D, currentCell.center);
+        //             if (dist < minDist)
+        //             {
+        //                 minDist = dist;
+        //                 cell = currentCell;
+        //             }
+        //         }
+        //         // Vector3 adjustedPosition = hit.point + hit.normal; // Décale légèrement
+        //         highlightMaterial.SetVector("_MousePosition", new Vector3(cell.center.x, hit.point.y + hit.normal.y, cell.center.y));
+        //         if (playerManager != null && clickedOnCell)
+        //         {
+        //             playerManager.SetSelectedCell(cell);
+        //         }
+        //     }
+        // }
+        // else
+        // {
+        //     highlightMaterial.SetVector("_MousePosition", new Vector4(-1000, -1000, -1000, -1));
+        // }
     }
 
     public void CreateHighlightBlock(Vector3 sizeTerrain, float[,] heights)
@@ -79,7 +117,7 @@ public class MouseShaderController : MonoBehaviour
         GameObject groundBlock = new GameObject(highlightObjectName);
         groundBlock.transform.parent = transform; // Assigner le parent
         groundBlock.transform.localPosition = new Vector3(0, 0.2f, 0);
-        groundBlock.layer = 7;
+        groundBlock.tag = "MouseDetection";
         
         // Ajout du MeshFilter et du MeshRenderer
         MeshFilter meshFilter = groundBlock.AddComponent<MeshFilter>();

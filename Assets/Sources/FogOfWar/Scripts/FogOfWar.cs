@@ -26,7 +26,7 @@ public class FogOfWar : MonoBehaviour
         GameObject groundBlock = new GameObject(fogObjectName);
         groundBlock.transform.parent = transform; // Assigner le parent
         groundBlock.transform.localPosition = new Vector3(0, height, 0);
-        groundBlock.layer = 6;
+        groundBlock.tag = "FogPlane";
         
         // Ajout du MeshFilter et du MeshRenderer
         MeshFilter meshFilter = groundBlock.AddComponent<MeshFilter>();

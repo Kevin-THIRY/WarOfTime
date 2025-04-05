@@ -6,7 +6,7 @@ using UnityEngine.PlayerLoop;
 public class FogLayerManager : MonoBehaviour
 {
     [SerializeField] private GameObject forOfWarPlane;
-    [SerializeField] private LayerMask fogLayer;
+    // [SerializeField] private LayerMask fogLayer;
     [SerializeField] private float radius = 2f;
     
     private float radiusSqr { get { return radius * radius; }}
@@ -24,19 +24,23 @@ public class FogLayerManager : MonoBehaviour
         Ray r = new Ray(transform.position + Vector3.up * forOfWarPlane.transform.position.y * 2f, Vector3.down);
         RaycastHit hit;
         // Debug.DrawRay(transform.position + Vector3.up * forOfWarPlane.transform.position.y * 2f, Vector3.down, Color.red, 2);
-        if (Physics.Raycast(r, out hit, 10, fogLayer, QueryTriggerInteraction.Collide))
+        // if (Physics.Raycast(r, out hit, 10, fogLayer, QueryTriggerInteraction.Collide))
+        if (Physics.Raycast(r, out hit, 10, LayerMask.GetMask(LayerMask.LayerToName(gameObject.layer)), QueryTriggerInteraction.Collide))
         {
-            for (int i = 0; i < vertices.Length; i++)
+            if (hit.collider.CompareTag("FogPlane"))
             {
-                Vector3 v = forOfWarPlane.transform.TransformPoint(vertices[i]);
-                float dist = Vector3.SqrMagnitude(v - hit.point);
-                if (dist < radiusSqr)
+                for (int i = 0; i < vertices.Length; i++)
                 {
-                    float alpha = Mathf.Lerp(colors[i].a, 0f, 1f - (dist / radiusSqr));
-                    colors[i].a = alpha;
+                    Vector3 v = forOfWarPlane.transform.TransformPoint(vertices[i]);
+                    float dist = Vector3.SqrMagnitude(v - hit.point);
+                    if (dist < radiusSqr)
+                    {
+                        float alpha = Mathf.Lerp(colors[i].a, 0f, 1f - (dist / radiusSqr));
+                        colors[i].a = alpha;
+                    }
                 }
+                UpdateColor();
             }
-            UpdateColor();
         }
     }
 
@@ -58,6 +62,6 @@ public class FogLayerManager : MonoBehaviour
         mesh.colors = colors;
     }
 
-    public void SetLayer(LayerMask layer) { fogLayer = layer; }
+    // public void SetLayer(LayerMask layer) { fogLayer = layer; }
     public void SetFogPlayer(GameObject _forOfWarPlane) { forOfWarPlane = _forOfWarPlane; }
 }

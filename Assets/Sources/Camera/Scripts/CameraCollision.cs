@@ -22,7 +22,9 @@ public class CameraCollision : MonoBehaviour
         Vector3 desiredCameraPos = transform.parent.TransformPoint(dollyDir * maxDistance);
         RaycastHit hit;
 
-        int layerMask = ~LayerMask.GetMask("MouseDetection");    
+        // int layerMask = ~LayerMask.GetMask("MouseDetection");
+        // int layerMask = ~LayerMask.GetMask(LayerMask.LayerToName(gameObject.layer));
+        int layerMask = ~LayerMask.GetMask("Player1") & ~LayerMask.GetMask("Player2") & ~LayerMask.GetMask("Player3") & ~LayerMask.GetMask("Player4");
         if (Physics.Linecast(transform.parent.position, desiredCameraPos, out hit, layerMask)){
             distance = Mathf.Clamp((hit.distance * 0.87f), minDistance, maxDistance);
         }

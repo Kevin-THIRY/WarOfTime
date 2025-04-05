@@ -4,6 +4,47 @@ using System.Collections.Generic;
 using System.Collections;
 using System;
 
+public class ElementaryBasics
+{
+    public static TerrainGenerator terrainGenerator { get; set;}
+    public static (int, int) GetGridPositionFromWorldPosition(Vector3 worldPosition)
+    {
+        int gridX = terrainGenerator.GetGridCells().GetLength(0) - 1;
+        int gridY = terrainGenerator.GetGridCells().GetLength(1) - 1;
+
+        float adjustedCellSizeX = terrainGenerator.GetWidth() / gridX;
+        float adjustedCellSizeY = terrainGenerator.GetWidth() / gridY;
+
+        float x_position = worldPosition.x / adjustedCellSizeX;
+        float z_position = worldPosition.z / adjustedCellSizeY;
+
+        // Convertit la position Unity en coordonnées de la grille
+        int X = Mathf.FloorToInt(Mathf.Clamp(x_position, 0, gridX - 1));
+        int Y = Mathf.FloorToInt(Mathf.Clamp(z_position, 0, gridY - 1));
+
+        return (X, Y);
+    }
+
+    public static Vector3 GetWorldPositionFromGridCoordinates(int x, int y, bool getCenterPosition = false)
+    {
+        TerrainGenerator.GridCell[,] gridCells = terrainGenerator.GetGridCells();
+        float worldPosY = gridCells[x, y].position.y;
+
+        if (getCenterPosition) 
+        {
+            float worldPosX = gridCells[x, y].center.x;
+            float worldPosZ = gridCells[x, y].center.y;
+            return new Vector3(worldPosX, worldPosY, worldPosZ);
+        }
+        else
+        {
+            float worldPosX = gridCells[x, y].position.x;
+            float worldPosZ = gridCells[x, y].position.z;
+            return new Vector3(worldPosX, worldPosY, worldPosZ);
+        }
+    }
+}
+
 public class Unit
 {
     GameObject me;
@@ -54,7 +95,7 @@ public class Unit
             isMoving = true;
             foreach (Vector2 targetGridPos in path)
             {
-                Vector3 targetWorldPos = PlayerManager.Instance.GetWorldPositionFromGridCoordinates((int)targetGridPos.x, (int)targetGridPos.y, true);
+                Vector3 targetWorldPos = ElementaryBasics.GetWorldPositionFromGridCoordinates((int)targetGridPos.x, (int)targetGridPos.y, true);
                 
                 while (Vector3.Distance(me.transform.position, targetWorldPos) > 0.1f)
                 {
@@ -82,20 +123,13 @@ public class PlayerManager : MonoBehaviour
     private Unit selectedUnit;
     private List<Unit> allUnitsOfThePlayer = new List<Unit>();
     private List<Vector2> path;
-    public static PlayerManager Instance { get; private set; }
-
-    void Awake()
-    {
-        if (Instance == null) Instance = this;
-        else Destroy(gameObject);
-    }
 
     void Start()
     {
         id = 0;
         gridCells = terrainGenerator.GetGridCells();
         mouseShaderController.SetPlayerManager(this);
-        (int x, int y) = GetGridPositionFromWorldPosition(firstUnit.transform.position);
+        (int x, int y) = ElementaryBasics.GetGridPositionFromWorldPosition(firstUnit.transform.position);
         selectedUnit = new Unit(firstUnit, id++, firstUnit.name, new Vector2(x, y));
         allUnitsOfThePlayer.Add(selectedUnit);
     }
@@ -128,7 +162,7 @@ public class PlayerManager : MonoBehaviour
         lineRenderer.positionCount = path.Count;
         for (int i = 0; i < path.Count; i++)
         {
-            lineRenderer.SetPosition(i, GetWorldPositionFromGridCoordinates((int)path[i].x, (int)path[i].y, true));
+            lineRenderer.SetPosition(i, ElementaryBasics.GetWorldPositionFromGridCoordinates((int)path[i].x, (int)path[i].y, true));
         }
     }
 
@@ -187,42 +221,6 @@ public class PlayerManager : MonoBehaviour
     private bool IsInsideGrid(int x, int y)
     {
         return x >= 0 && x < gridCells.GetLength(0) && y >= 0 && y < gridCells.GetLength(1);
-    }
-
-    public (int, int) GetGridPositionFromWorldPosition(Vector3 worldPosition)
-    {
-        int gridX = gridCells.GetLength(0) - 1;
-        int gridY = gridCells.GetLength(1) - 1;
-
-        float adjustedCellSizeX = terrainGenerator.GetWidth() / gridX;
-        float adjustedCellSizeY = terrainGenerator.GetWidth() / gridY;
-
-        float x_position = worldPosition.x / adjustedCellSizeX;
-        float z_position = worldPosition.z / adjustedCellSizeY;
-
-        // Convertit la position Unity en coordonnées de la grille
-        int X = Mathf.FloorToInt(Mathf.Clamp(x_position, 0, gridX - 1));
-        int Y = Mathf.FloorToInt(Mathf.Clamp(z_position, 0, gridY - 1));
-
-        return (X, Y);
-    }
-
-    public Vector3 GetWorldPositionFromGridCoordinates(int x, int y, bool getCenterPosition = false)
-    {
-        float worldPosY = gridCells[x, y].position.y;
-
-        if (getCenterPosition) 
-        {
-            float worldPosX = gridCells[x, y].center.x;
-            float worldPosZ = gridCells[x, y].center.y;
-            return new Vector3(worldPosX, worldPosY, worldPosZ);
-        }
-        else
-        {
-            float worldPosX = gridCells[x, y].position.x;
-            float worldPosZ = gridCells[x, y].position.z;
-            return new Vector3(worldPosX, worldPosY, worldPosZ);
-        }
     }
 
     #region Setter

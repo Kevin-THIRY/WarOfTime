@@ -174,9 +174,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   forOfWarPlane: {fileID: 0}
-  fogLayer:
-    serializedVersion: 2
-    m_Bits: 0
   radius: 10
 --- !u!1001 &4429529865934720874
 PrefabInstance:
@@ -293,9 +290,17 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6160176643531032910, guid: 4f0dfe603516ced4cae4bb86271df45f, type: 3}
+      propertyPath: m_TagString
+      value: FogPlane
+      objectReference: {fileID: 0}
     - target: {fileID: 8314296838874924234, guid: 4f0dfe603516ced4cae4bb86271df45f, type: 3}
       propertyPath: m_Name
       value: FogOfWar
+      objectReference: {fileID: 0}
+    - target: {fileID: 8314296838874924234, guid: 4f0dfe603516ced4cae4bb86271df45f, type: 3}
+      propertyPath: m_TagString
+      value: FogPlane
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -358,6 +363,14 @@ PrefabInstance:
     - target: {fileID: 6347786440905524825, guid: aa0a1ff36897f3f46acbc41c974babcc, type: 3}
       propertyPath: m_Name
       value: Highlight Map
+      objectReference: {fileID: 0}
+    - target: {fileID: 6347786440905524825, guid: aa0a1ff36897f3f46acbc41c974babcc, type: 3}
+      propertyPath: m_TagString
+      value: MouseDetection
+      objectReference: {fileID: 0}
+    - target: {fileID: 6840850487428152376, guid: aa0a1ff36897f3f46acbc41c974babcc, type: 3}
+      propertyPath: m_TagString
+      value: MouseDetection
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -530,6 +543,10 @@ PrefabInstance:
     - target: {fileID: 1826081262223996089, guid: 7fbb67d16f59b764198b5848fe5cf8e7, type: 3}
       propertyPath: m_Name
       value: CameraBase
+      objectReference: {fileID: 0}
+    - target: {fileID: 2550242617603910305, guid: 7fbb67d16f59b764198b5848fe5cf8e7, type: 3}
+      propertyPath: m_NormalizedViewPortRect.x
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3089529237299841716, guid: 7fbb67d16f59b764198b5848fe5cf8e7, type: 3}
       propertyPath: clampAngle
