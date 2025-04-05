@@ -12,5 +12,6 @@ EditorBuildSettings:
     path: Assets/Scenes/GameParty.unity
     guid: 7128b894ca1d9884b90d60631ae5bca8
   m_configObjects:
-    com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+    com.unity.input.settings: {fileID: 11400000, guid: 6660a6522ca8b574bbe62ba632eecf3c, type: 2}
+    com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 32f8aa80c1f7136438b92ac77235c416, type: 3}
   m_UseUCBPForAssetBundles: 0

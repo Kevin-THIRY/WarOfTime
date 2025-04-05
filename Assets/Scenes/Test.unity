@@ -510,7 +510,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 2147483647
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1805728593
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -696,6 +696,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2129207620}
   - component: {fileID: 2129207619}
+  - component: {fileID: 2129207621}
   m_Layer: 0
   m_Name: SkeletonManager
   m_TagString: Untagged
@@ -719,7 +720,7 @@ MonoBehaviour:
   botPrefab: {fileID: 0}
   terrain: {fileID: 1805728592}
   launch1Player: 1
-  nbPlayer: 3
+  nbPlayer: 2
 --- !u!4 &2129207620
 Transform:
   m_ObjectHideFlags: 0
@@ -735,6 +736,14 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!81 &2129207621
+AudioListener:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2129207618}
+  m_Enabled: 1
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

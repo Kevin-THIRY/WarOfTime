@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
+using UnityEngine.InputSystem;
 public class PartyManager : MonoBehaviour
 {
     [SerializeField] private GameObject playerPrefab; // Référence à la prefab
@@ -59,23 +60,28 @@ public class PartyManager : MonoBehaviour
         {
             Vector3 spawnPosition = new Vector3(i * 2, 0, 0); // Change la position selon ton besoin
             GameObject player = Instantiate(playerPrefab, spawnPosition, Quaternion.identity);
+
+            int playerNumber = i + 1;
+            PlayerInput playerInput = player.GetComponent<PlayerInput>();
+            playerInput.SwitchCurrentControlScheme("BasicsInput", Keyboard.current);
+            playerInput.SwitchCurrentActionMap("Player" + playerNumber);
+            player.GetComponentInChildren<MovementManager>().SetInputSystem(playerInput.actions);
             
             player.GetComponentInChildren<PlayerManager>().SetTerrainGenerator(terrain.GetComponent<TerrainGenerator>());
             player.GetComponentInChildren<Camera>().targetDisplay = i;
             AddHighlightMapToPlayer(player);
             AddFogOfWarToPlayer(player);
 
-            int playerNumber = i + 1;
+            
             SetLayerRecursively(player, LayerMask.NameToLayer("Player" + playerNumber));
 
             Camera cam = player.transform
                                 .Find("CameraBase/MainCamera")
                                 .GetComponent<Camera>();
             
-            // cam.cullingMask = LayerMask.GetMask("Default") & LayerMask.GetMask("TransparentFX") & LayerMask.GetMask("Ignore Raycast")
-            //                     & LayerMask.GetMask("Water") & LayerMask.GetMask("UI") & LayerMask.GetMask("Player" + playerNumber);
+            cam.cullingMask = LayerMask.GetMask("Default") | LayerMask.GetMask("TransparentFX") | LayerMask.GetMask("Ignore Raycast")
+                                & LayerMask.GetMask("Water") | LayerMask.GetMask("UI") | LayerMask.GetMask("Player" + playerNumber);
 
-            cam.cullingMask = LayerMask.GetMask("Default") & LayerMask.GetMask("Player" + playerNumber);
             // Optionnel : Modifier le nom et la couleur du joueur
             player.name = GameData.playerList[i].Name;
             // player.GetComponent<Renderer>().material.color = GameData.playerList[i].Color;
@@ -83,7 +89,7 @@ public class PartyManager : MonoBehaviour
             players.Add(player);
         }
 
-        //Only for splitscreen but useless here
+        // Only for splitscreen but useless here
         // List<Camera> cameras = new List<Camera>();
 
         // foreach (GameObject player in players) // players = ta liste de joueurs

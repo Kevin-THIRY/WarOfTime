@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public enum MovementState
 {
@@ -19,6 +20,9 @@ public class MovementManager : MonoBehaviour
     private MovementState movement_state;
     private float horizontal;
     private float vertical;
+    private PlayerInput playerInput;
+    private InputAction moveAction;
+    private InputActionAsset inputActions;
 
     // Inventaire
     private bool is_in_inventory;
@@ -32,13 +36,19 @@ public class MovementManager : MonoBehaviour
         rb = gameObject.GetComponent<Rigidbody>();
 
         movement_state = MovementState.Idle;
+        // moveAction = playerInput.actions["Move"];
+        // moveAction.Enable();
+        inputActions["Move"].Enable();
     }
 
     private void Update()
     {
+        Vector2 move = inputActions["Move"].ReadValue<Vector2>();
         if (!is_in_inventory){
-            horizontal = Input.GetAxisRaw("Horizontal");
-            vertical = Input.GetAxisRaw("Vertical");
+            horizontal = move.x;
+            vertical = move.y;
+            // horizontal = Input.GetAxisRaw("Horizontal");
+            // vertical = Input.GetAxisRaw("Vertical");
         }
         else
         {
@@ -83,6 +93,7 @@ public class MovementManager : MonoBehaviour
 
     #region Setter
     public void SetInOutInventory(bool in_out_inventory) { is_in_inventory = in_out_inventory; }
+    public void SetInputSystem(InputActionAsset _inputActions) { inputActions = _inputActions; }
 
     #endregion
 }

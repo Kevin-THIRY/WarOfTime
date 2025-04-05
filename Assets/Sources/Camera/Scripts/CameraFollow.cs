@@ -15,7 +15,7 @@ public class CameraFollow : MonoBehaviour
     [SerializeField] private float camDistanceZToPlayer;
     [SerializeField] private float smoothX;
     [SerializeField] private float smoothY;
-    [SerializeField] private float transition_camera_smooth_vertical = 1f;
+    // [SerializeField] private float transition_camera_smooth_vertical = 1f;
     private float mouseX;
     private float mouseY;
     private float finalInputX;
