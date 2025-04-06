@@ -50,6 +50,24 @@ public class PartyManager : MonoBehaviour
             player.GetComponentInChildren<FogLayerManager>().SetFogPlayer(player.transform.Find("FogOfWar/Fog/Fog of War").gameObject);
         }
 
+        void SetInputToPlayer(GameObject player, int playerNumber)
+        {
+            PlayerInput playerInput = player.GetComponent<PlayerInput>();
+            playerInput.SwitchCurrentControlScheme("BasicsInput", Keyboard.current);
+            playerInput.SwitchCurrentActionMap("Player" + playerNumber);
+            player.GetComponentInChildren<MovementManager>().SetInputSystem(playerInput.actions);
+        }
+
+        void InitializeCameraPlayer(GameObject player, int playerNumber)
+        {
+            Camera cam = player.transform
+                                .Find("CameraBase/MainCamera")
+                                .GetComponent<Camera>();
+            
+            cam.cullingMask = LayerMask.GetMask("Default") | LayerMask.GetMask("TransparentFX") | LayerMask.GetMask("Ignore Raycast")
+                                & LayerMask.GetMask("Water") | LayerMask.GetMask("UI") | LayerMask.GetMask("Player" + playerNumber);
+        }
+
         if (GameData.playerList == null || GameData.playerList.Count == 0)
         {
             Debug.LogWarning("Aucun joueur à instancier !");
@@ -58,29 +76,21 @@ public class PartyManager : MonoBehaviour
 
         for (int i = 0; i < GameData.playerList.Count; i++)
         {
+            int playerNumber = i + 1;
             Vector3 spawnPosition = new Vector3(i * 2, 0, 0); // Change la position selon ton besoin
             GameObject player = Instantiate(playerPrefab, spawnPosition, Quaternion.identity);
 
-            int playerNumber = i + 1;
-            PlayerInput playerInput = player.GetComponent<PlayerInput>();
-            playerInput.SwitchCurrentControlScheme("BasicsInput", Keyboard.current);
-            playerInput.SwitchCurrentActionMap("Player" + playerNumber);
-            player.GetComponentInChildren<MovementManager>().SetInputSystem(playerInput.actions);
+            SetInputToPlayer(player, playerNumber);
             
             player.GetComponentInChildren<PlayerManager>().SetTerrainGenerator(terrain.GetComponent<TerrainGenerator>());
             player.GetComponentInChildren<Camera>().targetDisplay = i;
+
             AddHighlightMapToPlayer(player);
             AddFogOfWarToPlayer(player);
 
-            
             SetLayerRecursively(player, LayerMask.NameToLayer("Player" + playerNumber));
 
-            Camera cam = player.transform
-                                .Find("CameraBase/MainCamera")
-                                .GetComponent<Camera>();
-            
-            cam.cullingMask = LayerMask.GetMask("Default") | LayerMask.GetMask("TransparentFX") | LayerMask.GetMask("Ignore Raycast")
-                                & LayerMask.GetMask("Water") | LayerMask.GetMask("UI") | LayerMask.GetMask("Player" + playerNumber);
+            InitializeCameraPlayer(player, playerNumber);
 
             // Optionnel : Modifier le nom et la couleur du joueur
             player.name = GameData.playerList[i].Name;
