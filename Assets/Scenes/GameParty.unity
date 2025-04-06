@@ -524,6 +524,7 @@ MonoBehaviour:
   botPrefab: {fileID: 0}
   terrain: {fileID: 1805728592}
   launch1Player: 0
+  nbPlayer: 1
 --- !u!4 &1787040134
 Transform:
   m_ObjectHideFlags: 0

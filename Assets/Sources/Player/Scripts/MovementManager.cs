@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using Unity.Netcode;
 
 public enum MovementState
 {
@@ -43,6 +44,8 @@ public class MovementManager : MonoBehaviour
 
     private void Update()
     {
+        // if (IsOwner)
+        // {
         Vector2 move = inputActions["Move"].ReadValue<Vector2>();
         if (!is_in_inventory){
             horizontal = move.x;
@@ -56,6 +59,7 @@ public class MovementManager : MonoBehaviour
             horizontal = 0;
             vertical = 0;
         }
+        // }
     }
 
     private void FixedUpdate()

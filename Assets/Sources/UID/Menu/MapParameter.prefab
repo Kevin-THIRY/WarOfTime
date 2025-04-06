@@ -468,7 +468,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 715450882012552304, guid: 2f0fe4adaa414154683c6e4720dac96f, type: 3}
       propertyPath: m_Text
-      value: Debug du test
+      value: D E B U G   D U   T E S T
       objectReference: {fileID: 0}
     - target: {fileID: 715450882012552304, guid: 2f0fe4adaa414154683c6e4720dac96f, type: 3}
       propertyPath: m_FontData.m_MinSize
