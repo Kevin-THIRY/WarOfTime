@@ -47,6 +47,7 @@ public class ResourcesClass
 public class ResourcesGenerator : MonoBehaviour
 {
     [SerializeField] private ResourcesClass[] resources;
+    [SerializeField] private bool debugGenerateResources = false;
 
     private TerrainGenerator terrainGenerator;
     private Terrain terrain;
@@ -55,13 +56,16 @@ public class ResourcesGenerator : MonoBehaviour
 
     void OnValidate()
     {
-        terrainGenerator = GetComponent<TerrainGenerator>();
-        terrain = GetComponent<Terrain>();
-        gridCells = terrainGenerator.GetGridCells();
-        ResetResourcesFromGrid(gridCells);
-        if (terrain) terrain.terrainData.treePrototypes = new TreePrototype[0];
-        foreach (var resource in resources) AddTreePrototype(resource);
-        foreach (var resource in resources) AddResourcesToGrid(resource);
+        if (debugGenerateResources)
+        {
+            terrainGenerator = GetComponent<TerrainGenerator>();
+            terrain = GetComponent<Terrain>();
+            gridCells = terrainGenerator.GetGridCells();
+            ResetResourcesFromGrid(gridCells);
+            if (terrain) terrain.terrainData.treePrototypes = new TreePrototype[0];
+            foreach (var resource in resources) AddTreePrototype(resource);
+            foreach (var resource in resources) AddResourcesToGrid(resource);
+        }
     }
 
     public void GenerateResources()

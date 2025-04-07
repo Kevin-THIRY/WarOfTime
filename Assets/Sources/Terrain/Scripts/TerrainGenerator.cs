@@ -65,6 +65,9 @@ public class TerrainGenerator : MonoBehaviour
     [Header("Highlight")]
     [SerializeField] private GameObject highlightPrefab;
 
+    [Header("Debug")]
+    [SerializeField] private bool debugGenerateTerrain;
+
     private Terrain terrain;
     private GridCell[,] gridCells;
     private int width = 0;
@@ -74,23 +77,25 @@ public class TerrainGenerator : MonoBehaviour
 
     void Start()
     {
-        // GenerateTerrain();
-        // GeneratePlayer();
+        GenerateTerrain();
     }
 
     void OnValidate()
     {
-        if (!terrain) terrain = GetComponent<Terrain>();
-        width = GetWidthFromType(terrainSize);
-        terrain.terrainData = GenerateTerrainData(terrain.terrainData);
-        GenerateLogicalGrid();
-        // ApplyBiomeTextures();
-        ApplyBiomeColors();
-
-        if (fogPrefab != null)
+        if (debugGenerateTerrain)
         {
-            fogPrefab.SetActive(displayFogOfWar);
-            EditorUtility.SetDirty(fogPrefab);
+            if (!terrain) terrain = GetComponent<Terrain>();
+            width = GetWidthFromType(terrainSize);
+            terrain.terrainData = GenerateTerrainData(terrain.terrainData);
+            GenerateLogicalGrid();
+            // ApplyBiomeTextures();
+            ApplyBiomeColors();
+
+            if (fogPrefab != null)
+            {
+                fogPrefab.SetActive(displayFogOfWar);
+                // EditorUtility.SetDirty(fogPrefab);
+            }
         }
     }
 

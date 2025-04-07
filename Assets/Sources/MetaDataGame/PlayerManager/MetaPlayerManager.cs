@@ -7,10 +7,11 @@ public enum BotDifficulty{
     Hard
 }
 
-public class PlayerOption
+public class PlayerInfos
 {
     public string Name { get; set;}
     public Color Color { get; set;}
+    public int localPlayerIndex { get; set;}
 }
 
 public class BotOption
@@ -20,6 +21,6 @@ public class BotOption
 
 public class GameData
 {
-    public static List<PlayerOption> playerList = new List<PlayerOption>();
+    public static PlayerInfos playerInfos = new PlayerInfos();
     public static List<BotOption> botList = new List<BotOption>();
 }

@@ -30,6 +30,7 @@ public class ButtonManagerEditor : Editor
         panelToCreateNextToMe = serializedObject.FindProperty("panelToCreateNextToMe");
         positionPanel = serializedObject.FindProperty("positionPanel");
         panelToDelete = serializedObject.FindProperty("panelToDelete");
+
     }
 
     public override void OnInspectorGUI()
@@ -71,6 +72,12 @@ public class ButtonManagerEditor : Editor
             }
             if (action == ButtonFunction.LaunchAnimation){
                 EditorGUILayout.PropertyField(animationsList);
+            }
+            if (action == ButtonFunction.ConnectClient){
+                base.serializedObject.FindProperty("ipAddress").stringValue = EditorGUILayout.TextField("Addresse IP :", buttonManager.GetIpAddress());
+            }
+            if (action == ButtonFunction.LaunchNewSceneFromHost){
+                base.serializedObject.FindProperty("sceneFromHost").stringValue = EditorGUILayout.TextField("Scene générée par l'hote :", buttonManager.GetSceneLoadedFromHost());
             }
         }
         serializedObject.ApplyModifiedProperties();

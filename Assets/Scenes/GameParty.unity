@@ -559,7 +559,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 2147483647
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &1805728593
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -601,6 +601,7 @@ MonoBehaviour:
     maxSize: 1
     elementPerCell: 24
     radius: 0.433
+  debugGenerateResources: 0
 --- !u!114 &1805728594
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -659,6 +660,7 @@ MonoBehaviour:
   fogPrefab: {fileID: 8314296838874924234, guid: 4f0dfe603516ced4cae4bb86271df45f, type: 3}
   displayFogOfWar: 1
   highlightPrefab: {fileID: 6347786440905524825, guid: aa0a1ff36897f3f46acbc41c974babcc, type: 3}
+  debugGenerateTerrain: 0
 --- !u!154 &1805728595
 TerrainCollider:
   m_ObjectHideFlags: 0

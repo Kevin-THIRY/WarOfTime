@@ -39,7 +39,7 @@ public class MovementManager : MonoBehaviour
         movement_state = MovementState.Idle;
         // moveAction = playerInput.actions["Move"];
         // moveAction.Enable();
-        inputActions["Move"].Enable();
+        // inputActions["Move"].Enable();
     }
 
     private void Update()

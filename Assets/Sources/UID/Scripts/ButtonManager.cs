@@ -3,7 +3,9 @@ using System.Collections;
 using System;
 using UnityEngine.UI;
 using System.Collections.Generic;
+using UnityEngine.SceneManagement;
 using UnityEditor;
+using Unity.Netcode;
 
 public enum ButtonFunction{
     ChangePanel,
@@ -16,11 +18,15 @@ public enum ButtonFunction{
 	DeletePanel,
 	AddPlayer,
 	AddBot,
+	LaunchHostSession,
+	ConnectClient,
+	LaunchNewSceneFromHost,
 	Test
 }
 
 public class ButtonManager : MonoBehaviour
 {
+	private GameManager manager;
     // Button animation
     private CanvasManager canvasManager;
 	private bool disableOnce;
@@ -46,9 +52,12 @@ public class ButtonManager : MonoBehaviour
 	[SerializeField] private GameObject panelToCreateNextToMe;
 	[SerializeField] private Vector2Int positionPanel;
 	[SerializeField] private GameObject panelToDelete;
+	[SerializeField] private string ipAddress;
+	[SerializeField] private string sceneFromHost;
 	
     void Start()
     {
+		manager = GameManager.instance;
         controller = FindAnyObjectByType<MenuController>();
 		try{canvasManager = GetComponentInParent<CanvasManager>();} finally{}
         try{animator = GetComponent<Animator>();} finally{}
@@ -70,6 +79,9 @@ public class ButtonManager : MonoBehaviour
 			{ ButtonFunction.DeletePanel, new Action<GameObject>(DeletePanel) },
 			{ ButtonFunction.AddPlayer, new Action(AddPlayer) },
 			{ ButtonFunction.AddBot, new Action(AddBot) },
+			{ ButtonFunction.LaunchHostSession, new Action(LaunchHostSession) },
+			{ ButtonFunction.ConnectClient, new Action<string>(ConnectClient) },
+			{ ButtonFunction.LaunchNewSceneFromHost, new Action<string>(LaunchNewSceneFromHost) },
 			{ ButtonFunction.Test, new Action(Test) }
         };
     }
@@ -158,6 +170,12 @@ public class ButtonManager : MonoBehaviour
 					break;
 				case ButtonFunction.DeletePanel:
 					ExecuteAction(action, panelToDelete);
+					break;
+				case ButtonFunction.ConnectClient:
+					ExecuteAction(action, ipAddress);
+					break;
+				case ButtonFunction.LaunchNewSceneFromHost:
+					ExecuteAction(action, sceneFromHost);
 					break;
 				default:
 					ExecuteAction(action);
@@ -274,7 +292,7 @@ public class ButtonManager : MonoBehaviour
 
 	private void AddPlayer()
 	{
-		GameData.playerList.Add(new PlayerOption { Name = "Joueur" + GameData.playerList.Count, Color = Color.blue });
+		GameData.playerInfos = new PlayerInfos { Name = "Joueur" + NetworkManager.Singleton.ConnectedClientsList.Count, localPlayerIndex = NetworkManager.Singleton.ConnectedClientsList.Count + 1, Color = Color.blue };
 	}
 
 	private void AddBot()
@@ -282,12 +300,32 @@ public class ButtonManager : MonoBehaviour
 		GameData.botList.Add(new BotOption { botDifficulty = BotDifficulty.Easy });
 	}
 
+	private void LaunchHostSession()
+	{
+		GameData.playerInfos = new PlayerInfos { Name = "Host", localPlayerIndex = 0, Color = Color.blue };
+		manager.StartHost();
+	}
+
+	private void ConnectClient(string ipAddress)
+	{
+		GameData.playerInfos =new PlayerInfos { Name = "Client " + NetworkManager.Singleton.ConnectedClientsList.Count, localPlayerIndex = NetworkManager.Singleton.ConnectedClientsList.Count + 1, Color = Color.red };
+		manager.StartClient(ipAddress);
+	}
+
+	private void LaunchNewSceneFromHost(string sceneFromHost)
+	{
+		if (NetworkManager.Singleton.IsServer)
+		{
+			NetworkManager.Singleton.SceneManager.LoadScene(sceneFromHost, LoadSceneMode.Single);
+		}
+	}
+
 	private void Test()
 	{
-		foreach (var player in GameData.playerList)
-		{
-			Debug.Log("Joueur : " + player.Name + ", Couleur : " + player.Color);
-		}
+		// foreach (var player in GameData.playerList)
+		// {
+		// 	Debug.Log("Joueur : " + player.Name + ", Couleur : " + player.Color);
+		// }
 	}
 
 	#region Getter
@@ -299,6 +337,8 @@ public class ButtonManager : MonoBehaviour
 	public List<Animation> GetAnimations() { return animations; }
 	public int GetVerticalIndex() { return thisVerticalIndex; }
 	public int GetHorizontalIndex() { return thisHorizontalIndex; }
+	public string GetIpAddress(){ return ipAddress; }
+	public string GetSceneLoadedFromHost(){ return sceneFromHost; }
 
 	#endregion
 

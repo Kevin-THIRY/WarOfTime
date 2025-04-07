@@ -15,7 +15,10 @@ public enum Type{
     Credits,
     Quit,
     BaseUID,
-    SlotControl
+    SlotControl,
+    MultiplayerSettings,
+    HostHub,
+    ClientHub
 }
 
 public class MenuController : MonoBehaviour
