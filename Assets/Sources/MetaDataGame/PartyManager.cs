@@ -49,6 +49,7 @@ public class PartyManager : MonoBehaviour
     private void SpawnPlayers()
     {
         bool isHost = NetworkManager.Singleton.IsHost;
+        bool IsServer = NetworkManager.Singleton.IsServer;
         bool isClientOnly = NetworkManager.Singleton.IsClient && !NetworkManager.Singleton.IsHost;
         void AddHighlightMapToPlayer(GameObject player)
         {
@@ -81,23 +82,39 @@ public class PartyManager : MonoBehaviour
                                 & LayerMask.GetMask("Water") | LayerMask.GetMask("UI") | LayerMask.GetMask("Player" + playerNumber);
         }
 
-        void OnClientConnected(ulong clientId)
+        GameObject GetNetworkPlayer()
         {
-            SetIndex();
-        }
-
-        void SetIndex()
-        {
-            if (!NetworkManager.Singleton.IsConnectedClient && !NetworkManager.Singleton.IsServer) return;
-
-            var clients = NetworkManager.Singleton.ConnectedClientsList;
-            for (int i = 0; i < clients.Count; i++)
+            if (NetworkManager.Singleton.IsServer)
             {
-                if (clients[i].ClientId == NetworkManager.Singleton.LocalClientId)
-                {
-                    GameData.playerInfos.localPlayerIndex = i;
-                    break;
-                }
+                Vector3 spawnPosition = new Vector3(0, 0, 0); // Change la position selon ton besoin
+                GameObject player = Instantiate(playerPrefab, spawnPosition, Quaternion.identity);
+                networkObject = player.GetComponent<NetworkObject>();
+                networkObject.SpawnAsPlayerObject(NetworkManager.Singleton.LocalClientId);
+                // GameObject player = FindAnyObjectByType<NetworkObject>().gameObject;
+
+                GameData.playerInfos.localPlayerIndex = 0;
+                return player;
+            }
+            // if (NetworkManager.Singleton.LocalClient.PlayerObject == null && isHost)
+            // {
+            //     Vector3 spawnPosition = new Vector3(0, 0, 0); // Change la position selon ton besoin
+            //     GameObject player = Instantiate(playerPrefab, spawnPosition, Quaternion.identity);
+            //     networkObject = player.GetComponent<NetworkObject>();
+            //     networkObject.SpawnAsPlayerObject(NetworkManager.Singleton.LocalClientId);
+            //     // GameObject player = FindAnyObjectByType<NetworkObject>().gameObject;
+
+            //     GameData.playerInfos.localPlayerIndex = 0;
+            //     return player;
+            // }
+            else
+            {
+                // Vector3 spawnPosition = new Vector3(0, 0, 0); // Change la position selon ton besoin
+                // GameObject player = Instantiate(playerPrefab, spawnPosition, Quaternion.identity);
+                // networkObject = player.GetComponent<NetworkObject>();
+                // networkObject.SpawnAsPlayerObject(NetworkManager.Singleton.LocalClientId);
+                GameObject player = FindAnyObjectByType<NetworkObject>().gameObject;
+                GameData.playerInfos.localPlayerIndex = NetworkManager.Singleton.ConnectedClientsList.Count;
+                return player;
             }
         }
 
@@ -107,62 +124,27 @@ public class PartyManager : MonoBehaviour
             return;
         }
 
-        if (NetworkManager.Singleton.LocalClient.PlayerObject == null && isHost)
-        {
-            Vector3 spawnPosition = new Vector3(0, 0, 0); // Change la position selon ton besoin
-            GameObject player = Instantiate(playerPrefab, spawnPosition, Quaternion.identity);
-            networkObject = player.GetComponent<NetworkObject>();
-            networkObject.SpawnAsPlayerObject(NetworkManager.Singleton.LocalClientId);
+        GameObject player = GetNetworkPlayer();
 
-            NetworkManager.Singleton.OnClientConnectedCallback += OnClientConnected;
-            SetIndex();
-
-            SetInputToPlayer(player, 1);
+        SetInputToPlayer(player, 1);
             
-            player.GetComponentInChildren<PlayerManager>().SetTerrainGenerator(terrain.GetComponent<TerrainGenerator>());
-            player.GetComponentInChildren<Camera>().targetDisplay = 0;
+        player.GetComponentInChildren<PlayerManager>().SetTerrainGenerator(terrain.GetComponent<TerrainGenerator>());
+        player.GetComponentInChildren<Camera>().targetDisplay = 0;
 
-            AddHighlightMapToPlayer(player);
-            AddFogOfWarToPlayer(player);
+        AddHighlightMapToPlayer(player);
+        AddFogOfWarToPlayer(player);
 
-            int playerNumber = GameData.playerInfos.localPlayerIndex + 1;
+        int playerNumber = GameData.playerInfos.localPlayerIndex + 1;
 
-            SetLayerRecursively(player, LayerMask.NameToLayer("Player" + playerNumber));
+        SetLayerRecursively(player, LayerMask.NameToLayer("Player" + playerNumber));
 
-            InitializeCameraPlayer(player, playerNumber);
+        InitializeCameraPlayer(player, playerNumber);
 
-            // Optionnel : Modifier le nom et la couleur du joueur
-            player.name = GameData.playerInfos.Name;
-            // player.GetComponent<Renderer>().material.color = GameData.playerList[i].Color;
+        // Optionnel : Modifier le nom et la couleur du joueur
+        player.name = GameData.playerInfos.Name;
+        // player.GetComponent<Renderer>().material.color = GameData.playerList[i].Color;
 
-            players.Add(player);
-        }
-
-        else
-        {
-            GameObject player = FindAnyObjectByType<NetworkObject>().gameObject;
-            GameData.playerInfos.localPlayerIndex = NetworkManager.Singleton.ConnectedClientsList.Count;
-
-            SetInputToPlayer(player, 1);
-            
-            player.GetComponentInChildren<PlayerManager>().SetTerrainGenerator(terrain.GetComponent<TerrainGenerator>());
-            player.GetComponentInChildren<Camera>().targetDisplay = 0;
-
-            AddHighlightMapToPlayer(player);
-            AddFogOfWarToPlayer(player);
-
-            int playerNumber = GameData.playerInfos.localPlayerIndex + 1;
-
-            SetLayerRecursively(player, LayerMask.NameToLayer("Player" + playerNumber));
-
-            InitializeCameraPlayer(player, playerNumber);
-
-            // Optionnel : Modifier le nom et la couleur du joueur
-            player.name = GameData.playerInfos.Name;
-            // player.GetComponent<Renderer>().material.color = GameData.playerList[i].Color;
-
-            players.Add(player);
-        }
+        players.Add(player);
 
         // Only for splitscreen but useless here
         // List<Camera> cameras = new List<Camera>();
@@ -205,50 +187,6 @@ public class PartyManager : MonoBehaviour
         foreach (Transform child in obj.transform)
         {
             SetLayerRecursively(child.gameObject, newLayer);
-        }
-    }
-
-    // SplitScreen
-    private void SetupViewports(List<Camera> cameras)
-    {
-        int count = cameras.Count;
-
-        for (int i = 0; i < cameras.Count; i++)
-        {
-            Camera cam = cameras[i];
-
-            switch (count)
-            {
-                case 1:
-                    cam.rect = new Rect(0f, 0f, 1f, 1f);
-                    break;
-
-                case 2:
-                    cam.rect = new Rect(i == 0 ? 0f : 0.5f, 0f, 0.5f, 1f);
-                    break;
-
-                case 3:
-                    if (i == 0)
-                        cam.rect = new Rect(0.25f, 0.5f, 0.5f, 0.5f); // Haut, centré
-                    else if (i == 1)
-                        cam.rect = new Rect(0f, 0f, 0.5f, 0.5f); // Bas gauche
-                    else
-                        cam.rect = new Rect(0.5f, 0f, 0.5f, 0.5f); // Bas droite
-                    break;
-
-                case 4:
-                    cam.rect = new Rect(
-                        (i % 2) * 0.5f,
-                        (i < 2 ? 0.5f : 0f),
-                        0.5f,
-                        0.5f
-                    );
-                    break;
-
-                default:
-                    Debug.LogWarning("Nombre de joueurs non géré");
-                    break;
-            }
         }
     }
 }

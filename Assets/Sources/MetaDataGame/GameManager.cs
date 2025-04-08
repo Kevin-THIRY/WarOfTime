@@ -30,6 +30,11 @@ public class GameManager : MonoBehaviour
         NetworkManager.Singleton.StartHost();
     }
 
+    public void StartServeur()
+    {
+        NetworkManager.Singleton.StartServer();
+    }
+
     public void StartClient(string address)
     {
         NetworkManager.Singleton.GetComponent<UnityTransport>().ConnectionData.Address = address;

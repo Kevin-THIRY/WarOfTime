@@ -303,7 +303,7 @@ public class ButtonManager : MonoBehaviour
 	private void LaunchHostSession()
 	{
 		GameData.playerInfos = new PlayerInfos { Name = "Host", localPlayerIndex = 0, Color = Color.blue };
-		manager.StartHost();
+		manager.StartServeur();
 	}
 
 	private void ConnectClient(string ipAddress)
