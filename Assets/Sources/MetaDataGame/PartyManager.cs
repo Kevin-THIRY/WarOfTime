@@ -28,9 +28,35 @@ public class PartyManager : MonoBehaviour
             }
         }
         PrepareTerrain();
-        SpawnPlayers();
+        // SpawnHost();
+        // if (NetworkManager.Singleton.IsServer)
+        // {
+        //     SpawnPlayers(0);
+        // }
+        SpawnPlayers(0);
         // SpawnBots();
     }
+
+    private void SpawnHost()
+    {
+        if (NetworkManager.Singleton.IsServer)
+        {
+            Debug.Log("Hello");
+            Vector3 spawnPosition = new Vector3(0, 0, 0); // Change la position selon ton besoin
+            GameObject player = Instantiate(playerPrefab, spawnPosition, Quaternion.identity);
+            networkObject = player.GetComponent<NetworkObject>();
+            networkObject.SpawnAsPlayerObject(NetworkManager.Singleton.LocalClientId);
+            // GameObject player = FindAnyObjectByType<NetworkObject>().gameObject;
+
+            GameData.playerInfos.localPlayerIndex = 0;
+        }
+    }
+
+    // private void OnEnable()
+    // {
+    //     // S'abonner au callback lorsque le client est connecté
+    //     NetworkManager.Singleton.OnClientConnectedCallback += SpawnPlayers;
+    // }
 
     private void Update()
     {
@@ -46,7 +72,7 @@ public class PartyManager : MonoBehaviour
         if (terrain.transform.Find("Highlight Map(Clone)") != null) terrain.transform.Find("Highlight Map(Clone)").gameObject.SetActive(false);
     }
 
-    private void SpawnPlayers()
+    private void SpawnPlayers(ulong clientId)
     {
         bool isHost = NetworkManager.Singleton.IsHost;
         bool IsServer = NetworkManager.Singleton.IsServer;
@@ -86,6 +112,7 @@ public class PartyManager : MonoBehaviour
         {
             if (NetworkManager.Singleton.IsServer)
             {
+                Debug.Log("Spawn host");
                 Vector3 spawnPosition = new Vector3(0, 0, 0); // Change la position selon ton besoin
                 GameObject player = Instantiate(playerPrefab, spawnPosition, Quaternion.identity);
                 networkObject = player.GetComponent<NetworkObject>();
@@ -95,27 +122,38 @@ public class PartyManager : MonoBehaviour
                 GameData.playerInfos.localPlayerIndex = 0;
                 return player;
             }
-            // if (NetworkManager.Singleton.LocalClient.PlayerObject == null && isHost)
-            // {
-            //     Vector3 spawnPosition = new Vector3(0, 0, 0); // Change la position selon ton besoin
-            //     GameObject player = Instantiate(playerPrefab, spawnPosition, Quaternion.identity);
-            //     networkObject = player.GetComponent<NetworkObject>();
-            //     networkObject.SpawnAsPlayerObject(NetworkManager.Singleton.LocalClientId);
-            //     // GameObject player = FindAnyObjectByType<NetworkObject>().gameObject;
+            // // if (NetworkManager.Singleton.LocalClient.PlayerObject == null && isHost)
+            // // {
+            // //     Vector3 spawnPosition = new Vector3(0, 0, 0); // Change la position selon ton besoin
+            // //     GameObject player = Instantiate(playerPrefab, spawnPosition, Quaternion.identity);
+            // //     networkObject = player.GetComponent<NetworkObject>();
+            // //     networkObject.SpawnAsPlayerObject(NetworkManager.Singleton.LocalClientId);
+            // //     // GameObject player = FindAnyObjectByType<NetworkObject>().gameObject;
 
-            //     GameData.playerInfos.localPlayerIndex = 0;
-            //     return player;
-            // }
+            // //     GameData.playerInfos.localPlayerIndex = 0;
+            // //     return player;
+            // // }
             else
             {
                 // Vector3 spawnPosition = new Vector3(0, 0, 0); // Change la position selon ton besoin
                 // GameObject player = Instantiate(playerPrefab, spawnPosition, Quaternion.identity);
                 // networkObject = player.GetComponent<NetworkObject>();
                 // networkObject.SpawnAsPlayerObject(NetworkManager.Singleton.LocalClientId);
+                Debug.Log("Spawn client");
+                // NetworkHandler netHandler = FindAnyObjectByType<NetworkHandler>();
+                // netHandler.SpawnClientServerRpc();
                 GameObject player = FindAnyObjectByType<NetworkObject>().gameObject;
+                // GameObject player = FindAnyObjectByType<NetworkObject>().gameObject;
                 GameData.playerInfos.localPlayerIndex = NetworkManager.Singleton.ConnectedClientsList.Count;
                 return player;
             }
+            // Debug.Log("Spawn client");
+            // // NetworkHandler netHandler = FindAnyObjectByType<NetworkHandler>();
+            // // netHandler.SpawnClientServerRpc();
+            // GameObject player = FindAnyObjectByType<NetworkObject>().gameObject;
+            // // GameObject player = FindAnyObjectByType<NetworkObject>().gameObject;
+            // GameData.playerInfos.localPlayerIndex = NetworkManager.Singleton.ConnectedClientsList.Count;
+            // return player;
         }
 
         if (GameData.playerInfos == null)
@@ -145,6 +183,8 @@ public class PartyManager : MonoBehaviour
         // player.GetComponent<Renderer>().material.color = GameData.playerList[i].Color;
 
         players.Add(player);
+
+        Debug.Log("Is host : " + NetworkManager.Singleton.IsHost + " Is client : " + NetworkManager.Singleton.IsClient);
 
         // Only for splitscreen but useless here
         // List<Camera> cameras = new List<Camera>();

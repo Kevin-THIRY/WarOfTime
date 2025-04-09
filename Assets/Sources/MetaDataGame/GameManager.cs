@@ -9,6 +9,8 @@ public class GameManager : MonoBehaviour
 
     [Header("Debug")]
     [SerializeField] private bool fakeHost = false;
+    // public GameObject networkHandlerPrefab;
+    // private GameObject handlerInstance;
 
     private void Awake() {
         if(instance != null){
@@ -23,6 +25,11 @@ public class GameManager : MonoBehaviour
     private void Start()
     {
         if (fakeHost) StartHost();
+        // if (NetworkManager.Singleton.IsServer)
+        // {
+        //     handlerInstance = Instantiate(networkHandlerPrefab);
+        //     handlerInstance.GetComponent<NetworkObject>().Spawn();
+        // }
     }
 
     public void StartHost()
