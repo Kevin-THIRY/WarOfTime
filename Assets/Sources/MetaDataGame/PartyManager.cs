@@ -3,17 +3,27 @@ using System.Collections.Generic;
 using UnityEngine.InputSystem;
 using Unity.Netcode;
 
-public class PartyManager : MonoBehaviour
+public class PartyManager : NetworkBehaviour
 {
     [SerializeField] private GameObject playerPrefab; // Référence à la prefab
     // [SerializeField] private GameObject botPrefab; // Référence à la prefab
-    // [SerializeField] private GameObject terrain;
+    private TerrainGenerator terrain;
 
     [Header("Host/Client")]
     private NetworkObject networkObject;
     
     private void Start() {
-        StartHost();
+        PrepareTerrain();
+        // StartHost();
+    }
+
+    private void PrepareTerrain()
+    {
+        terrain = FindAnyObjectByType<TerrainGenerator>();
+        terrain.GenerateTerrain();
+        ElementaryBasics.terrainGenerator = terrain;
+        if (terrain.transform.Find("FogOfWar(Clone)") != null) terrain.transform.Find("FogOfWar(Clone)").gameObject.SetActive(false);
+        if (terrain.transform.Find("Highlight Map(Clone)") != null) terrain.transform.Find("Highlight Map(Clone)").gameObject.SetActive(false);
     }
 
     private void StartHost()

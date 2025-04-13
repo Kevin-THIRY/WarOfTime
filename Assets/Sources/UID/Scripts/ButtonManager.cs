@@ -19,6 +19,7 @@ public enum ButtonFunction{
 	AddPlayer,
 	AddBot,
 	LaunchHostSession,
+	LaunchHost,
 	ConnectClient,
 	LaunchNewSceneFromHost,
 	Test
@@ -80,6 +81,7 @@ public class ButtonManager : MonoBehaviour
 			{ ButtonFunction.AddPlayer, new Action(AddPlayer) },
 			{ ButtonFunction.AddBot, new Action(AddBot) },
 			{ ButtonFunction.LaunchHostSession, new Action(LaunchHostSession) },
+			{ ButtonFunction.LaunchHost, new Action(LaunchHost) },
 			{ ButtonFunction.ConnectClient, new Action<string>(ConnectClient) },
 			{ ButtonFunction.LaunchNewSceneFromHost, new Action<string>(LaunchNewSceneFromHost) },
 			{ ButtonFunction.Test, new Action(Test) }
@@ -306,9 +308,15 @@ public class ButtonManager : MonoBehaviour
 		manager.StartServeur();
 	}
 
+	private void LaunchHost()
+	{
+		GameData.playerInfos = new PlayerInfos { Name = "Host", localPlayerIndex = 0, Color = Color.blue };
+		manager.StartHost();
+	}
+
 	private void ConnectClient(string ipAddress)
 	{
-		GameData.playerInfos =new PlayerInfos { Name = "Client " + NetworkManager.Singleton.ConnectedClientsList.Count, localPlayerIndex = NetworkManager.Singleton.ConnectedClientsList.Count + 1, Color = Color.red };
+		GameData.playerInfos = new PlayerInfos { Name = "Client " + NetworkManager.Singleton.ConnectedClientsList.Count, localPlayerIndex = NetworkManager.Singleton.ConnectedClientsList.Count + 1, Color = Color.red };
 		manager.StartClient(ipAddress);
 	}
 

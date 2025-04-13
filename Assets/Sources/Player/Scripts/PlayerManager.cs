@@ -2,6 +2,7 @@ using System.Linq;
 using UnityEngine;
 using System.Collections.Generic;
 using System.Collections;
+using Unity.Netcode;
 using System;
 
 public class ElementaryBasics
@@ -99,6 +100,9 @@ public class Unit
                 
                 while (Vector3.Distance(me.transform.position, targetWorldPos) > 0.1f)
                 {
+                    // Vector3 move = Vector3.MoveTowards(me.transform.position, targetWorldPos, speed * Time.deltaTime);
+                    // me.GetComponent<Rigidbody>().MovePosition(move); // synchrone avec NetworkTransform
+                    // yield return null;
                     me.transform.position = Vector3.MoveTowards(me.transform.position, targetWorldPos, speed * Time.deltaTime);
                     yield return null;
                 }
@@ -111,7 +115,7 @@ public class Unit
     }
 }
 
-public class PlayerManager : MonoBehaviour
+public class PlayerManager : NetworkBehaviour
 {
     [SerializeField] private GameObject firstUnit;
     [SerializeField] private TerrainGenerator terrainGenerator;
@@ -135,7 +139,8 @@ public class PlayerManager : MonoBehaviour
     }
 
     void Update()
-    {
+    {   
+        if (!IsOwner) return;
         if (allUnitsOfThePlayer == null || selectedUnit == null || selectedCell == null) return;
         if (!selectedUnit.isMoving && selectedCell.gridPosition != selectedUnit.gridPosition)
         {

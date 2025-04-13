@@ -122,14 +122,18 @@ public class MenuController : MonoBehaviour
                 if (isMatchingButton(target, button.GetUniqueId())){
                     button.ChangeState(animate, false, changePanel);
                 }
-                // Réactiver le bouton correspondant au sommet de pileCanvas
-                if (button.GetUniqueId() == pileCanvas[pileCanvas.Count - 1]){
-                    button.ChangeState(animate, true, !changePanel);
+                if (pileCanvas.Count != 0)
+                {
+                    // Réactiver le bouton correspondant au sommet de pileCanvas
+                    if (button.GetUniqueId() == pileCanvas[pileCanvas.Count - 1])
+                    {
+                        button.ChangeState(animate, true, !changePanel);
+                    }
                 }
             }
         }
 
-        pileCanvas.RemoveAt(pileCanvas.Count - 1);
+        if (pileCanvas.Count != 0) pileCanvas.RemoveAt(pileCanvas.Count - 1);
     }
 
     private IEnumerator OpenStateButton<T>(T target, int second, bool animate, bool changePanel, int canvasOrigin, System.Func<T, bool> isTargetNone, System.Func<T, int, bool> isMatchingButton)

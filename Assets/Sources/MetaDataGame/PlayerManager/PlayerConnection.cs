@@ -3,28 +3,19 @@ using System.Collections.Generic;
 using UnityEngine.InputSystem;
 using Unity.Netcode;
 
-public class PlayerConnection : MonoBehaviour
+public class PlayerConnection : NetworkBehaviour
 {
     private List<GameObject> players = new List<GameObject>();
     private TerrainGenerator terrain;
     
     private void Start() {
-        PrepareTerrain();
+        terrain = FindAnyObjectByType<TerrainGenerator>();
         SpawnPlayers();
     }
 
     private void Update()
     {
         // Debug.Log(PlayerInfos.localPlayerIndex);
-    }
-
-    private void PrepareTerrain()
-    {
-        terrain = FindAnyObjectByType<TerrainGenerator>();
-        terrain.GenerateTerrain();
-        ElementaryBasics.terrainGenerator = terrain;
-        if (terrain.transform.Find("FogOfWar(Clone)") != null) terrain.transform.Find("FogOfWar(Clone)").gameObject.SetActive(false);
-        if (terrain.transform.Find("Highlight Map(Clone)") != null) terrain.transform.Find("Highlight Map(Clone)").gameObject.SetActive(false);
     }
 
     private void SpawnPlayers()

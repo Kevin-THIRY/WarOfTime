@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5797591173948528147}
   - component: {fileID: 530635892826269369}
+  - component: {fileID: -8810297024716984859}
   - component: {fileID: 2492004381102087926}
   - component: {fileID: 5614448561657272390}
   m_Layer: 0
@@ -62,6 +63,31 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 116
   m_CollisionDetection: 0
+--- !u!114 &-8810297024716984859
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8062723145237547210}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  GlobalObjectIdHash: 1131482408
+  InScenePlacedSourceGlobalObjectIdHash: 0
+  DeferredDespawnTick: 0
+  Ownership: 1
+  AlwaysReplicateAsRoot: 0
+  SynchronizeTransform: 1
+  ActiveSceneSynchronization: 0
+  SceneMigrationSynchronization: 1
+  SpawnWithObservers: 1
+  DontDestroyWithOwner: 0
+  AutoObjectParentSync: 1
+  SyncOwnerTransformWhenParented: 1
+  AllowOwnerToParent: 0
 --- !u!114 &2492004381102087926
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -74,6 +100,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 01ee22022ac4bbd4d9f4d280410a8892, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  ShowTopMostFoldoutHeaderGroup: 1
   walk_speed: 50
 --- !u!114 &5614448561657272390
 MonoBehaviour:
@@ -87,7 +114,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cd0ba420ce3b29444a6dee8870887985, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mouseShaderController: {fileID: 0}
+  ShowTopMostFoldoutHeaderGroup: 1
   firstUnit: {fileID: 0}
   terrainGenerator: {fileID: 0}
   lineRenderer: {fileID: 0}

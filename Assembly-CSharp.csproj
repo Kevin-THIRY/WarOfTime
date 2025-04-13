@@ -84,7 +84,6 @@
     <Compile Include="Assets\TutorialInfo\Scripts\Readme.cs" />
     <Compile Include="Assets\Sources\FogOfWar\Scripts\FogOfWar.cs" />
     <Compile Include="Assets\Sources\Mesh Optimizer\Scripts\OptimizeMesh.cs" />
-    <Compile Include="Assets\Sources\MetaDataGame\NetworkHandler.cs" />
     <Compile Include="Assets\Sources\Player\Scripts\MovementManager.cs" />
     <Compile Include="Assets\Sources\FogOfWar\Scripts\FogLayerManager.cs" />
   </ItemGroup>

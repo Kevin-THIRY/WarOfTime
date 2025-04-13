@@ -8,7 +8,7 @@ public enum MovementState
     Run,
 }
 
-public class MovementManager : MonoBehaviour
+public class MovementManager : NetworkBehaviour
 {
     #region Variables
     // Composants du personnage
@@ -44,6 +44,7 @@ public class MovementManager : MonoBehaviour
 
     private void Update()
     {
+        // if (!IsOwner) return;
         // if (IsOwner)
         // {
         Vector2 move = inputActions["Move"].ReadValue<Vector2>();
@@ -64,6 +65,7 @@ public class MovementManager : MonoBehaviour
 
     private void FixedUpdate()
     {
+        // if (!IsOwner) return;
         UpdateState();
         ProcessMovement();
     }
