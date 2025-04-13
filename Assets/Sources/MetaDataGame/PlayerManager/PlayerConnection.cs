@@ -63,14 +63,14 @@ public class PlayerConnection : NetworkBehaviour
         AddHighlightMapToPlayer();
         AddFogOfWarToPlayer();
 
-        int playerNumber = GameData.playerInfos.localPlayerIndex + 1;
+        int playerNumber = NetworkManager.Singleton.ConnectedClients.Count;
 
         SetLayerRecursively(gameObject, LayerMask.NameToLayer("Player" + playerNumber));
 
-        InitializeCameraPlayer(playerNumber);
+        if (IsOwner) InitializeCameraPlayer(playerNumber);
 
         // Optionnel : Modifier le nom et la couleur du joueur
-        gameObject.name = GameData.playerInfos.Name;
+        if (IsOwner) gameObject.name = GameData.playerInfos.Name;
         // player.GetComponent<Renderer>().material.color = GameData.playerList[i].Color;
 
         players.Add(gameObject);
