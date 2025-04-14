@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using UnityEngine.InputSystem;
 using Unity.Netcode;
 
-public class PlayerConnection : NetworkBehaviour
+public class PlayerConnection : MonoBehaviour
 {
     private List<GameObject> players = new List<GameObject>();
     private TerrainGenerator terrain;
     
     private void Start() {
-        terrain = FindAnyObjectByType<TerrainGenerator>();
+        PrepareTerrain();
         SpawnPlayers();
     }
 
@@ -18,18 +18,27 @@ public class PlayerConnection : NetworkBehaviour
         // Debug.Log(PlayerInfos.localPlayerIndex);
     }
 
+    private void PrepareTerrain()
+    {
+        terrain = FindAnyObjectByType<TerrainGenerator>();
+        terrain.GenerateTerrain();
+        ElementaryBasics.terrainGenerator = terrain;
+        if (terrain.transform.Find("FogOfWar(Clone)") != null) terrain.transform.Find("FogOfWar(Clone)").gameObject.SetActive(false);
+        if (terrain.transform.Find("Highlight Map(Clone)") != null) terrain.transform.Find("Highlight Map(Clone)").gameObject.SetActive(false);
+    }
+
     private void SpawnPlayers()
     {
         void AddHighlightMapToPlayer()
         {
-            terrain.GetComponent<TerrainGenerator>().GenerateHighlightPlayer(transform.Find("Highlight Map/Highlight").gameObject);
-            gameObject.GetComponentInChildren<PlayerManager>().SetMouseShaderController(transform.Find("Highlight Map/Highlight").gameObject.GetComponent<MouseShaderController>());
+            terrain.GenerateHighlightPlayer(transform.Find("Highlight Map/Highlight").gameObject);
+            // gameObject.GetComponentInChildren<PlayerManager>().SetMouseShaderController(transform.Find("Highlight Map/Highlight").gameObject.GetComponent<MouseShaderController>());
         }
 
         void AddFogOfWarToPlayer()
         {
-            terrain.GetComponent<TerrainGenerator>().GenerateFogPlayer(transform.Find("FogOfWar/Fog").gameObject);
-            gameObject.GetComponentInChildren<FogLayerManager>().SetFogPlayer(transform.Find("FogOfWar/Fog/Fog of War").gameObject);
+            terrain.GenerateFogPlayer(transform.Find("FogOfWar/Fog").gameObject);
+            // gameObject.GetComponentInChildren<FogLayerManager>().SetFogPlayer(transform.Find("FogOfWar/Fog/Fog of War").gameObject);
         }
 
         void SetInputToPlayer()
@@ -56,26 +65,25 @@ public class PlayerConnection : NetworkBehaviour
         }
 
         SetInputToPlayer();
-            
-        gameObject.GetComponentInChildren<PlayerManager>().SetTerrainGenerator(terrain.GetComponent<TerrainGenerator>());
+
         gameObject.GetComponentInChildren<Camera>().targetDisplay = 0;
 
         AddHighlightMapToPlayer();
         AddFogOfWarToPlayer();
 
-        int playerNumber = NetworkManager.Singleton.ConnectedClients.Count;
+        int playerNumber = NetworkManager.Singleton.ConnectedClients.Count + 1;
 
         SetLayerRecursively(gameObject, LayerMask.NameToLayer("Player" + playerNumber));
 
-        if (IsOwner) InitializeCameraPlayer(playerNumber);
+        InitializeCameraPlayer(playerNumber);
 
         // Optionnel : Modifier le nom et la couleur du joueur
-        if (IsOwner) gameObject.name = GameData.playerInfos.Name;
+        // gameObject.name = GameData.playerInfos.Name;
         // player.GetComponent<Renderer>().material.color = GameData.playerList[i].Color;
 
         players.Add(gameObject);
 
-        Debug.Log("Is host : " + NetworkManager.Singleton.IsHost + " Is client : " + NetworkManager.Singleton.IsClient);
+        // Debug.Log("Is host : " + NetworkManager.Singleton.IsHost + " Is client : " + NetworkManager.Singleton.IsClient);
     }
 
     private void SetLayerRecursively(GameObject obj, int newLayer)

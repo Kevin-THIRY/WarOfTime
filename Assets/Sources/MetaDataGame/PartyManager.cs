@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine.InputSystem;
 using Unity.Netcode;
 
-public class PartyManager : NetworkBehaviour
+public class PartyManager : MonoBehaviour
 {
     [SerializeField] private GameObject playerPrefab; // Référence à la prefab
     // [SerializeField] private GameObject botPrefab; // Référence à la prefab
@@ -13,7 +13,7 @@ public class PartyManager : NetworkBehaviour
     private NetworkObject networkObject;
     
     private void Start() {
-        PrepareTerrain();
+        // PrepareTerrain();
         // StartHost();
     }
 

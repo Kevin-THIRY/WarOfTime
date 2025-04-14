@@ -2,6 +2,7 @@ using System.Collections;
 using UnityEngine;
 using System.Collections.Generic;
 using UnityEngine.PlayerLoop;
+using System;
 
 public class FogLayerManager : MonoBehaviour
 {
@@ -15,17 +16,18 @@ public class FogLayerManager : MonoBehaviour
     private Color[] colors;
 
     void Start() {
+        forOfWarPlane = FindAnyObjectByType<FogOfWar>().transform.Find("Fog of War").gameObject;
         Initialize();
     }
 
     void Update()
     {
         // Ray r = new Ray(transform.position, Vector3.up);
-        Ray r = new Ray(transform.position + Vector3.up * forOfWarPlane.transform.position.y * 2f, Vector3.down);
+        Ray r = new Ray(transform.position + Vector3.up * forOfWarPlane.transform.position.y * 2f, Vector3.down * 5f);
         RaycastHit hit;
-        // Debug.DrawRay(transform.position + Vector3.up * forOfWarPlane.transform.position.y * 2f, Vector3.down, Color.red, 2);
+        // Debug.DrawRay(transform.position + Vector3.up * forOfWarPlane.transform.position.y * 2f, Vector3.down * 5f, Color.red, 2);
         // if (Physics.Raycast(r, out hit, 10, fogLayer, QueryTriggerInteraction.Collide))
-        if (Physics.Raycast(r, out hit, 10, LayerMask.GetMask(LayerMask.LayerToName(gameObject.layer)), QueryTriggerInteraction.Collide))
+        if (Physics.Raycast(r, out hit, 10, LayerMask.GetMask(LayerMask.LayerToName(forOfWarPlane.layer)), QueryTriggerInteraction.Collide))
         {
             if (hit.collider.CompareTag("FogPlane"))
             {
@@ -61,7 +63,4 @@ public class FogLayerManager : MonoBehaviour
         forOfWarPlane.GetComponent<MeshRenderer>().material.enableInstancing = true;
         mesh.colors = colors;
     }
-
-    // public void SetLayer(LayerMask layer) { fogLayer = layer; }
-    public void SetFogPlayer(GameObject _forOfWarPlane) { forOfWarPlane = _forOfWarPlane; }
 }

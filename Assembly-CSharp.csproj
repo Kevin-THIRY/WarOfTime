@@ -77,6 +77,7 @@
     <Compile Include="Assets\Sources\MetaDataGame\PlayerManager\PlayerConnection.cs" />
     <Compile Include="Assets\Sources\Camera\Scripts\CameraCollision.cs" />
     <Compile Include="Assets\Sources\Ai\AIMovementManager.cs" />
+    <Compile Include="Assets\Sources\Unit\Scripts\UnitManager.cs" />
     <Compile Include="Assets\Sources\Camera\Scripts\CameraFollow.cs" />
     <Compile Include="Assets\Sources\MetaDataGame\PartyManager.cs" />
     <Compile Include="Assets\Sources\MetaDataGame\PlayerManager\MetaPlayerManager.cs" />

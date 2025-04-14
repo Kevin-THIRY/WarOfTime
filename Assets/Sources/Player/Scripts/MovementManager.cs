@@ -8,7 +8,7 @@ public enum MovementState
     Run,
 }
 
-public class MovementManager : NetworkBehaviour
+public class MovementManager : MonoBehaviour
 {
     #region Variables
     // Composants du personnage

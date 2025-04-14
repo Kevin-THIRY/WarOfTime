@@ -46,82 +46,13 @@ public class ElementaryBasics
     }
 }
 
-public class Unit
+public class PlayerManager : MonoBehaviour
 {
-    GameObject me;
-    public bool isMoving = false;
-    public int id;
-    public string name;
-    public Vector2 gridPosition;
-    private Queue<Vector2> pathQueue;
-    public Unit(GameObject me, int id, string name, Vector2 position)
-    {
-        this.me = me;
-        this.id = id;
-        this.name = name;
-        this.gridPosition = position;
-        this.pathQueue = new Queue<Vector2>();
-    }
-
-    public void Goto(List<Vector2> path)
-    {
-        if (path == null || path.Count == 0)
-        {
-            Debug.Log("Aucun chemin trouvé !");
-            return;
-        }
-        
-        pathQueue = new Queue<Vector2>(path);
-        MoveToNextTile();
-    }
-
-    private void MoveToNextTile()
-    {
-        if (pathQueue.Count > 0)
-        {
-            gridPosition = pathQueue.Dequeue();
-            Debug.Log($"Unité {name} déplacée en ({gridPosition.x}, {gridPosition.y})");
-        }
-    }
-
-    public IEnumerator Goto(List<Vector2> path, float speed, System.Action<bool> onComplete)
-    {
-        if (path == null || path.Count == 0) 
-        {
-            onComplete?.Invoke(false);
-            yield return null;
-        }
-        if (!isMoving)
-        {
-            isMoving = true;
-            foreach (Vector2 targetGridPos in path)
-            {
-                Vector3 targetWorldPos = ElementaryBasics.GetWorldPositionFromGridCoordinates((int)targetGridPos.x, (int)targetGridPos.y, true);
-                
-                while (Vector3.Distance(me.transform.position, targetWorldPos) > 0.1f)
-                {
-                    // Vector3 move = Vector3.MoveTowards(me.transform.position, targetWorldPos, speed * Time.deltaTime);
-                    // me.GetComponent<Rigidbody>().MovePosition(move); // synchrone avec NetworkTransform
-                    // yield return null;
-                    me.transform.position = Vector3.MoveTowards(me.transform.position, targetWorldPos, speed * Time.deltaTime);
-                    yield return null;
-                }
-                
-                gridPosition = targetGridPos; // Met à jour la position une fois arrivé
-            }
-            isMoving = false;
-            onComplete?.Invoke(true); // Succès
-        }
-    }
-}
-
-public class PlayerManager : NetworkBehaviour
-{
-    [SerializeField] private GameObject firstUnit;
+    // [SerializeField] private GameObject firstUnit;
     [SerializeField] private TerrainGenerator terrainGenerator;
     [SerializeField] private LineRenderer lineRenderer;
     private MouseShaderController mouseShaderController;
-    private int id;
+    // private int id;
     private TerrainGenerator.GridCell[,] gridCells;
     private TerrainGenerator.GridCell selectedCell;
     private Unit selectedUnit;
@@ -130,18 +61,19 @@ public class PlayerManager : NetworkBehaviour
 
     void Start()
     {
-        id = 0;
+        // id = 0;
         gridCells = terrainGenerator.GetGridCells();
-        mouseShaderController.SetPlayerManager(this);
-        (int x, int y) = ElementaryBasics.GetGridPositionFromWorldPosition(firstUnit.transform.position);
-        selectedUnit = new Unit(firstUnit, id++, firstUnit.name, new Vector2(x, y));
-        allUnitsOfThePlayer.Add(selectedUnit);
+        FindAnyObjectByType<MouseShaderController>().SetPlayerManager(this);
+        // mouseShaderController.SetPlayerManager(this);
+        // (int x, int y) = ElementaryBasics.GetGridPositionFromWorldPosition(firstUnit.transform.position);
+        // selectedUnit = new Unit(firstUnit, id++, firstUnit.name, new Vector2(x, y));
+        // allUnitsOfThePlayer.Add(selectedUnit);
     }
 
     void Update()
-    {   
-        if (!IsOwner) return;
-        if (allUnitsOfThePlayer == null || selectedUnit == null || selectedCell == null) return;
+    {
+        if (gridCells == null) gridCells = terrainGenerator.GetGridCells();
+        if (gridCells == null || allUnitsOfThePlayer == null || selectedUnit == null || selectedCell == null) return;
         if (!selectedUnit.isMoving && selectedCell.gridPosition != selectedUnit.gridPosition)
         {
             path = FindPath(selectedUnit.gridPosition, selectedCell.gridPosition);
@@ -230,9 +162,9 @@ public class PlayerManager : NetworkBehaviour
 
     #region Setter
     public void SetSelectedCell(TerrainGenerator.GridCell _cell) { selectedCell = _cell; }
-    public void SetTerrainGenerator(TerrainGenerator _terrainGenerator) { terrainGenerator = _terrainGenerator; }
-    public void SetMouseShaderController(MouseShaderController _mouseShaderController) { mouseShaderController = _mouseShaderController; }
+    // public void SetMouseShaderController(MouseShaderController _mouseShaderController) { mouseShaderController = _mouseShaderController; }
     public void AddUnit(Unit _unit) { allUnitsOfThePlayer.Append(_unit); }
+    public void SetSelectedUnit(Unit _unit) { selectedUnit = _unit; }
     #endregion
 }
 
