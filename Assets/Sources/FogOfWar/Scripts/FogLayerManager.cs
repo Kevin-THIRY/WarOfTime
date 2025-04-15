@@ -1,8 +1,5 @@
-using System.Collections;
 using UnityEngine;
-using System.Collections.Generic;
-using UnityEngine.PlayerLoop;
-using System;
+using Unity.Netcode;
 
 public class FogLayerManager : MonoBehaviour
 {
@@ -15,13 +12,23 @@ public class FogLayerManager : MonoBehaviour
     private Vector3[] vertices;
     private Color[] colors;
 
+    private NetworkObject netObj;
+
     void Start() {
+        netObj = GetComponent<NetworkObject>();
+
+        // Ne faire le setup QUE si on est owner (sinon → hors de ma juridiction)
+        if (!netObj.IsOwner) return;
+
         forOfWarPlane = FindAnyObjectByType<FogOfWar>().transform.Find("Fog of War").gameObject;
-        Initialize();
+
+        if (forOfWarPlane != null)
+            Initialize();
     }
 
     void Update()
     {
+        if (forOfWarPlane == null) return;
         // Ray r = new Ray(transform.position, Vector3.up);
         Ray r = new Ray(transform.position + Vector3.up * forOfWarPlane.transform.position.y * 2f, Vector3.down * 5f);
         RaycastHit hit;
