@@ -24,7 +24,7 @@ public enum Type{
 public class MenuController : MonoBehaviour
 {
 
-    [Header("Buttons (Il faut obligatoirement BaseUID en position 1 et Inventaire en position 2)")]
+    [Header("Buttons")]
 
     [SerializeField] private List<CanvasManager> buttonList = new List<CanvasManager>();
     // [SerializeField] private CanvasCharacterManager canvasCharacterManager;

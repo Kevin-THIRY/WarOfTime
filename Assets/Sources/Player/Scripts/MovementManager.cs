@@ -28,6 +28,9 @@ public class MovementManager : MonoBehaviour
     // Inventaire
     private bool is_in_inventory;
 
+    // UID
+    [SerializeField] private MenuController menuController;
+
     #endregion
     
     // Start is called before the first frame update
@@ -37,9 +40,7 @@ public class MovementManager : MonoBehaviour
         rb = gameObject.GetComponent<Rigidbody>();
 
         movement_state = MovementState.Idle;
-        // moveAction = playerInput.actions["Move"];
-        // moveAction.Enable();
-        // inputActions["Move"].Enable();
+        menuController = FindAnyObjectByType<MenuController>();
     }
 
     private void Update()
@@ -48,11 +49,10 @@ public class MovementManager : MonoBehaviour
         // if (IsOwner)
         // {
         Vector2 move = inputActions["Move"].ReadValue<Vector2>();
+        bool openOption = inputActions["Option"].ReadValue<bool>();
         if (!is_in_inventory){
             horizontal = move.x;
             vertical = move.y;
-            // horizontal = Input.GetAxisRaw("Horizontal");
-            // vertical = Input.GetAxisRaw("Vertical");
         }
         else
         {
@@ -60,7 +60,11 @@ public class MovementManager : MonoBehaviour
             horizontal = 0;
             vertical = 0;
         }
-        // }
+        if (!is_in_inventory && openOption)
+        {
+            menuController.ChangePanel(Type.Options, 0, type => type == Type.None, (type, button) => button.GetButtonType() == type);
+            is_in_inventory = true;
+        }
     }
 
     private void FixedUpdate()
@@ -82,10 +86,12 @@ public class MovementManager : MonoBehaviour
 
     private void UpdateState(){
         // Movement state manager
-        if (horizontal == 0 && vertical == 0){
+        if (horizontal == 0 && vertical == 0)
+        {
             movement_state = MovementState.Idle;
         }
-        else{
+        else
+        {
             movement_state = MovementState.Run;
         }
     }

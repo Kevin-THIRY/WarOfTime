@@ -22,6 +22,7 @@ public enum ButtonFunction{
 	LaunchHost,
 	ConnectClient,
 	LaunchNewSceneFromHost,
+	EndTurn,
 	Test
 }
 
@@ -84,6 +85,7 @@ public class ButtonManager : MonoBehaviour
 			{ ButtonFunction.LaunchHost, new Action(LaunchHost) },
 			{ ButtonFunction.ConnectClient, new Action<string>(ConnectClient) },
 			{ ButtonFunction.LaunchNewSceneFromHost, new Action<string>(LaunchNewSceneFromHost) },
+			{ ButtonFunction.EndTurn, new Action(EndTurn) },
 			{ ButtonFunction.Test, new Action(Test) }
         };
     }
@@ -328,6 +330,15 @@ public class ButtonManager : MonoBehaviour
 		}
 	}
 
+	private void EndTurn()
+	{
+		var tm = FindAnyObjectByType<TurnManager>();
+        if (tm != null && tm.IsMyTurn())
+        {
+            tm.EndTurnServerRpc();
+        }
+	}
+
 	private void Test()
 	{
 		// foreach (var player in GameData.playerList)
@@ -347,6 +358,7 @@ public class ButtonManager : MonoBehaviour
 	public int GetHorizontalIndex() { return thisHorizontalIndex; }
 	public string GetIpAddress(){ return ipAddress; }
 	public string GetSceneLoadedFromHost(){ return sceneFromHost; }
+	
 
 	#endregion
 
