@@ -21,7 +21,6 @@ public class MouseShaderController : MonoBehaviour
     void Update()
     {
         if (Input.GetMouseButtonDown(0)) clickedOnCell = true;
-        else clickedOnCell = false;
     }
 
     void FixedUpdate()
@@ -60,6 +59,7 @@ public class MouseShaderController : MonoBehaviour
                 if (playerManager != null && clickedOnCell)
                 {
                     playerManager.SetSelectedCell(cell);
+                    clickedOnCell = false;
                 }
                 break; // Si tu veux sortir dès que tu trouves le premier plan
             }

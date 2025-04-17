@@ -28,6 +28,9 @@ public class MovementManager : MonoBehaviour
     // Inventaire
     private bool is_in_inventory;
 
+    // Turn
+    private TurnManager turn;
+
     // UID
     [SerializeField] private MenuController menuController;
 
@@ -38,19 +41,16 @@ public class MovementManager : MonoBehaviour
     {
         // Composants du personnage
         rb = gameObject.GetComponent<Rigidbody>();
-
+        turn = FindAnyObjectByType<TurnManager>();
         movement_state = MovementState.Idle;
         menuController = FindAnyObjectByType<MenuController>();
     }
 
     private void Update()
     {
-        // if (!IsOwner) return;
-        // if (IsOwner)
-        // {
         Vector2 move = inputActions["Move"].ReadValue<Vector2>();
-        bool openOption = inputActions["Option"].ReadValue<bool>();
-        if (!is_in_inventory){
+        float openOption = inputActions["Option"].ReadValue<float>();
+        if (!is_in_inventory){ // && turn.IsMyTurn()){
             horizontal = move.x;
             vertical = move.y;
         }
@@ -60,7 +60,7 @@ public class MovementManager : MonoBehaviour
             horizontal = 0;
             vertical = 0;
         }
-        if (!is_in_inventory && openOption)
+        if (!is_in_inventory && (openOption != 0))
         {
             menuController.ChangePanel(Type.Options, 0, type => type == Type.None, (type, button) => button.GetButtonType() == type);
             is_in_inventory = true;

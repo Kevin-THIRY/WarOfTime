@@ -23,6 +23,7 @@ public enum ButtonFunction{
 	ConnectClient,
 	LaunchNewSceneFromHost,
 	EndTurn,
+	CloseInventory,
 	Test
 }
 
@@ -86,6 +87,7 @@ public class ButtonManager : MonoBehaviour
 			{ ButtonFunction.ConnectClient, new Action<string>(ConnectClient) },
 			{ ButtonFunction.LaunchNewSceneFromHost, new Action<string>(LaunchNewSceneFromHost) },
 			{ ButtonFunction.EndTurn, new Action(EndTurn) },
+			{ ButtonFunction.CloseInventory, new Action(CloseInventory) },
 			{ ButtonFunction.Test, new Action(Test) }
         };
     }
@@ -337,6 +339,11 @@ public class ButtonManager : MonoBehaviour
         {
             tm.EndTurnServerRpc();
         }
+	}
+
+	private void CloseInventory()
+	{
+		FindAnyObjectByType<MovementManager>().SetInOutInventory(false);
 	}
 
 	private void Test()
