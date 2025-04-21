@@ -6,7 +6,6 @@ using Unity.Netcode.Transports.UTP;
 public class GameManager : MonoBehaviour
 {
     public static GameManager instance {private set; get;}
-    [SerializeField] private GameObject turnManager;
 
     [Header("Debug")]
     [SerializeField] private bool fakeHost = false;
@@ -36,12 +35,6 @@ public class GameManager : MonoBehaviour
     public void StartHost()
     {
         NetworkManager.Singleton.StartHost();
-
-        if (NetworkManager.Singleton.IsServer)
-        {
-            turnManager = Instantiate(turnManager);
-            turnManager.GetComponent<NetworkObject>().Spawn();
-        }
     }
 
     public void StartServeur()

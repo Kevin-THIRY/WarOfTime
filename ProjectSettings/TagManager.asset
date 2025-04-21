@@ -6,6 +6,7 @@ TagManager:
   tags:
   - FogPlane
   - MouseDetection
+  - TurnText
   layers:
   - Default
   - TransparentFX

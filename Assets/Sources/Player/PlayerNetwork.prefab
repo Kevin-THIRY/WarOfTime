@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 9020018082546086588}
   - component: {fileID: 8315905349255440708}
   - component: {fileID: -8102161455361458077}
+  - component: {fileID: -960662402348324953}
   m_Layer: 0
   m_Name: PlayerNetwork
   m_TagString: Untagged
@@ -71,3 +72,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
+--- !u!114 &-960662402348324953
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9105118795470374167}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 82050b8768ea8644c92f715a431a5529, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ShowTopMostFoldoutHeaderGroup: 1
+  unitPrefabs:
+  - {fileID: 1276793047587215747, guid: f111a6a57dd98f34db3a464e65d8140d, type: 3}
+  selectedPrefabIndex: 0

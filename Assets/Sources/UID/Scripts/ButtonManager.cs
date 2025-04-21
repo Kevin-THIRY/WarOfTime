@@ -337,7 +337,7 @@ public class ButtonManager : MonoBehaviour
 		var tm = FindAnyObjectByType<TurnManager>();
         if (tm != null && tm.IsMyTurn())
         {
-            tm.EndTurnServerRpc();
+            tm.EndTurn();
         }
 	}
 

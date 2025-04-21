@@ -61,13 +61,8 @@ public class PlayerManager : MonoBehaviour
 
     void Start()
     {
-        // id = 0;
         gridCells = terrainGenerator.GetGridCells();
         FindAnyObjectByType<MouseShaderController>().SetPlayerManager(this);
-        // mouseShaderController.SetPlayerManager(this);
-        // (int x, int y) = ElementaryBasics.GetGridPositionFromWorldPosition(firstUnit.transform.position);
-        // selectedUnit = new Unit(firstUnit, id++, firstUnit.name, new Vector2(x, y));
-        // allUnitsOfThePlayer.Add(selectedUnit);
     }
 
     void Update()
@@ -78,19 +73,17 @@ public class PlayerManager : MonoBehaviour
         {
             path = FindPath(selectedUnit.gridPosition, selectedCell.gridPosition);
             ShowPathLine(path);
-            // StartCoroutine(selectedUnit.Goto(path, 10));
             StartCoroutine(selectedUnit.Goto(path, 10, (success) =>
             {
                 if (success)
                 {
-                    Debug.Log("Déplacement terminé avec succès !");
+                    // Debug.Log("Déplacement terminé avec succès !");
                 }
                 else
                 {
-                    Debug.Log("Échec du déplacement.");
+                    // Debug.Log("Échec du déplacement.");
                 }
             }));
-            // selectedUnit.Goto(path);
         }
     }
 
@@ -162,7 +155,6 @@ public class PlayerManager : MonoBehaviour
 
     #region Setter
     public void SetSelectedCell(TerrainGenerator.GridCell _cell) { selectedCell = _cell; }
-    // public void SetMouseShaderController(MouseShaderController _mouseShaderController) { mouseShaderController = _mouseShaderController; }
     public void AddUnit(Unit _unit) { allUnitsOfThePlayer.Append(_unit); }
     public void SetSelectedUnit(Unit _unit) { selectedUnit = _unit; }
     #endregion

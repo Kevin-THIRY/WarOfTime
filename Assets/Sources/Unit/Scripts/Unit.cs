@@ -17,16 +17,6 @@ public class Unit : NetworkBehaviour
     [NonSerialized] public string unitName;
     [NonSerialized] public Vector2 gridPosition;
 
-    // private Unit selfUnit;
-
-    // public Unit(GameObject me, int id, string unitName, Vector2 position)
-    // {
-    //     this.me = me;
-    //     this.id = id;
-    //     this.unitName = unitName;
-    //     this.gridPosition = position;
-    // }
-
     void Start()
     {
         var (x, y) = ElementaryBasics.GetGridPositionFromWorldPosition(transform.position);
@@ -34,10 +24,6 @@ public class Unit : NetworkBehaviour
         unitName = name;
         gridPosition = new Vector2(x, y);
         if (IsOwner) FindAnyObjectByType<PlayerManager>().SetSelectedUnit(this);
-
-        // (int x, int y) = ElementaryBasics.GetGridPositionFromWorldPosition(gameObject.transform.position);
-        // selfUnit = new Unit(gameObject, 0, gameObject.name, new Vector2(x, y));
-        // FindAnyObjectByType<PlayerManager>().SetSelectedUnit(selfUnit);
     }
 
     public IEnumerator Goto(List<Vector2> path, float speed, System.Action<bool> onComplete)
@@ -58,9 +44,6 @@ public class Unit : NetworkBehaviour
                     
                     while (Vector3.Distance(transform.position, targetWorldPos) > 0.1f)
                     {
-                        // Vector3 move = Vector3.MoveTowards(me.transform.position, targetWorldPos, speed * Time.deltaTime);
-                        // me.GetComponent<Rigidbody>().MovePosition(move); // synchrone avec NetworkTransform
-                        // yield return null;
                         transform.position = Vector3.MoveTowards(transform.position, targetWorldPos, speed * Time.deltaTime);
                         yield return null;
                     }
@@ -78,16 +61,3 @@ public class Unit : NetworkBehaviour
         }
     }
 }
-
-// public class UnitManager : NetworkBehaviour
-// {
-//     private Unit selfUnit;
-//     // private Queue<Vector2> pathQueue;
-
-//     void Start()
-//     {
-//         (int x, int y) = ElementaryBasics.GetGridPositionFromWorldPosition(gameObject.transform.position);
-//         selfUnit = new Unit(gameObject, 0, gameObject.name, new Vector2(x, y));
-//         FindAnyObjectByType<PlayerManager>().SetSelectedUnit(selfUnit);
-//     }
-// }

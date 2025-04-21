@@ -28,6 +28,7 @@ public class CanvasManager : MonoBehaviour
     private Button button;
     private CanvasGroup group;
     private Animator animator;
+    private bool noButton;
 
     void Start () {
 		audioSource = GetComponent<AudioSource>();
@@ -44,8 +45,11 @@ public class CanvasManager : MonoBehaviour
                 horizontalIndexList.Add(button.GetHorizontalIndex());
                 buttonPositions.Add(new Vector2Int(button.GetVerticalIndex(), button.GetHorizontalIndex()));
             }
+            else noButton = true;
         }
         try{
+            if (verticalIndexList == null || verticalIndexList.Count == 0) return;
+            if (horizontalIndexList == null || horizontalIndexList.Count == 0) return;
             maxVerticalIndex = verticalIndexList.Max();
             maxHorizontalIndex = horizontalIndexList.Max();
         }
@@ -57,7 +61,7 @@ public class CanvasManager : MonoBehaviour
     }
 
     void Update () {
-        if (state)
+        if (state && !noButton)
         {
             if(Input.GetAxis ("Vertical") != 0){
                 if(!keyDown){
