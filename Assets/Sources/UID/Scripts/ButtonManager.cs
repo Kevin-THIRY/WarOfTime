@@ -335,7 +335,7 @@ public class ButtonManager : MonoBehaviour
 	private void EndTurn()
 	{
 		var tm = FindAnyObjectByType<TurnManager>();
-        if (tm != null && tm.IsMyTurn())
+        if (tm != null) // && tm.IsMyTurn())
         {
             tm.EndTurn();
         }
