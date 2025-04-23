@@ -4,10 +4,10 @@ using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine.UI;
 using UnityEngine;
+using Unity.VisualScripting;
 
 public class TurnManager : NetworkBehaviour
 {
-    private List<ulong> playerIds = new();
     private NetworkVariable<ulong> activePlayerId = new NetworkVariable<ulong>(0);
     private Text turnText;
     private Text activePlayerIdText;
@@ -27,27 +27,9 @@ public class TurnManager : NetworkBehaviour
         turnCount.OnValueChanged += UpdateTurnDisplay;
         activePlayerId.OnValueChanged += UpdateActivePlayerIdDisplay;
 
-        if (IsServer)
+        if (IsHost)
         {
-            if (playerIds.Count == 0) // Si la liste est vide, on la remplie
-            {
-                foreach (var client in NetworkManager.Singleton.ConnectedClientsList)
-                {
-                    playerIds.Add(client.ClientId);
-                }
-                activePlayerId.Value = playerIds[0];
-            }
-            else
-            {
-                // On ajoute le client qui vient de se connecter
-                foreach (var client in NetworkManager.Singleton.ConnectedClientsList)
-                {
-                    if (!playerIds.Contains(client.ClientId)) // Si le client n'est pas déjà dans la liste
-                    {
-                        playerIds.Add(client.ClientId);
-                    }
-                }
-            }
+            activePlayerId.Value = OwnerClientId;
         }
     }
 
@@ -55,7 +37,7 @@ public class TurnManager : NetworkBehaviour
     {
         Debug.Log($"Demandande de fin de tour par le client : {NetworkManager.Singleton.LocalClientId}");
         Debug.Log(activePlayerId.Value);
-        if (activePlayerId.Value == NetworkManager.Singleton.LocalClientId)
+        if (IsOwner && activePlayerId.Value == NetworkManager.Singleton.LocalClientId)
         {
             RequestEndTurnServerRpc();
         }
@@ -66,9 +48,12 @@ public class TurnManager : NetworkBehaviour
     {
         if (IsServer)
         {
-            int currentTurnIndex = (playerIds.IndexOf(activePlayerId.Value) + 1) % playerIds.Count;
-            activePlayerId.Value = playerIds[currentTurnIndex];
+            activePlayerId.Value = rpcParams.Receive.SenderClientId++ % ((ulong)NetworkManager.Singleton.ConnectedClients.Count);
             turnCount.Value++;
+        }
+        else
+        {
+            Debug.Log("Je ne suis pas serveur et je fais le fou");
         }
     }
 
