@@ -5,11 +5,11 @@ using UnityEngine.AI;
 
 public class AIMovementManager : MonoBehaviour
 {
-    private TerrainGenerator.GridCell[,] gridCells;
+    // private TerrainGenerator.GridCell[,] gridCells;
 
     void Start()
     {
-        if (gridCells == null) Debug.LogWarning("gridCells not defined");
+        if (TerrainGenerator.instance.gridCells == null) Debug.LogWarning("gridCells not defined");
     }
 
     // void Update()
@@ -21,8 +21,4 @@ public class AIMovementManager : MonoBehaviour
     // {
     //     navMeshAgent.destination = destination;
     // }
-
-    #region Setter
-    public void SetGridCells(TerrainGenerator.GridCell[,] terrainGridCells) { gridCells = terrainGridCells; }
-    #endregion
 }

@@ -10,8 +10,8 @@ public class ElementaryBasics
     public static TerrainGenerator terrainGenerator { get; set;}
     public static (int, int) GetGridPositionFromWorldPosition(Vector3 worldPosition)
     {
-        int gridX = terrainGenerator.GetGridCells().GetLength(0) - 1;
-        int gridY = terrainGenerator.GetGridCells().GetLength(1) - 1;
+        int gridX = TerrainGenerator.instance.gridCells.GetLength(0) - 1;
+        int gridY = TerrainGenerator.instance.gridCells.GetLength(1) - 1;
 
         float adjustedCellSizeX = terrainGenerator.GetWidth() / gridX;
         float adjustedCellSizeY = terrainGenerator.GetWidth() / gridY;
@@ -28,19 +28,18 @@ public class ElementaryBasics
 
     public static Vector3 GetWorldPositionFromGridCoordinates(int x, int y, bool getCenterPosition = false)
     {
-        TerrainGenerator.GridCell[,] gridCells = terrainGenerator.GetGridCells();
-        float worldPosY = gridCells[x, y].position.y;
+        float worldPosY = TerrainGenerator.instance.gridCells[x, y].position.y;
 
         if (getCenterPosition) 
         {
-            float worldPosX = gridCells[x, y].center.x;
-            float worldPosZ = gridCells[x, y].center.y;
+            float worldPosX = TerrainGenerator.instance.gridCells[x, y].center.x;
+            float worldPosZ = TerrainGenerator.instance.gridCells[x, y].center.y;
             return new Vector3(worldPosX, worldPosY, worldPosZ);
         }
         else
         {
-            float worldPosX = gridCells[x, y].position.x;
-            float worldPosZ = gridCells[x, y].position.z;
+            float worldPosX = TerrainGenerator.instance.gridCells[x, y].position.x;
+            float worldPosZ = TerrainGenerator.instance.gridCells[x, y].position.z;
             return new Vector3(worldPosX, worldPosY, worldPosZ);
         }
     }
@@ -51,7 +50,6 @@ public class PlayerManager : MonoBehaviour
     public static PlayerManager instance {private set; get;}
     [SerializeField] private TerrainGenerator terrainGenerator;
     [SerializeField] private LineRenderer lineRenderer;
-    private TerrainGenerator.GridCell[,] gridCells;
     private TerrainGenerator.GridCell selectedCell;
     private Unit selectedUnit;
     private List<Unit> allUnitsOfThePlayer = new List<Unit>();
@@ -68,26 +66,24 @@ public class PlayerManager : MonoBehaviour
 
     void Start()
     {
-        gridCells = terrainGenerator.GetGridCells();
     }
 
     void Update()
     {
-        if (gridCells == null) gridCells = terrainGenerator.GetGridCells();
     }
 
     public void MoveUnit()
     {
-        if (gridCells == null || allUnitsOfThePlayer == null || selectedUnit == null || selectedCell == null) return;
+        if (TerrainGenerator.instance.gridCells == null || allUnitsOfThePlayer == null || selectedUnit == null || selectedCell == null) return;
         if (!selectedUnit.isMoving && selectedCell.gridPosition != selectedUnit.gridPosition)
         {
             path = FindPath(selectedUnit.gridPosition, selectedCell.gridPosition);
             ShowPathLine(path);
             Debug.Log((int)selectedUnit.gridPosition.x);
             Debug.Log((int)selectedUnit.gridPosition.y);
-            gridCells[(int)selectedUnit.gridPosition.x, (int)selectedUnit.gridPosition.y].isOccupied = false;
-            Debug.Log(gridCells[(int)selectedUnit.gridPosition.x, (int)selectedUnit.gridPosition.y].gridPosition);
-            Debug.Log(gridCells[(int)selectedUnit.gridPosition.x, (int)selectedUnit.gridPosition.y].isOccupied);
+            TerrainGenerator.instance.gridCells[(int)selectedUnit.gridPosition.x, (int)selectedUnit.gridPosition.y].isOccupied = false;
+            Debug.Log(TerrainGenerator.instance.gridCells[(int)selectedUnit.gridPosition.x, (int)selectedUnit.gridPosition.y].gridPosition);
+            Debug.Log(TerrainGenerator.instance.gridCells[(int)selectedUnit.gridPosition.x, (int)selectedUnit.gridPosition.y].isOccupied);
             StartCoroutine(selectedUnit.Goto(path, 10, (success) =>
             {
                 if (success)
@@ -138,7 +134,7 @@ public class PlayerManager : MonoBehaviour
                 Vector2 neighbor = new Vector2(current.x + dx[i], current.y + dy[i]);
                 if (!IsInsideGrid((int)neighbor.x, (int)neighbor.y)) continue;
                 
-                float newCost = costSoFar[current] + gridCells[(int)neighbor.x, (int)neighbor.y].cost;
+                float newCost = costSoFar[current] + TerrainGenerator.instance.gridCells[(int)neighbor.x, (int)neighbor.y].cost;
                 
                 if (!costSoFar.ContainsKey(neighbor) || newCost < costSoFar[neighbor])
                 {
@@ -169,7 +165,7 @@ public class PlayerManager : MonoBehaviour
 
     private bool IsInsideGrid(int x, int y)
     {
-        return x >= 0 && x < gridCells.GetLength(0) && y >= 0 && y < gridCells.GetLength(1);
+        return x >= 0 && x < TerrainGenerator.instance.gridCells.GetLength(0) && y >= 0 && y < TerrainGenerator.instance.gridCells.GetLength(1);
     }
 
     #region Setter

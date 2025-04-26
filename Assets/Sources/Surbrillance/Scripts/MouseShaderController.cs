@@ -10,7 +10,6 @@ public class MouseShaderController : MonoBehaviour
     private float cellSize;
     private Camera cam;
     private int resolution;
-    private TerrainGenerator.GridCell[,] gridCells;
     private bool clickedOnCell;
 
     void Start()
@@ -46,7 +45,7 @@ public class MouseShaderController : MonoBehaviour
                 TerrainGenerator.GridCell cell = new TerrainGenerator.GridCell(new Vector3(0, 0, 0), new Vector2(0, 0), BiomeName.Water, 0);
                 float minDist = float.MaxValue;
 
-                foreach (TerrainGenerator.GridCell currentCell in gridCells)
+                foreach (TerrainGenerator.GridCell currentCell in TerrainGenerator.instance.gridCells)
                 {
                     float dist = Vector2.Distance(mousePos2D, currentCell.center);
                     if (dist < minDist)
@@ -173,6 +172,5 @@ public class MouseShaderController : MonoBehaviour
     #region Setter
     public void SetResolution(int res) { resolution = res; }
     public void SetCellSize(float _cellSize) { cellSize = _cellSize; }
-    public void SetGridCell(TerrainGenerator.GridCell[,] _gridCells) { gridCells = _gridCells; }
     #endregion
 }

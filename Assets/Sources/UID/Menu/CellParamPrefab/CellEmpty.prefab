@@ -410,7 +410,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4369065082735945914, guid: 2f0fe4adaa414154683c6e4720dac96f, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -160
+      value: -150
       objectReference: {fileID: 0}
     - target: {fileID: 4369065082735945914, guid: 2f0fe4adaa414154683c6e4720dac96f, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -476,7 +476,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 715450882012552304, guid: 2f0fe4adaa414154683c6e4720dac96f, type: 3}
       propertyPath: m_Text
-      value: D E B U G   D U   T E S T
+      value: 
       objectReference: {fileID: 0}
     - target: {fileID: 715450882012552304, guid: 2f0fe4adaa414154683c6e4720dac96f, type: 3}
       propertyPath: m_FontData.m_MinSize
@@ -564,7 +564,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4369065082735945914, guid: 2f0fe4adaa414154683c6e4720dac96f, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -81
+      value: -50
       objectReference: {fileID: 0}
     - target: {fileID: 4369065082735945914, guid: 2f0fe4adaa414154683c6e4720dac96f, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -626,7 +626,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 715450882012552304, guid: 2f0fe4adaa414154683c6e4720dac96f, type: 3}
       propertyPath: m_Text
-      value: A J O U T E R   U N   O R D I
+      value: 
       objectReference: {fileID: 0}
     - target: {fileID: 715450882012552304, guid: 2f0fe4adaa414154683c6e4720dac96f, type: 3}
       propertyPath: m_FontData.m_MinSize
@@ -714,7 +714,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4369065082735945914, guid: 2f0fe4adaa414154683c6e4720dac96f, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 0
+      value: 50
       objectReference: {fileID: 0}
     - target: {fileID: 4369065082735945914, guid: 2f0fe4adaa414154683c6e4720dac96f, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -796,7 +796,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 715450882012552304, guid: 2f0fe4adaa414154683c6e4720dac96f, type: 3}
       propertyPath: m_Text
-      value: A J O U T E R   U N   J O U E U R
+      value: D E P L A C E R   L ' U N I T E
       objectReference: {fileID: 0}
     - target: {fileID: 715450882012552304, guid: 2f0fe4adaa414154683c6e4720dac96f, type: 3}
       propertyPath: m_FontData.m_MinSize
@@ -884,7 +884,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4369065082735945914, guid: 2f0fe4adaa414154683c6e4720dac96f, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 160
+      value: 150
       objectReference: {fileID: 0}
     - target: {fileID: 4369065082735945914, guid: 2f0fe4adaa414154683c6e4720dac96f, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x

@@ -35,6 +35,8 @@ public class Biome
 [ExecuteInEditMode]
 public class TerrainGenerator : MonoBehaviour
 {
+    public static TerrainGenerator instance {private set; get;}
+
     [Header("Terrain Settings")]
     public TerrainSizeType terrainSize = TerrainSizeType.Moyen;
     [Range(1, 100)] public int detailLevel = 50;
@@ -69,11 +71,20 @@ public class TerrainGenerator : MonoBehaviour
     [SerializeField] private bool debugGenerateTerrain;
 
     private Terrain terrain;
-    private GridCell[,] gridCells;
+    public GridCell[,] gridCells;
     private int width = 0;
     private Biome[,] biomeCells;
     public static GameObject fogInstance;
     public static GameObject highlightInstance;
+
+    private void Awake() {
+        if(instance != null){
+            Destroy(this);
+            return;
+        }
+
+        instance = this;
+    }
 
     void Start()
     {
@@ -137,7 +148,7 @@ public class TerrainGenerator : MonoBehaviour
         if (highlightInstance == null) highlightInstance = Instantiate(highlightPrefab, transform.position, Quaternion.identity, transform);
         highlightInstance.GetComponentInChildren<MouseShaderController>().SetResolution(terrain.terrainData.heightmapResolution);
         highlightInstance.GetComponentInChildren<MouseShaderController>().SetCellSize(cellSize);
-        highlightInstance.GetComponentInChildren<MouseShaderController>().SetGridCell(gridCells);
+        // highlightInstance.GetComponentInChildren<MouseShaderController>().SetGridCell(gridCells);
         highlightInstance.GetComponentInChildren<MouseShaderController>().CreateHighlightBlock(new Vector3(terrain.terrainData.size.x, terrain.terrainData.size.y, terrain.terrainData.size.z), terrain.terrainData.GetHeights(0, 0, terrain.terrainData.heightmapResolution, terrain.terrainData.heightmapResolution));
     }
 
@@ -145,7 +156,7 @@ public class TerrainGenerator : MonoBehaviour
     {
         highlightPlayer.GetComponentInChildren<MouseShaderController>().SetResolution(terrain.terrainData.heightmapResolution);
         highlightPlayer.GetComponentInChildren<MouseShaderController>().SetCellSize(cellSize);
-        highlightPlayer.GetComponentInChildren<MouseShaderController>().SetGridCell(gridCells);
+        // highlightPlayer.GetComponentInChildren<MouseShaderController>().SetGridCell(gridCells);
         highlightPlayer.GetComponentInChildren<MouseShaderController>().CreateHighlightBlock(new Vector3(terrain.terrainData.size.x, terrain.terrainData.size.y, terrain.terrainData.size.z), terrain.terrainData.GetHeights(0, 0, terrain.terrainData.heightmapResolution, terrain.terrainData.heightmapResolution));
     }
 
@@ -688,7 +699,6 @@ public class TerrainGenerator : MonoBehaviour
     }
 
     #region Getter
-    public GridCell[,] GetGridCells() { return gridCells; }
     public float GetCellSize() { return cellSize; }
     public float GetWidth() { return width; }
     public float GetMinHeight() { return depth * biomes[biomes.Length - 1].biomeHeight; }

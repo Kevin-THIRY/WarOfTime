@@ -51,7 +51,6 @@ public class ResourcesGenerator : MonoBehaviour
 
     private TerrainGenerator terrainGenerator;
     private Terrain terrain;
-    private TerrainGenerator.GridCell[,] gridCells;
     private List<TreeInstance> trees;
 
     void OnValidate()
@@ -60,8 +59,7 @@ public class ResourcesGenerator : MonoBehaviour
         {
             terrainGenerator = GetComponent<TerrainGenerator>();
             terrain = GetComponent<Terrain>();
-            gridCells = terrainGenerator.GetGridCells();
-            ResetResourcesFromGrid(gridCells);
+            ResetResourcesFromGrid(TerrainGenerator.instance.gridCells);
             if (terrain) terrain.terrainData.treePrototypes = new TreePrototype[0];
             foreach (var resource in resources) AddTreePrototype(resource);
             foreach (var resource in resources) AddResourcesToGrid(resource);
@@ -72,8 +70,7 @@ public class ResourcesGenerator : MonoBehaviour
     {
         terrainGenerator = GetComponent<TerrainGenerator>();
         terrain = GetComponent<Terrain>();
-        gridCells = terrainGenerator.GetGridCells();
-        ResetResourcesFromGrid(gridCells);
+        ResetResourcesFromGrid(TerrainGenerator.instance.gridCells);
         if (terrain) terrain.terrainData.treePrototypes = new TreePrototype[0];
         foreach (var resource in resources) AddTreePrototype(resource);
         foreach (var resource in resources) AddResourcesToGrid(resource);
@@ -94,7 +91,7 @@ public class ResourcesGenerator : MonoBehaviour
             return;
         }
 
-        if (gridCells == null)
+        if (TerrainGenerator.instance.gridCells == null)
         {
             Debug.LogError("GridCells non initialisé !");
             return;
@@ -102,8 +99,8 @@ public class ResourcesGenerator : MonoBehaviour
 
         List<BiomeName> biomes = BiomeResourceMapping.GetBiomesForResource(resource.resourcesType);
 
-        int gridX = gridCells.GetLength(0) - 1;
-        int gridY = gridCells.GetLength(1) - 1;
+        int gridX = TerrainGenerator.instance.gridCells.GetLength(0) - 1;
+        int gridY = TerrainGenerator.instance.gridCells.GetLength(1) - 1;
         TerrainData terrainData = terrain.terrainData;
 
         int resolution = terrainData.heightmapResolution;
@@ -119,9 +116,9 @@ public class ResourcesGenerator : MonoBehaviour
             {
                 foreach (BiomeName biome in biomes)
                 {
-                    if (gridCells[x, y].biomeName == biome && UnityEngine.Random.Range(0f, 1f) > 1 - resource.density && IsFreeAround(x, y, gridX, gridY))
+                    if (TerrainGenerator.instance.gridCells[x, y].biomeName == biome && UnityEngine.Random.Range(0f, 1f) > 1 - resource.density && IsFreeAround(x, y, gridX, gridY))
                     {
-                        gridCells[x, y].resourceType = resource.resourcesType;
+                        TerrainGenerator.instance.gridCells[x, y].resourceType = resource.resourcesType;
                         // Centre de la cellule
                         float centerX = (x * gridXOverResolution + (gridXOverResolution / 2)) / resolution;
                         float centerZ = (y * gridYOverResolution + (gridYOverResolution / 2)) / resolution;
@@ -161,15 +158,15 @@ public class ResourcesGenerator : MonoBehaviour
 
     private bool IsFreeAround(int x, int y, int gridX, int gridY)
     {
-        ResourcesType cyx   = gridCells[x, y].resourceType;
-        ResourcesType cyxm  = (x - 1 > 0) ? gridCells[x - 1, y].resourceType : cyx;
-        ResourcesType cymx  = (y - 1 > 0) ? gridCells[x, y - 1].resourceType : cyx;
-        ResourcesType cymxm = (x - 1 > 0 && y - 1 > 0) ? gridCells[x - 1, y - 1].resourceType : cyx;
-        ResourcesType cyxp  = (x + 1 < gridX) ? gridCells[x + 1, y].resourceType : cyx;
-        ResourcesType cypx  = (y + 1 < gridY) ? gridCells[x, y + 1].resourceType : cyx;
-        ResourcesType cypxp = (x + 1 < gridX && y + 1 < gridY) ? gridCells[x + 1, y + 1].resourceType : cyx;
-        ResourcesType cymxp = (x + 1 < gridX && y - 1 > 0) ? gridCells[x + 1, y - 1].resourceType : cyx;
-        ResourcesType cypxm = (x - 1 > 0 && y + 1 < gridY) ? gridCells[x- 1, y + 1].resourceType : cyx;
+        ResourcesType cyx   = TerrainGenerator.instance.gridCells[x, y].resourceType;
+        ResourcesType cyxm  = (x - 1 > 0) ? TerrainGenerator.instance.gridCells[x - 1, y].resourceType : cyx;
+        ResourcesType cymx  = (y - 1 > 0) ? TerrainGenerator.instance.gridCells[x, y - 1].resourceType : cyx;
+        ResourcesType cymxm = (x - 1 > 0 && y - 1 > 0) ? TerrainGenerator.instance.gridCells[x - 1, y - 1].resourceType : cyx;
+        ResourcesType cyxp  = (x + 1 < gridX) ? TerrainGenerator.instance.gridCells[x + 1, y].resourceType : cyx;
+        ResourcesType cypx  = (y + 1 < gridY) ? TerrainGenerator.instance.gridCells[x, y + 1].resourceType : cyx;
+        ResourcesType cypxp = (x + 1 < gridX && y + 1 < gridY) ? TerrainGenerator.instance.gridCells[x + 1, y + 1].resourceType : cyx;
+        ResourcesType cymxp = (x + 1 < gridX && y - 1 > 0) ? TerrainGenerator.instance.gridCells[x + 1, y - 1].resourceType : cyx;
+        ResourcesType cypxm = (x - 1 > 0 && y + 1 < gridY) ? TerrainGenerator.instance.gridCells[x- 1, y + 1].resourceType : cyx;
 
         if (cyx == ResourcesType.Null && cyxm == ResourcesType.Null && cymx == ResourcesType.Null && cymxm == ResourcesType.Null &&
             cyxp == ResourcesType.Null && cypx == ResourcesType.Null && cypxp == ResourcesType.Null &&
