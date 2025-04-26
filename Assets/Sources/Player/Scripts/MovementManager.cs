@@ -10,6 +10,8 @@ public enum MovementState
 
 public class MovementManager : MonoBehaviour
 {
+    public static MovementManager instance {private set; get;}
+
     #region Variables
     // Composants du personnage
     private Rigidbody rb;
@@ -28,22 +30,23 @@ public class MovementManager : MonoBehaviour
     // Inventaire
     private bool is_in_inventory;
 
-    // Turn
-    private TurnManager turn;
-
-    // UID
-    [SerializeField] private MenuController menuController;
-
     #endregion
+
+    private void Awake() {
+        if(instance != null){
+            Destroy(this);
+            return;
+        }
+
+        instance = this;
+    }
     
     // Start is called before the first frame update
     void Start()
     {
         // Composants du personnage
         rb = gameObject.GetComponent<Rigidbody>();
-        turn = FindAnyObjectByType<TurnManager>();
         movement_state = MovementState.Idle;
-        menuController = FindAnyObjectByType<MenuController>();
     }
 
     private void Update()
@@ -62,7 +65,7 @@ public class MovementManager : MonoBehaviour
         }
         if (!is_in_inventory && (openOption != 0))
         {
-            menuController.ChangePanel(Type.Options, 0, type => type == Type.None, (type, button) => button.GetButtonType() == type);
+            MenuController.instance.ChangePanel(Type.Options, 0, type => type == Type.None, (type, button) => button.GetButtonType() == type);
             is_in_inventory = true;
         }
     }

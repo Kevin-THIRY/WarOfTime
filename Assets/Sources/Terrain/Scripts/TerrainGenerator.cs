@@ -671,6 +671,7 @@ public class TerrainGenerator : MonoBehaviour
         public ResourcesType resourceType;
         public Vector2 center;
         public readonly BiomeName biomeName;
+        public bool isOccupied = false;
 
         public GridCell(Vector3 position, Vector2 gridPosition, BiomeName biomeName, int cost)
         {

@@ -13,7 +13,7 @@ public class CanvasCharacterManager : MonoBehaviour
     [SerializeField] private GameObject canvasTarget = null;
     [SerializeField] private Vector2Int positionPanel = new Vector2Int(0, 0);
     private GameObject overCanvasOpened = null;
-    private MovementManager move_character;
+    // private MovementManager move_character;
     private CanvasManager activeCanvas;
     private bool isCanvasOpen = false;
     
@@ -21,7 +21,7 @@ public class CanvasCharacterManager : MonoBehaviour
     void Start()
     {
         menuController.ChangePanel(Type.BaseUID, 0, type => type == Type.None, (type, button) => button.GetButtonType() == type);
-        move_character = GetComponent<MovementManager>();
+        // move_character = GetComponent<MovementManager>();
     }
 
     private void Update()
@@ -36,15 +36,15 @@ public class CanvasCharacterManager : MonoBehaviour
         // if (nearEnvironmentManager.GetObjectDetected()) OpenActionMenuOnObject();
         else if(isCanvasOpen) CloseCanvas();
 
-        if (activeCanvas.GetButtonType() != Type.BaseUID) move_character.SetInOutInventory(true);
-        else move_character.SetInOutInventory(false);
+        if (activeCanvas.GetButtonType() != Type.BaseUID) MovementManager.instance.SetInOutInventory(true);
+        else MovementManager.instance.SetInOutInventory(false);
     }
 
     private void OpenActionMenuOnObject()
     {
         if (canvasTarget && !isCanvasOpen){
             isCanvasOpen = true;
-            menuController.CreatePanelAndOpenNextToMe(canvasTarget, activeCanvas.GetUniqueId(), positionPanel);
+            // menuController.CreatePanelAndOpenNextToMe(canvasTarget, activeCanvas.GetUniqueId(), positionPanel);
         }
     }
 

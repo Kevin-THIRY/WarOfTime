@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
+using System.Linq;
 
 public enum Type{
     None,
@@ -18,11 +20,13 @@ public enum Type{
     SlotControl,
     MultiplayerSettings,
     HostHub,
-    ClientHub
+    ClientHub,
+    CellParamEmpty,
 }
 
 public class MenuController : MonoBehaviour
 {
+    public static MenuController instance {private set; get;}
 
     [Header("Buttons")]
 
@@ -33,6 +37,15 @@ public class MenuController : MonoBehaviour
     private CanvasManager activeCanvas;
     private List<int> pileCanvas = new List<int>();
     private int maxId = 0;
+
+    private void Awake() {
+        if(instance != null){
+            Destroy(this);
+            return;
+        }
+
+        instance = this;
+    }
 
     private void Start() {
         manager = GameManager.instance;
@@ -98,10 +111,11 @@ public class MenuController : MonoBehaviour
         // try {canvasCharacterManager.SetOpenedCanvas(instance);}
         // finally{}
         buttonList.Add(instance.GetComponent<CanvasManager>());
+        activeCanvas = instance.GetComponent<CanvasManager>();
         OpenPanel(instance.GetComponent<CanvasManager>(), canvasOrigin, canvas => canvas.GetButtonType() == Type.None, (canvas, button) => button == canvas.GetUniqueId());
     }
 
-    public void ChangeScene (string _sceneName) {
+    public void ChangeScene(string _sceneName) {
         manager.ChangeScene(_sceneName);
     }
 
@@ -134,6 +148,7 @@ public class MenuController : MonoBehaviour
         }
 
         if (pileCanvas.Count != 0) pileCanvas.RemoveAt(pileCanvas.Count - 1);
+        if (pileCanvas.Count != 0) activeCanvas = buttonList.FirstOrDefault(b => b.GetUniqueId() == pileCanvas[^1]);
     }
 
     private IEnumerator OpenStateButton<T>(T target, int second, bool animate, bool changePanel, int canvasOrigin, System.Func<T, bool> isTargetNone, System.Func<T, int, bool> isMatchingButton)

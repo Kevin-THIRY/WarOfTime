@@ -136,12 +136,40 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 373040578329591891, guid: 2f0fe4adaa414154683c6e4720dac96f, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 373040578329591891, guid: 2f0fe4adaa414154683c6e4720dac96f, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 373040578329591891, guid: 2f0fe4adaa414154683c6e4720dac96f, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 1973307214}
+    - target: {fileID: 373040578329591891, guid: 2f0fe4adaa414154683c6e4720dac96f, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[1].m_Target
       value: 
       objectReference: {fileID: 1973307214}
     - target: {fileID: 373040578329591891, guid: 2f0fe4adaa414154683c6e4720dac96f, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 373040578329591891, guid: 2f0fe4adaa414154683c6e4720dac96f, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: PressedButton
+      objectReference: {fileID: 0}
+    - target: {fileID: 373040578329591891, guid: 2f0fe4adaa414154683c6e4720dac96f, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[1].m_MethodName
       value: PressedButton
+      objectReference: {fileID: 0}
+    - target: {fileID: 373040578329591891, guid: 2f0fe4adaa414154683c6e4720dac96f, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: ButtonManager, Assembly-CSharp
+      objectReference: {fileID: 0}
+    - target: {fileID: 373040578329591891, guid: 2f0fe4adaa414154683c6e4720dac96f, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_StringArgument
+      value: 
       objectReference: {fileID: 0}
     - target: {fileID: 715450882012552304, guid: 2f0fe4adaa414154683c6e4720dac96f, type: 3}
       propertyPath: m_FontData.m_MinSize
@@ -1286,6 +1314,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 2045056444}
     m_Modifications:
+    - target: {fileID: 457846750203425218, guid: 7b47d11a88b7e4240a1990edda5e6d62, type: 3}
+      propertyPath: m_AdditionalShaderChannelsFlag
+      value: 25
+      objectReference: {fileID: 0}
     - target: {fileID: 1593036682576865157, guid: 7b47d11a88b7e4240a1990edda5e6d62, type: 3}
       propertyPath: type
       value: 11
@@ -1440,6 +1472,10 @@ PrefabInstance:
     - target: {fileID: 457846750203425218, guid: 2e5a36478de6a904caab908a09fce3b1, type: 3}
       propertyPath: m_RenderMode
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 457846750203425218, guid: 2e5a36478de6a904caab908a09fce3b1, type: 3}
+      propertyPath: m_AdditionalShaderChannelsFlag
+      value: 25
       objectReference: {fileID: 0}
     - target: {fileID: 900348145395120023, guid: 2e5a36478de6a904caab908a09fce3b1, type: 3}
       propertyPath: m_UiScaleMode

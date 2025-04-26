@@ -1,15 +1,16 @@
 using System.Linq;
 using UnityEngine;
 using Unity.Netcode;
+using System.Collections.Generic;
 
 public class MouseShaderController : MonoBehaviour
 {
     [SerializeField] private Material highlightMaterial;
+    [SerializeField] private List<CanvasManager> listCanvasManager = new List<CanvasManager>();
     private float cellSize;
     private Camera cam;
     private int resolution;
     private TerrainGenerator.GridCell[,] gridCells;
-    private PlayerManager playerManager;
     private bool clickedOnCell;
 
     void Start()
@@ -56,9 +57,18 @@ public class MouseShaderController : MonoBehaviour
                 }
                 // Vector3 adjustedPosition = hit.point + hit.normal; // Décale légèrement
                 highlightMaterial.SetVector("_MousePosition", new Vector3(cell.center.x, hit.point.y + hit.normal.y, cell.center.y));
-                if (playerManager != null && clickedOnCell)
+                if (PlayerManager.instance != null && clickedOnCell)
                 {
-                    playerManager.SetSelectedCell(cell);
+                    if (!cell.isOccupied)
+                    {
+                        PlayerManager.instance.SetSelectedCell(cell);
+                        MenuController.instance.CreatePanelAndOpenNextToMe(listCanvasManager[0].gameObject, MenuController.instance.GetActiveCanvas().GetUniqueId(), new Vector2Int(30, 30));
+                        MovementManager.instance.SetInOutInventory(true);
+                    }
+                    else
+                    {
+                        Debug.Log("Cell is occupied");
+                    }
                     clickedOnCell = false;
                 }
                 break; // Si tu veux sortir dès que tu trouves le premier plan
@@ -164,6 +174,5 @@ public class MouseShaderController : MonoBehaviour
     public void SetResolution(int res) { resolution = res; }
     public void SetCellSize(float _cellSize) { cellSize = _cellSize; }
     public void SetGridCell(TerrainGenerator.GridCell[,] _gridCells) { gridCells = _gridCells; }
-    public void SetPlayerManager(PlayerManager _playerManager) { playerManager = _playerManager; }
     #endregion
 }

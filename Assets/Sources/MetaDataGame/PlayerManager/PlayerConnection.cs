@@ -46,7 +46,7 @@ public class PlayerConnection : MonoBehaviour
             PlayerInput playerInput = gameObject.GetComponent<PlayerInput>();
             playerInput.SwitchCurrentControlScheme("BasicsInput", Keyboard.current);
             playerInput.SwitchCurrentActionMap("Player" + 1);
-            gameObject.GetComponentInChildren<MovementManager>().SetInputSystem(playerInput.actions);
+            MovementManager.instance.SetInputSystem(playerInput.actions);
         }
 
         void InitializeCameraPlayer(int playerNumber)

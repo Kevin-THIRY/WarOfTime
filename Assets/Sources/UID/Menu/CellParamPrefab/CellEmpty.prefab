@@ -19,7 +19,7 @@ GameObject:
   - component: {fileID: 8689348692216191962}
   - component: {fileID: 19344224693171388}
   m_Layer: 0
-  m_Name: CellParameters
+  m_Name: CellEmpty
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -310,7 +310,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 860db7be33e0d8e4b99f524bdf38a8df, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  type: 12
+  type: 16
   animationTransitionTime: 0
 --- !u!1001 &748685722213617667
 PrefabInstance:
@@ -437,16 +437,24 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 19344224693171388}
     - target: {fileID: 5355458695114469533, guid: 2f0fe4adaa414154683c6e4720dac96f, type: 3}
+      propertyPath: panelToDelete
+      value: 
+      objectReference: {fileID: 7436569850891478746}
+    - target: {fileID: 5355458695114469533, guid: 2f0fe4adaa414154683c6e4720dac96f, type: 3}
       propertyPath: thisVerticalIndex
       value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 5355458695114469533, guid: 2f0fe4adaa414154683c6e4720dac96f, type: 3}
       propertyPath: actionsToPerform.Array.size
-      value: 1
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 5355458695114469533, guid: 2f0fe4adaa414154683c6e4720dac96f, type: 3}
       propertyPath: 'actionsToPerform.Array.data[0]'
-      value: 4
+      value: 7
+      objectReference: {fileID: 0}
+    - target: {fileID: 5355458695114469533, guid: 2f0fe4adaa414154683c6e4720dac96f, type: 3}
+      propertyPath: 'actionsToPerform.Array.data[1]'
+      value: 15
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -576,7 +584,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4369065082735945917, guid: 2f0fe4adaa414154683c6e4720dac96f, type: 3}
       propertyPath: m_Name
-      value: Test
+      value: SeeInfo
       objectReference: {fileID: 0}
     - target: {fileID: 5355458695114469533, guid: 2f0fe4adaa414154683c6e4720dac96f, type: 3}
       propertyPath: thisVerticalIndex
@@ -726,8 +734,12 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4369065082735945917, guid: 2f0fe4adaa414154683c6e4720dac96f, type: 3}
       propertyPath: m_Name
-      value: AddBot
+      value: Build
       objectReference: {fileID: 0}
+    - target: {fileID: 5355458695114469533, guid: 2f0fe4adaa414154683c6e4720dac96f, type: 3}
+      propertyPath: targetCanvas
+      value: 
+      objectReference: {fileID: 19344224693171388, guid: 2952ac655f5e32a45bca943a63fd0d59, type: 3}
     - target: {fileID: 5355458695114469533, guid: 2f0fe4adaa414154683c6e4720dac96f, type: 3}
       propertyPath: thisVerticalIndex
       value: 1
@@ -738,7 +750,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5355458695114469533, guid: 2f0fe4adaa414154683c6e4720dac96f, type: 3}
       propertyPath: 'actionsToPerform.Array.data[0]'
-      value: 9
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8157862164507402858, guid: 2f0fe4adaa414154683c6e4720dac96f, type: 3}
       propertyPath: m_SizeDelta.x
@@ -892,19 +904,27 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4369065082735945917, guid: 2f0fe4adaa414154683c6e4720dac96f, type: 3}
       propertyPath: m_Name
-      value: AddPlayer
+      value: MoveUnit
       objectReference: {fileID: 0}
     - target: {fileID: 4449160728563609267, guid: 2f0fe4adaa414154683c6e4720dac96f, type: 3}
       propertyPath: m_Color.a
       value: 0.5019608
       objectReference: {fileID: 0}
     - target: {fileID: 5355458695114469533, guid: 2f0fe4adaa414154683c6e4720dac96f, type: 3}
+      propertyPath: panelToDelete
+      value: 
+      objectReference: {fileID: 7436569850891478746}
+    - target: {fileID: 5355458695114469533, guid: 2f0fe4adaa414154683c6e4720dac96f, type: 3}
       propertyPath: actionsToPerform.Array.size
-      value: 1
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 5355458695114469533, guid: 2f0fe4adaa414154683c6e4720dac96f, type: 3}
       propertyPath: 'actionsToPerform.Array.data[0]'
-      value: 8
+      value: 16
+      objectReference: {fileID: 0}
+    - target: {fileID: 5355458695114469533, guid: 2f0fe4adaa414154683c6e4720dac96f, type: 3}
+      propertyPath: 'actionsToPerform.Array.data[1]'
+      value: 7
       objectReference: {fileID: 0}
     - target: {fileID: 8157862164507402858, guid: 2f0fe4adaa414154683c6e4720dac96f, type: 3}
       propertyPath: m_SizeDelta.x

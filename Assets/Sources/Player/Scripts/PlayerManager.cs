@@ -48,34 +48,54 @@ public class ElementaryBasics
 
 public class PlayerManager : MonoBehaviour
 {
-    // [SerializeField] private GameObject firstUnit;
+    public static PlayerManager instance {private set; get;}
     [SerializeField] private TerrainGenerator terrainGenerator;
     [SerializeField] private LineRenderer lineRenderer;
-    // private int id;
     private TerrainGenerator.GridCell[,] gridCells;
     private TerrainGenerator.GridCell selectedCell;
     private Unit selectedUnit;
     private List<Unit> allUnitsOfThePlayer = new List<Unit>();
     private List<Vector2> path;
 
+    private void Awake() {
+        if(instance != null){
+            Destroy(this);
+            return;
+        }
+
+        instance = this;
+    }
+
     void Start()
     {
         gridCells = terrainGenerator.GetGridCells();
-        FindAnyObjectByType<MouseShaderController>().SetPlayerManager(this);
     }
 
     void Update()
     {
         if (gridCells == null) gridCells = terrainGenerator.GetGridCells();
+    }
+
+    public void MoveUnit()
+    {
         if (gridCells == null || allUnitsOfThePlayer == null || selectedUnit == null || selectedCell == null) return;
         if (!selectedUnit.isMoving && selectedCell.gridPosition != selectedUnit.gridPosition)
         {
             path = FindPath(selectedUnit.gridPosition, selectedCell.gridPosition);
             ShowPathLine(path);
+            Debug.Log((int)selectedUnit.gridPosition.x);
+            Debug.Log((int)selectedUnit.gridPosition.y);
+            gridCells[(int)selectedUnit.gridPosition.x, (int)selectedUnit.gridPosition.y].isOccupied = false;
+            Debug.Log(gridCells[(int)selectedUnit.gridPosition.x, (int)selectedUnit.gridPosition.y].gridPosition);
+            Debug.Log(gridCells[(int)selectedUnit.gridPosition.x, (int)selectedUnit.gridPosition.y].isOccupied);
             StartCoroutine(selectedUnit.Goto(path, 10, (success) =>
             {
                 if (success)
                 {
+                    selectedCell.isOccupied = true;
+                    Debug.Log(selectedCell.gridPosition);
+                    Debug.Log(selectedCell.isOccupied);
+                    MovementManager.instance.SetInOutInventory(false);
                     // Debug.Log("Déplacement terminé avec succès !");
                 }
                 else

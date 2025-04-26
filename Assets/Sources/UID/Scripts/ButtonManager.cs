@@ -24,6 +24,7 @@ public enum ButtonFunction{
 	LaunchNewSceneFromHost,
 	EndTurn,
 	CloseInventory,
+	MoveUnit,
 	Test
 }
 
@@ -42,7 +43,6 @@ public class ButtonManager : MonoBehaviour
 
     // Transition variables
     [SerializeField] private int animationTime;
-    private MenuController controller;
 
 	private Dictionary<ButtonFunction, Delegate> actionDictionary;
 
@@ -61,7 +61,6 @@ public class ButtonManager : MonoBehaviour
     void Start()
     {
 		manager = GameManager.instance;
-        controller = FindAnyObjectByType<MenuController>();
 		try{canvasManager = GetComponentInParent<CanvasManager>();} finally{}
         try{animator = GetComponent<Animator>();} finally{}
 
@@ -88,6 +87,7 @@ public class ButtonManager : MonoBehaviour
 			{ ButtonFunction.LaunchNewSceneFromHost, new Action<string>(LaunchNewSceneFromHost) },
 			{ ButtonFunction.EndTurn, new Action(EndTurn) },
 			{ ButtonFunction.CloseInventory, new Action(CloseInventory) },
+			{ ButtonFunction.MoveUnit, new Action(MoveUnit) },
 			{ ButtonFunction.Test, new Action(Test) }
         };
     }
@@ -250,14 +250,14 @@ public class ButtonManager : MonoBehaviour
 	private void ChangePanel()
 	{
 		if (targetCanvas.GetButtonType() == Type.Quit){
-			controller.Quit();
+			MenuController.instance.Quit();
 		}
-		else{controller.ChangePanel(targetCanvas, animationTime, canvas => canvas.GetButtonType() == Type.None,(canvas, button) => button.GetUniqueId() == canvas.GetUniqueId());}
+		else{MenuController.instance.ChangePanel(targetCanvas, animationTime, canvas => canvas.GetButtonType() == Type.None,(canvas, button) => button.GetUniqueId() == canvas.GetUniqueId());}
 	}
 
 	private void ChangeScene(string sceneName)
 	{
-		controller.ChangeScene(sceneName);
+		MenuController.instance.ChangeScene(sceneName);
 	}
 
 	private void ReactivateScript(MonoBehaviour script)
@@ -273,27 +273,27 @@ public class ButtonManager : MonoBehaviour
 	private void ClosePanel()
 	{
 		if (targetCanvas.GetButtonType() == Type.Quit){
-			controller.Quit();
+			MenuController.instance.Quit();
 		}
-		else{controller.ClosePanel(targetCanvas, canvas => canvas.GetButtonType() == Type.None, (canvas, button) => button == canvas.GetUniqueId());}
+		else{MenuController.instance.ClosePanel(targetCanvas, canvas => canvas.GetButtonType() == Type.None, (canvas, button) => button == canvas.GetUniqueId());}
 	}
 
 	private void OpenPanel()
 	{
 		if (targetCanvas.GetButtonType() == Type.Quit){
-			controller.Quit();
+			MenuController.instance.Quit();
 		}
-		else{controller.OpenPanel(targetCanvas, canvasManager.GetUniqueId(), canvas => canvas.GetButtonType() == Type.None, (canvas, button) => button == canvas.GetUniqueId());}
+		else{MenuController.instance.OpenPanel(targetCanvas, canvasManager.GetUniqueId(), canvas => canvas.GetButtonType() == Type.None, (canvas, button) => button == canvas.GetUniqueId());}
 	}
 
 	private void CreatePanelAndOpenNextToMe(GameObject canvasObject, Vector2Int positionPanel)
 	{
-		controller.CreatePanelAndOpenNextToMe(canvasObject, canvasManager.GetUniqueId(), positionPanel);
+		MenuController.instance.CreatePanelAndOpenNextToMe(canvasObject, canvasManager.GetUniqueId(), positionPanel);
 	}
 
 	private void DeletePanel(GameObject canvasObject)
 	{
-		controller.DeletePanel(canvasObject);
+		MenuController.instance.DeletePanel(canvasObject);
 	}
 
 	private void AddPlayer()
@@ -339,7 +339,12 @@ public class ButtonManager : MonoBehaviour
 
 	private void CloseInventory()
 	{
-		FindAnyObjectByType<MovementManager>().SetInOutInventory(false);
+		MovementManager.instance.SetInOutInventory(false);
+	}
+
+	private void MoveUnit()
+	{
+		PlayerManager.instance.MoveUnit();
 	}
 
 	private void Test()
