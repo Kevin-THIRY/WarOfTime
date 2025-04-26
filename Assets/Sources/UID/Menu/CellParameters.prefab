@@ -19,7 +19,7 @@ GameObject:
   - component: {fileID: 8689348692216191962}
   - component: {fileID: 19344224693171388}
   m_Layer: 0
-  m_Name: MapParameter
+  m_Name: CellParameters
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -766,6 +766,22 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 7500660191769629747}
     m_Modifications:
+    - target: {fileID: 373040578329591891, guid: 2f0fe4adaa414154683c6e4720dac96f, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.size
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 373040578329591891, guid: 2f0fe4adaa414154683c6e4720dac96f, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[2].m_Mode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 373040578329591891, guid: 2f0fe4adaa414154683c6e4720dac96f, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[2].m_CallState
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 373040578329591891, guid: 2f0fe4adaa414154683c6e4720dac96f, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[2].m_TargetAssemblyTypeName
+      value: ButtonManager, Assembly-CSharp
+      objectReference: {fileID: 0}
     - target: {fileID: 715450882012552304, guid: 2f0fe4adaa414154683c6e4720dac96f, type: 3}
       propertyPath: m_Text
       value: A J O U T E R   U N   J O U E U R

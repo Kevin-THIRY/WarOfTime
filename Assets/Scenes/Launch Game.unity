@@ -1019,7 +1019,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5c876063985f5374aa54894a97bfaa00, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  firstUnitGO: {fileID: 1276793047587215747, guid: f111a6a57dd98f34db3a464e65d8140d, type: 3}
   fakeHost: 0
 --- !u!1 &1405673308
 GameObject:

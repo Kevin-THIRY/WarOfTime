@@ -8,11 +8,26 @@ using Unity.VisualScripting;
 
 public class TurnManager : NetworkBehaviour
 {
+    public static TurnManager Instance;
     private NetworkVariable<ulong> activePlayerId = new NetworkVariable<ulong>(0);
     private Text turnText;
     private Text activePlayerIdText;
     private NetworkVariable<int> turnCount = new NetworkVariable<int>(0);
 
+    // private void Awake()
+    // {
+    //     if (Instance != null && Instance != this)
+    //     {
+    //         Destroy(gameObject);
+    //         return;
+    //     }
+    //     Instance = this;
+
+    //     if (!IsServer)
+    //     {
+    //         Destroy(gameObject); 
+    //     }
+    // }
 
     public void Start()
     {
@@ -24,20 +39,25 @@ public class TurnManager : NetworkBehaviour
     {
         base.OnNetworkSpawn();
 
+        if (IsServer && !IsOwner)
+        {
+            Destroy(gameObject); 
+        }
+        else Instance = this;
+
         turnCount.OnValueChanged += UpdateTurnDisplay;
         activePlayerId.OnValueChanged += UpdateActivePlayerIdDisplay;
 
-        if (IsHost)
+        if (IsServer)
         {
-            activePlayerId.Value = OwnerClientId;
+            if (NetworkManager.Singleton.ConnectedClientsList.Count > 0)
+                activePlayerId.Value = NetworkManager.Singleton.ConnectedClientsList[0].ClientId;
         }
     }
 
     public void EndTurn()
     {
-        Debug.Log($"Demandande de fin de tour par le client : {NetworkManager.Singleton.LocalClientId}");
-        Debug.Log(activePlayerId.Value);
-        if (IsOwner && activePlayerId.Value == NetworkManager.Singleton.LocalClientId)
+        if (activePlayerId.Value == NetworkManager.Singleton.LocalClientId)
         {
             RequestEndTurnServerRpc();
         }
@@ -46,15 +66,25 @@ public class TurnManager : NetworkBehaviour
     [ServerRpc(RequireOwnership = false)]
     private void RequestEndTurnServerRpc(ServerRpcParams rpcParams = default)
     {
-        if (IsServer)
+        if (!IsServer) return;
+
+        var clients = NetworkManager.Singleton.ConnectedClientsList;
+        int currentIndex = -1;
+        for (int i = 0; i < clients.Count; i++)
         {
-            activePlayerId.Value = rpcParams.Receive.SenderClientId++ % ((ulong)NetworkManager.Singleton.ConnectedClients.Count);
-            turnCount.Value++;
+            if (clients[i].ClientId == activePlayerId.Value)
+            {
+                currentIndex = i;
+                break;
+            }
         }
-        else
-        {
-            Debug.Log("Je ne suis pas serveur et je fais le fou");
-        }
+
+        if (currentIndex == -1) currentIndex = 0;
+
+        int nextIndex = (currentIndex + 1) % clients.Count;
+        activePlayerId.Value = clients[nextIndex].ClientId;
+
+        turnCount.Value++;
     }
 
     private void UpdateTurnDisplay(int oldValue, int _turnCount)

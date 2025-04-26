@@ -334,11 +334,7 @@ public class ButtonManager : MonoBehaviour
 
 	private void EndTurn()
 	{
-		var tm = FindAnyObjectByType<TurnManager>();
-        if (tm != null) // && tm.IsMyTurn())
-        {
-            tm.EndTurn();
-        }
+		TurnManager.Instance.EndTurn();
 	}
 
 	private void CloseInventory()
@@ -348,10 +344,6 @@ public class ButtonManager : MonoBehaviour
 
 	private void Test()
 	{
-		// foreach (var player in GameData.playerList)
-		// {
-		// 	Debug.Log("Joueur : " + player.Name + ", Couleur : " + player.Color);
-		// }
 	}
 
 	#region Getter

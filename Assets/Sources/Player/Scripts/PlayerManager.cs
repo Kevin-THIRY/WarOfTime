@@ -51,7 +51,6 @@ public class PlayerManager : MonoBehaviour
     // [SerializeField] private GameObject firstUnit;
     [SerializeField] private TerrainGenerator terrainGenerator;
     [SerializeField] private LineRenderer lineRenderer;
-    private MouseShaderController mouseShaderController;
     // private int id;
     private TerrainGenerator.GridCell[,] gridCells;
     private TerrainGenerator.GridCell selectedCell;

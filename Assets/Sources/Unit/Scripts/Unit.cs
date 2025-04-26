@@ -11,7 +11,6 @@ public static class UnitlList
 
 public class Unit : NetworkBehaviour
 {
-    GameObject me;
     [NonSerialized] public bool isMoving = false;
     [NonSerialized] public int id;
     [NonSerialized] public string unitName;
