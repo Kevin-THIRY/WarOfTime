@@ -58,15 +58,29 @@ public class MouseShaderController : MonoBehaviour
                 highlightMaterial.SetVector("_MousePosition", new Vector3(cell.center.x, hit.point.y + hit.normal.y, cell.center.y));
                 if (PlayerManager.instance != null && clickedOnCell)
                 {
-                    if (!cell.isOccupied)
+                    if (PlayerManager.instance.selectedUnit)
                     {
-                        PlayerManager.instance.SetSelectedCell(cell);
-                        MenuController.instance.CreatePanelAndOpenNextToMe(listCanvasManager[0].gameObject, MenuController.instance.GetActiveCanvas().GetUniqueId(), new Vector2Int(30, 30));
-                        MovementManager.instance.SetInOutInventory(true);
+                        if (!cell.isOccupied)
+                        {
+                            PlayerManager.instance.SetSelectedCell(cell);
+                            MenuController.instance.CreatePanelAndOpenNextToMe(listCanvasManager[0].gameObject, MenuController.instance.GetActiveCanvas().GetUniqueId(), new Vector2Int(30, 30));
+                            MovementManager.instance.SetInOutInventory(true);
+                        }
+                        else
+                        {
+                            Debug.Log("Cell is occupied");
+                        }
                     }
                     else
                     {
-                        Debug.Log("Cell is occupied");
+                        Unit unit = UnitlList.AllUnits.FirstOrDefault(u => u.gridPosition == cell.gridPosition);
+                        if (unit != null)
+                        {
+                            // Une unité a été trouvée sur la cellule
+                            PlayerManager.instance.SetSelectedUnit(unit);
+                            // Ouvre un menu de selection d'unité
+                            // MenuController.instance.CreatePanelAndOpenNextToMe(listCanvasManager[0].gameObject, MenuController.instance.GetActiveCanvas().GetUniqueId(), new Vector2Int(30, 30));
+                        }
                     }
                     clickedOnCell = false;
                 }

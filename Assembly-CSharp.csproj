@@ -66,11 +66,11 @@
     <Analyzer Include="C:\Program Files\Unity\Hub\Editor\6000.0.39f1\Editor\Data\Tools\Unity.SourceGenerators\Unity.UIToolkit.SourceGenerator.dll" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Assets\Sources\MetaDataGame\TurnManager.cs" />
     <Compile Include="Assets\Sources\UID\Scripts\MenuController.cs" />
     <Compile Include="Assets\Sources\MetaDataGame\GameManager.cs" />
     <Compile Include="Assets\Sources\Terrain\Scripts\TerrainGenerator.cs" />
     <Compile Include="Assets\Sources\Surbrillance\Scripts\MouseShaderController.cs" />
+    <Compile Include="Assets\Sources\MetaDataGame\MapManager.cs" />
     <Compile Include="Assets\Sources\Terrain\Scripts\ResourcesGenerator.cs" />
     <Compile Include="Assets\Sources\Unit\Scripts\Unit.cs" />
     <Compile Include="Assets\Sources\UID\Scripts\ButtonManager.cs" />

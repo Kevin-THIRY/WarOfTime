@@ -1,11 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Assembly-CSharp", "Assembly-CSharp.csproj", "{07BC7E0A-913B-C955-0973-44E0443AA131}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Assembly-CSharp-Editor", "Assembly-CSharp-Editor.csproj", "{071F206F-77FE-3E96-1F0A-4AE50866B41D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Whinarn.UnityMeshSimplifier.Runtime", "Whinarn.UnityMeshSimplifier.Runtime.csproj", "{95DC68DC-66EE-F9F3-9A50-DF057ACA31DA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Assembly-CSharp", "Assembly-CSharp.csproj", "{07BC7E0A-913B-C955-0973-44E0443AA131}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Whinarn.UnityMeshSimplifier.Editor", "Whinarn.UnityMeshSimplifier.Editor.csproj", "{EB6BAAC5-2C2B-25F9-0203-A690ABFD3DFE}"
 EndProject
@@ -15,10 +15,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{07BC7E0A-913B-C955-0973-44E0443AA131}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{07BC7E0A-913B-C955-0973-44E0443AA131}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{07BC7E0A-913B-C955-0973-44E0443AA131}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{07BC7E0A-913B-C955-0973-44E0443AA131}.Release|Any CPU.Build.0 = Release|Any CPU
 		{071F206F-77FE-3E96-1F0A-4AE50866B41D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{071F206F-77FE-3E96-1F0A-4AE50866B41D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{071F206F-77FE-3E96-1F0A-4AE50866B41D}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -27,6 +23,10 @@ Global
 		{95DC68DC-66EE-F9F3-9A50-DF057ACA31DA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{95DC68DC-66EE-F9F3-9A50-DF057ACA31DA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{95DC68DC-66EE-F9F3-9A50-DF057ACA31DA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{07BC7E0A-913B-C955-0973-44E0443AA131}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{07BC7E0A-913B-C955-0973-44E0443AA131}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{07BC7E0A-913B-C955-0973-44E0443AA131}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{07BC7E0A-913B-C955-0973-44E0443AA131}.Release|Any CPU.Build.0 = Release|Any CPU
 		{EB6BAAC5-2C2B-25F9-0203-A690ABFD3DFE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{EB6BAAC5-2C2B-25F9-0203-A690ABFD3DFE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EB6BAAC5-2C2B-25F9-0203-A690ABFD3DFE}.Release|Any CPU.ActiveCfg = Release|Any CPU

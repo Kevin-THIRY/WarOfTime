@@ -51,7 +51,7 @@ public class PlayerManager : MonoBehaviour
     [SerializeField] private TerrainGenerator terrainGenerator;
     [SerializeField] private LineRenderer lineRenderer;
     private TerrainGenerator.GridCell selectedCell;
-    private Unit selectedUnit;
+    public Unit selectedUnit {private set; get;}
     private List<Unit> allUnitsOfThePlayer = new List<Unit>();
     private List<Vector2> path;
 
@@ -79,19 +79,16 @@ public class PlayerManager : MonoBehaviour
         {
             path = FindPath(selectedUnit.gridPosition, selectedCell.gridPosition);
             ShowPathLine(path);
-            Debug.Log((int)selectedUnit.gridPosition.x);
-            Debug.Log((int)selectedUnit.gridPosition.y);
             TerrainGenerator.instance.gridCells[(int)selectedUnit.gridPosition.x, (int)selectedUnit.gridPosition.y].isOccupied = false;
-            Debug.Log(TerrainGenerator.instance.gridCells[(int)selectedUnit.gridPosition.x, (int)selectedUnit.gridPosition.y].gridPosition);
-            Debug.Log(TerrainGenerator.instance.gridCells[(int)selectedUnit.gridPosition.x, (int)selectedUnit.gridPosition.y].isOccupied);
+            MapManager.Instance.RequestGridCellUpdate(TerrainGenerator.instance.gridCells[(int)selectedUnit.gridPosition.x, (int)selectedUnit.gridPosition.y]);
             StartCoroutine(selectedUnit.Goto(path, 10, (success) =>
             {
                 if (success)
                 {
                     selectedCell.isOccupied = true;
-                    Debug.Log(selectedCell.gridPosition);
-                    Debug.Log(selectedCell.isOccupied);
+                    MapManager.Instance.RequestGridCellUpdate(selectedCell);
                     MovementManager.instance.SetInOutInventory(false);
+                    selectedUnit = null;
                     // Debug.Log("Déplacement terminé avec succès !");
                 }
                 else
@@ -116,26 +113,29 @@ public class PlayerManager : MonoBehaviour
         Dictionary<Vector2, float> costSoFar = new Dictionary<Vector2, float>();
         Dictionary<Vector2, Vector2> cameFrom = new Dictionary<Vector2, Vector2>();
         PriorityQueue<Vector2> frontier = new PriorityQueue<Vector2>();
-        
+
         frontier.Enqueue(start, 0);
         costSoFar[start] = 0;
-        
+
         int[] dx = { 0, 0, -1, 1 };
         int[] dy = { -1, 1, 0, 0 };
-        
+
         while (frontier.Count > 0)
         {
             Vector2 current = frontier.Dequeue();
-            
+
             if (current == goal) break;
-            
+
             for (int i = 0; i < 4; i++)
             {
                 Vector2 neighbor = new Vector2(current.x + dx[i], current.y + dy[i]);
                 if (!IsInsideGrid((int)neighbor.x, (int)neighbor.y)) continue;
-                
+
+                // Check occupation ici
+                if (TerrainGenerator.instance.gridCells[(int)neighbor.x, (int)neighbor.y].isOccupied) continue;
+
                 float newCost = costSoFar[current] + TerrainGenerator.instance.gridCells[(int)neighbor.x, (int)neighbor.y].cost;
-                
+
                 if (!costSoFar.ContainsKey(neighbor) || newCost < costSoFar[neighbor])
                 {
                     costSoFar[neighbor] = newCost;
@@ -144,15 +144,21 @@ public class PlayerManager : MonoBehaviour
                 }
             }
         }
-        
+
         return ReconstructPath(cameFrom, start, goal);
     }
 
     private List<Vector2> ReconstructPath(Dictionary<Vector2, Vector2> cameFrom, Vector2 start, Vector2 goal)
     {
         List<Vector2> path = new List<Vector2>();
-        if (!cameFrom.ContainsKey(goal)) return path; // Aucun chemin trouvé
-        
+
+        if (!cameFrom.ContainsKey(goal))
+        {
+            // Peut-être que le goal est occupé => chercher la case la plus proche
+            goal = FindNearestNonOccupied(cameFrom, goal);
+            if (goal == Vector2.zero) return path; // Rien trouvé
+        }
+
         Vector2 current = goal;
         while (current != start)
         {
@@ -166,6 +172,23 @@ public class PlayerManager : MonoBehaviour
     private bool IsInsideGrid(int x, int y)
     {
         return x >= 0 && x < TerrainGenerator.instance.gridCells.GetLength(0) && y >= 0 && y < TerrainGenerator.instance.gridCells.GetLength(1);
+    }
+
+    private Vector2 FindNearestNonOccupied(Dictionary<Vector2, Vector2> cameFrom, Vector2 goal)
+    {
+        Vector2 current = goal;
+
+        while (cameFrom.ContainsKey(current))
+        {
+            int x = (int)current.x;
+            int y = (int)current.y;
+            if (!TerrainGenerator.instance.gridCells[x, y].isOccupied)
+                return current;
+
+            current = cameFrom[current];
+        }
+
+        return Vector2.zero; // Fail
     }
 
     #region Setter

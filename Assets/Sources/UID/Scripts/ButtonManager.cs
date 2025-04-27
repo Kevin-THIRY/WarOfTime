@@ -334,7 +334,7 @@ public class ButtonManager : MonoBehaviour
 
 	private void EndTurn()
 	{
-		TurnManager.Instance.EndTurn();
+		MapManager.Instance.EndTurn();
 	}
 
 	private void CloseInventory()

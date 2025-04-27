@@ -1,4 +1,3 @@
-// TurnManager.cs
 using System;
 using System.Collections.Generic;
 using Unity.Netcode;
@@ -6,9 +5,9 @@ using UnityEngine.UI;
 using UnityEngine;
 using Unity.VisualScripting;
 
-public class TurnManager : NetworkBehaviour
+public class MapManager : NetworkBehaviour
 {
-    public static TurnManager Instance;
+    public static MapManager Instance;
     private NetworkVariable<ulong> activePlayerId = new NetworkVariable<ulong>(0);
     private Text turnText;
     private Text activePlayerIdText;
@@ -53,6 +52,43 @@ public class TurnManager : NetworkBehaviour
             if (NetworkManager.Singleton.ConnectedClientsList.Count > 0)
                 activePlayerId.Value = NetworkManager.Singleton.ConnectedClientsList[0].ClientId;
         }
+    }
+
+    public void RequestGridCellUpdate(TerrainGenerator.GridCell updatedCell)
+    {
+        // Client demande au serveur de mettre à jour une cellule
+        UpdateGridCellServerRpc(
+            updatedCell.gridPosition,
+            updatedCell.isOccupied,
+            updatedCell.resourceType
+        );
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    private void UpdateGridCellServerRpc(Vector2 gridPos, bool isOccupied, ResourcesType resourceType)
+    {
+        int x = (int)gridPos.x;
+        int y = (int)gridPos.y;
+
+        // Mettre à jour côté serveur
+        TerrainGenerator.instance.gridCells[x, y].isOccupied = isOccupied;
+        TerrainGenerator.instance.gridCells[x, y].resourceType = resourceType;
+
+        // Propager aux autres clients
+        UpdateGridCellClientRpc(gridPos, isOccupied, resourceType);
+    }
+
+    [ClientRpc]
+    private void UpdateGridCellClientRpc(Vector2 gridPos, bool isOccupied, ResourcesType resourceType)
+    {
+        if (IsServer) return; // Le serveur a déjà mis à jour sa version
+
+        int x = (int)gridPos.x;
+        int y = (int)gridPos.y;
+
+        // Mettre à jour localement sur les clients
+        TerrainGenerator.instance.gridCells[x, y].isOccupied = isOccupied;
+        TerrainGenerator.instance.gridCells[x, y].resourceType = resourceType;
     }
 
     public void EndTurn()

@@ -22,7 +22,14 @@ public class Unit : NetworkBehaviour
         id = 0;
         unitName = name;
         gridPosition = new Vector2(x, y);
-        if (IsOwner) PlayerManager.instance.SetSelectedUnit(this);
+        // if (IsOwner) PlayerManager.instance.SetSelectedUnit(this);
+    }
+
+    public override void OnNetworkSpawn()
+    {
+        base.OnNetworkSpawn();
+
+        if (IsOwner) UnitlList.AllUnits.Add(this);
     }
 
     public IEnumerator Goto(List<Vector2> path, float speed, System.Action<bool> onComplete)

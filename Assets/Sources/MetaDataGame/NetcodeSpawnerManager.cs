@@ -11,7 +11,7 @@ public class NetworkSpawnerManager : NetworkBehaviour
     {
         if (IsOwner)
         {
-            if (IsServer) RequestSpawnUnitServerRpc(0, "TurnManager");
+            if (IsServer) RequestSpawnUnitServerRpc(0, "MapManager");
             RequestSpawnUnitServerRpc(1);
         }
     }

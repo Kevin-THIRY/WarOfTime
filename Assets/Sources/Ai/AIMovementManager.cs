@@ -5,8 +5,6 @@ using UnityEngine.AI;
 
 public class AIMovementManager : MonoBehaviour
 {
-    // private TerrainGenerator.GridCell[,] gridCells;
-
     void Start()
     {
         if (TerrainGenerator.instance.gridCells == null) Debug.LogWarning("gridCells not defined");
