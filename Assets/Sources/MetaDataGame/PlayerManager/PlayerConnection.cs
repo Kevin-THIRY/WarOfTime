@@ -25,6 +25,7 @@ public class PlayerConnection : MonoBehaviour
         ElementaryBasics.terrainGenerator = terrain;
         if (terrain.transform.Find("FogOfWar(Clone)") != null) terrain.transform.Find("FogOfWar(Clone)").gameObject.SetActive(false);
         if (terrain.transform.Find("Highlight Map(Clone)") != null) terrain.transform.Find("Highlight Map(Clone)").gameObject.SetActive(false);
+        if (terrain.transform.Find("UnlockedFog(Clone)") != null) terrain.transform.Find("UnlockedFog(Clone)").gameObject.SetActive(false);
     }
 
     private void SpawnPlayers()
@@ -38,6 +39,12 @@ public class PlayerConnection : MonoBehaviour
         void AddFogOfWarToPlayer()
         {
             terrain.GenerateFogPlayer(transform.Find("FogOfWar/Fog").gameObject);
+            // gameObject.GetComponentInChildren<FogLayerManager>().SetFogPlayer(transform.Find("FogOfWar/Fog/Fog of War").gameObject);
+        }
+
+        void AddUnlockedFogToPlayer()
+        {
+            terrain.GeneratUnlockedPlayer(transform.Find("UnlockedFog/Fog").gameObject);
             // gameObject.GetComponentInChildren<FogLayerManager>().SetFogPlayer(transform.Find("FogOfWar/Fog/Fog of War").gameObject);
         }
 
@@ -70,6 +77,7 @@ public class PlayerConnection : MonoBehaviour
 
         AddHighlightMapToPlayer();
         AddFogOfWarToPlayer();
+        AddUnlockedFogToPlayer();
 
         int playerNumber = NetworkManager.Singleton.ConnectedClients.Count + 1;
 

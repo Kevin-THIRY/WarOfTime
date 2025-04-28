@@ -76,6 +76,7 @@ public class TerrainGenerator : MonoBehaviour
     private Biome[,] biomeCells;
     public static GameObject fogInstance;
     public static GameObject highlightInstance;
+    public static GameObject unlockedFogInstance;
 
     private void Awake() {
         if(instance != null){
@@ -158,6 +159,21 @@ public class TerrainGenerator : MonoBehaviour
         highlightPlayer.GetComponentInChildren<MouseShaderController>().SetCellSize(cellSize);
         // highlightPlayer.GetComponentInChildren<MouseShaderController>().SetGridCell(gridCells);
         highlightPlayer.GetComponentInChildren<MouseShaderController>().CreateHighlightBlock(new Vector3(terrain.terrainData.size.x, terrain.terrainData.size.y, terrain.terrainData.size.z), terrain.terrainData.GetHeights(0, 0, terrain.terrainData.heightmapResolution, terrain.terrainData.heightmapResolution));
+    }
+
+    public void GeneratUnlockedMap()
+    {
+        if (unlockedFogInstance == null) unlockedFogInstance = Instantiate(highlightPrefab, transform.position, Quaternion.identity, transform);
+        unlockedFogInstance.GetComponentInChildren<UnlockedFog>().SetResolution(terrain.terrainData.heightmapResolution);
+        // highlightInstance.GetComponentInChildren<MouseShaderController>().SetGridCell(gridCells);
+        unlockedFogInstance.GetComponentInChildren<UnlockedFog>().CreateUnlockedFogBlock(new Vector3(terrain.terrainData.size.x, terrain.terrainData.size.y, terrain.terrainData.size.z), terrain.terrainData.GetHeights(0, 0, terrain.terrainData.heightmapResolution, terrain.terrainData.heightmapResolution));
+    }
+
+    public void GeneratUnlockedPlayer(GameObject unlockedFogInstance)
+    {
+        unlockedFogInstance.GetComponentInChildren<UnlockedFog>().SetResolution(terrain.terrainData.heightmapResolution);
+        // highlightPlayer.GetComponentInChildren<MouseShaderController>().SetGridCell(gridCells);
+        unlockedFogInstance.GetComponentInChildren<UnlockedFog>().CreateUnlockedFogBlock(new Vector3(terrain.terrainData.size.x, terrain.terrainData.size.y, terrain.terrainData.size.z), terrain.terrainData.GetHeights(0, 0, terrain.terrainData.heightmapResolution, terrain.terrainData.heightmapResolution));
     }
 
     public void GenerateTerrain()

@@ -26,5 +26,9 @@ public class TerrainGeneratorEditor : Editor
         {
             generator.GenerateHighlightMap();
         }
+        if (GUILayout.Button("Add Unlocked Map"))
+        {
+            generator.GeneratUnlockedMap();
+        }
     }
 }
