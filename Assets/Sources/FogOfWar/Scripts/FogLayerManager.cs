@@ -1,5 +1,6 @@
 using UnityEngine;
 using Unity.Netcode;
+using System.Collections.Generic;
 
 public class FogLayerManager : MonoBehaviour
 {
@@ -30,7 +31,31 @@ public class FogLayerManager : MonoBehaviour
     {
         if (forOfWarPlane == null) return;
         // Ray r = new Ray(transform.position, Vector3.up);
-        Ray r = new Ray(transform.position + Vector3.up * forOfWarPlane.transform.position.y * 2f, Vector3.down * 5f);
+        // Ray r = new Ray(transform.position + Vector3.up * forOfWarPlane.transform.position.y * 2f, Vector3.down * 5f);
+        // RaycastHit hit;
+        // // Debug.DrawRay(transform.position + Vector3.up * forOfWarPlane.transform.position.y * 2f, Vector3.down * 5f, Color.red, 2);
+        // // if (Physics.Raycast(r, out hit, 10, fogLayer, QueryTriggerInteraction.Collide))
+        // if (Physics.Raycast(r, out hit, 10, LayerMask.GetMask(LayerMask.LayerToName(forOfWarPlane.layer)), QueryTriggerInteraction.Collide))
+        // {
+        //     if (hit.collider.CompareTag("FogPlane"))
+        //     {
+        //         for (int i = 0; i < vertices.Length; i++)
+        //         {
+        //             Vector3 v = forOfWarPlane.transform.TransformPoint(vertices[i]);
+        //             float dist = Vector3.SqrMagnitude(v - hit.point);
+        //             // float dist = Vector3.(v - hit.point);
+        //             if (dist < radiusSqr)
+        //             {
+        //                 float alpha = Mathf.Lerp(colors[i].a, 0f, 1f - (dist / radiusSqr));
+        //                 colors[i].a = alpha;
+        //             }
+        //         }
+        //         UpdateColor();
+        //     }
+        // }
+
+        int visionRange = 2;
+        Ray r = new Ray(transform.position + Vector3.up * forOfWarPlane.transform.position.y * 2f, Vector3.down * 100f);
         RaycastHit hit;
         // Debug.DrawRay(transform.position + Vector3.up * forOfWarPlane.transform.position.y * 2f, Vector3.down * 5f, Color.red, 2);
         // if (Physics.Raycast(r, out hit, 10, fogLayer, QueryTriggerInteraction.Collide))
@@ -38,16 +63,31 @@ public class FogLayerManager : MonoBehaviour
         {
             if (hit.collider.CompareTag("FogPlane"))
             {
-                for (int i = 0; i < vertices.Length; i++)
+                (int centerX, int centerY) = ElementaryBasics.GetGridPositionFromWorldPosition(hit.point);
+
+                HashSet<(int, int)> revealedCells = new HashSet<(int, int)>();
+                for (int x = -visionRange; x <= visionRange; x++)
                 {
-                    Vector3 v = forOfWarPlane.transform.TransformPoint(vertices[i]);
-                    float dist = Vector3.SqrMagnitude(v - hit.point);
-                    if (dist < radiusSqr)
+                    for (int y = -visionRange; y <= visionRange; y++)
                     {
-                        float alpha = Mathf.Lerp(colors[i].a, 0f, 1f - (dist / radiusSqr));
-                        colors[i].a = alpha;
+                        if (Mathf.Abs(x) + Mathf.Abs(y) <= visionRange)
+                        {
+                            revealedCells.Add((centerX + x, centerY + y));
+                        }
                     }
                 }
+
+                for (int i = 0; i < vertices.Length; i++)
+                {
+                    Vector3 worldV = forOfWarPlane.transform.TransformPoint(vertices[i]);
+                    (int vx, int vy) = ElementaryBasics.GetGridPositionFromWorldPosition(worldV);
+
+                    if (revealedCells.Contains((vx, vy)))
+                    {
+                        colors[i].a = 0f;
+                    }
+                }
+
                 UpdateColor();
             }
         }
