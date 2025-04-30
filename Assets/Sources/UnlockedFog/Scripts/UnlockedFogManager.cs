@@ -33,7 +33,7 @@ public class UnlockedFogManager : MonoBehaviour
     {
         if (unlockedFogBlock == null) return;
         // Ray r = new Ray(transform.position, Vector3.up);
-        Ray r = new Ray(transform.position + Vector3.up * unlockedFogBlock.transform.position.y * 4f, Vector3.down * 10f);
+        Ray r = new Ray(transform.position + Vector3.up * unlockedFogBlock.transform.position.y * 5f, Vector3.down * 10f);
         RaycastHit[] hits = Physics.RaycastAll(r, Mathf.Infinity);
         // RaycastHit hit;
         // Debug.DrawRay(transform.position + Vector3.up * unlockedFogBlock.transform.position.y * 4f, Vector3.down * 10f, Color.red, 2);

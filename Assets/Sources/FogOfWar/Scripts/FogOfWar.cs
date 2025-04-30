@@ -95,13 +95,13 @@ public class FogOfWar : MonoBehaviour
             {
                 existingMeshFilter.mesh = GenerateMesh(sizeTerrain, heights);
             }
-            existingBlock.localPosition = new Vector3(0, 1.8f, 0);
+            existingBlock.localPosition = new Vector3(0, 3f, 0);
             return;
         }
         // Création du GameObject
         GameObject groundBlock = new GameObject(highlightObjectName);
         groundBlock.transform.parent = transform; // Assigner le parent
-        groundBlock.transform.localPosition = new Vector3(0, 1.8f, 0);
+        groundBlock.transform.localPosition = new Vector3(0, 3f, 0);
         groundBlock.tag = "FogPlane";
         
         // Ajout du MeshFilter et du MeshRenderer

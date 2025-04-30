@@ -29,7 +29,7 @@ public class LevelScriptEditor : Editor
 public class OptimizeMesh : MonoBehaviour
 {
     [Range(0.0f, 1.0f)]
-    [SerializeField] float _quality = 0.5f;
+    // [SerializeField] float _quality = 0.5f;
     MeshFilter _renderer;
     Mesh _mesh;
     void Start()
@@ -53,7 +53,7 @@ public class OptimizeMesh : MonoBehaviour
         {
             var meshSimplifier = new UnityMeshSimplifier.MeshSimplifier();
             meshSimplifier.Initialize(_mesh);
-            meshSimplifier.SimplifyMesh(_quality);
+            meshSimplifier.SimplifyMesh(0.5f);
             var destMesh = meshSimplifier.ToMesh();
             _renderer.sharedMesh = destMesh;
         }

@@ -11,9 +11,6 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/GameParty.unity
     guid: 7128b894ca1d9884b90d60631ae5bca8
-  - enabled: 0
-    path: Assets/Scenes/Test.unity
-    guid: d619363a56df4b841bdc137c2e302f13
   m_configObjects:
     com.unity.input.settings: {fileID: 11400000, guid: 6660a6522ca8b574bbe62ba632eecf3c, type: 2}
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 32f8aa80c1f7136438b92ac77235c416, type: 3}

@@ -30,11 +30,13 @@ public class FogLayerManager : MonoBehaviour
     {
         if (forOfWarPlane == null) return;
 
-        Ray r = new Ray(transform.position + Vector3.up * forOfWarPlane.transform.position.y * 4f, Vector3.down * 5f);
-        RaycastHit hit;
+        Ray r = new Ray(transform.position + Vector3.up * forOfWarPlane.transform.position.y * 5f, Vector3.down * 10f);
+        // RaycastHit hit;
+        RaycastHit[] hits = Physics.RaycastAll(r, Mathf.Infinity);
         // Debug.DrawRay(transform.position + Vector3.up * forOfWarPlane.transform.position.y * 4f, Vector3.down * 5f, Color.red, 2);
         // if (Physics.Raycast(r, out hit, 10, fogLayer, QueryTriggerInteraction.Collide))
-        if (Physics.Raycast(r, out hit, 10, LayerMask.GetMask(LayerMask.LayerToName(forOfWarPlane.layer)), QueryTriggerInteraction.Collide))
+        // if (Physics.Raycast(r, out hit, 10, LayerMask.GetMask(LayerMask.LayerToName(forOfWarPlane.layer)), QueryTriggerInteraction.Collide))
+        foreach (var hit in hits)
         {
             if (hit.collider.CompareTag("FogPlane"))
             {
