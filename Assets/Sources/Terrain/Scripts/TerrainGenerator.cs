@@ -637,7 +637,7 @@ public class TerrainGenerator : MonoBehaviour
     {
         // Création du GameObject
         string waterObjectName = "Water";
-        float minWaterHeight = depth * (biomes[0].biomeHeight + biomes[1].biomeHeight) / 2;
+        float minWaterHeight = depth * (biomes[0].biomeHeight) / 2;
 
         // Vérifier si l'objet existe déjà
         Transform existingBlock = transform.Find(waterObjectName);
