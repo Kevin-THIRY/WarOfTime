@@ -11,6 +11,7 @@ public class NetworkSpawnerManager : NetworkBehaviour
     {
         if (IsOwner)
         {
+            RequestAllUnitsServerRpc();
             if (IsServer) RequestSpawnUnitServerRpc(0, "MapManager");
             RequestSpawnUnitServerRpc(1);
         }
@@ -31,5 +32,36 @@ public class NetworkSpawnerManager : NetworkBehaviour
         GameObject go = Instantiate(unitPrefabs[prefabIndex], spawnPos, Quaternion.identity);
         go.name = $"{gameObjectName}_{clientId}_P{prefabIndex}";
         go.GetComponent<NetworkObject>().SpawnWithOwnership(clientId);
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    public void RequestAllUnitsServerRpc(ServerRpcParams rpcParams = default)
+    {
+        ulong clientId = rpcParams.Receive.SenderClientId;
+
+        List<ulong> ids = new List<ulong>();
+        foreach (var unit in UnitList.AllUnits)
+        {
+            ids.Add(unit.NetworkObjectId);
+        }
+
+        SendAllUnitsClientRpc(ids.ToArray(), clientId);
+    }
+
+    [ClientRpc]
+    private void SendAllUnitsClientRpc(ulong[] unitIds, ulong targetClientId)
+    {
+        // S'assure que seul le bon client traite la réponse
+        if (NetworkManager.Singleton.LocalClientId != targetClientId)
+            return;
+
+        foreach (var id in unitIds)
+        {
+            if (NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(id, out var netObj))
+            {
+                var unit = netObj.GetComponent<Unit>();
+                UnitList.AllUnits.Add(unit);
+            }
+        }
     }
 }

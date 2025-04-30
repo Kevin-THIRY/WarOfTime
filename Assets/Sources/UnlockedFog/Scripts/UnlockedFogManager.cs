@@ -1,11 +1,14 @@
 using UnityEngine;
 using Unity.Netcode;
+using System.Collections.Generic;
 
 public class UnlockedFogManager : MonoBehaviour
 {
     [SerializeField] private GameObject unlockedFogBlock;
     // [SerializeField] private LayerMask fogLayer;
     [SerializeField] private float radius = 2f;
+
+    private HashSet<(int, int)> myRevealedCells = new HashSet<(int, int)>();
     
     private float radiusSqr { get { return radius * radius; }}
     private Mesh mesh;
@@ -30,28 +33,60 @@ public class UnlockedFogManager : MonoBehaviour
     {
         if (unlockedFogBlock == null) return;
         // Ray r = new Ray(transform.position, Vector3.up);
-        Ray r = new Ray(transform.position + Vector3.up * unlockedFogBlock.transform.position.y * 2f, Vector3.down * 5f);
-        RaycastHit hit;
-        // Debug.DrawRay(transform.position + Vector3.up * forOfWarPlane.transform.position.y * 2f, Vector3.down * 5f, Color.red, 2);
-        // if (Physics.Raycast(r, out hit, 10, fogLayer, QueryTriggerInteraction.Collide))
-        if (Physics.Raycast(r, out hit, 10, LayerMask.GetMask(LayerMask.LayerToName(unlockedFogBlock.layer)), QueryTriggerInteraction.Collide))
+        Ray r = new Ray(transform.position + Vector3.up * unlockedFogBlock.transform.position.y * 4f, Vector3.down * 10f);
+        RaycastHit[] hits = Physics.RaycastAll(r, Mathf.Infinity);
+        // RaycastHit hit;
+        // Debug.DrawRay(transform.position + Vector3.up * unlockedFogBlock.transform.position.y * 4f, Vector3.down * 10f, Color.red, 2);
+        foreach (var hit in hits)
         {
             if (hit.collider.CompareTag("UnlockedFog"))
             {
+                (int centerX, int centerY) = ElementaryBasics.GetGridPositionFromWorldPosition(hit.point);
+                HashSet<(int, int)> currentVisibleCells = new HashSet<(int, int)>();
+                for (int x = -GetComponent<Unit>().visibility; x <= GetComponent<Unit>().visibility; x++)
+                {
+                    for (int y = -GetComponent<Unit>().visibility; y <= GetComponent<Unit>().visibility; y++)
+                    {
+                        if (Mathf.Abs(x) + Mathf.Abs(y) <= GetComponent<Unit>().visibility)
+                        {
+                            currentVisibleCells.Add((centerX + x, centerY + y));
+                        }
+                    }
+                }
+
+                // Ajoute nouvelles cases visibles globalement
+                foreach (var cell in currentVisibleCells)
+                {
+                    ElementaryBasics.visibleCells.Add(cell);
+                }
+
+                // Retire les anciennes qui ne sont plus dans le champ vision
+                foreach (var cell in myRevealedCells)
+                {
+                    if (!currentVisibleCells.Contains(cell))
+                    {
+                        ElementaryBasics.visibleCells.Remove(cell);
+                    }
+                }
+
+                // Mets à jour ton cache
+                myRevealedCells = currentVisibleCells;
+
                 for (int i = 0; i < vertices.Length; i++)
                 {
-                    Vector3 v = unlockedFogBlock.transform.TransformPoint(vertices[i]);
-                    float dist = Vector3.SqrMagnitude(v - hit.point);
-                    if (dist < radiusSqr * 0.5f)
+                    Vector3 worldV = unlockedFogBlock.transform.TransformPoint(vertices[i]);
+                    (int vx, int vy) = ElementaryBasics.GetGridPositionFromWorldPosition(worldV);
+
+                    if (ElementaryBasics.visibleCells.Contains((vx, vy)))
                     {
-                        float alpha = Mathf.Lerp(colors[i].a, 0f, 1f - (dist * 2f / radiusSqr));
-                        colors[i].a = alpha;
+                        colors[i].a = 0f;
                     }
                     else
                     {
                         colors[i].a = Mathf.MoveTowards(colors[i].a, 0.5f, Time.deltaTime * 2f); // 0.1f = vitesse du "re-fog"
                     }
                 }
+
                 UpdateColor();
             }
         }

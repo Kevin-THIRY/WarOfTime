@@ -73,7 +73,7 @@ public class MouseShaderController : MonoBehaviour
                     }
                     else
                     {
-                        Unit unit = UnitlList.AllUnits.FirstOrDefault(u => u.gridPosition == cell.gridPosition);
+                        Unit unit = UnitList.MyUnitsList.FirstOrDefault(u => u.gridPosition == cell.gridPosition);
                         if (unit != null)
                         {
                             // Une unité a été trouvée sur la cellule

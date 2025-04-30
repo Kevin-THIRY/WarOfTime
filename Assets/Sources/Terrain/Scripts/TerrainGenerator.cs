@@ -132,16 +132,20 @@ public class TerrainGenerator : MonoBehaviour
     public void GenerateFogOfWar()
     {
         if (fogInstance == null) fogInstance = Instantiate(fogPrefab, transform.position, Quaternion.identity, transform);
-        fogInstance.GetComponentInChildren<FogOfWar>().SetResolution(width);
-        fogInstance.GetComponentInChildren<FogOfWar>().SetHeight(depth * biomes[biomes.Length - 1].biomeHeight);
-        fogInstance.GetComponentInChildren<FogOfWar>().CreateFogBlock();
+        // fogInstance.GetComponentInChildren<FogOfWar>().SetResolution(width);
+        // fogInstance.GetComponentInChildren<FogOfWar>().SetHeight(depth * biomes[biomes.Length - 1].biomeHeight);
+        // fogInstance.GetComponentInChildren<FogOfWar>().CreateFogBlock();
+        fogInstance.GetComponentInChildren<FogOfWar>().SetResolution(terrain.terrainData.heightmapResolution);
+        fogInstance.GetComponentInChildren<FogOfWar>().CreateFogBlock(new Vector3(terrain.terrainData.size.x, terrain.terrainData.size.y, terrain.terrainData.size.z), terrain.terrainData.GetHeights(0, 0, terrain.terrainData.heightmapResolution, terrain.terrainData.heightmapResolution));
     }
 
     public void GenerateFogPlayer(GameObject fogOfWarPlayer)
     {
-        fogOfWarPlayer.GetComponentInChildren<FogOfWar>().SetResolution(width);
-        fogOfWarPlayer.GetComponentInChildren<FogOfWar>().SetHeight(depth * biomes[biomes.Length - 1].biomeHeight);
-        fogOfWarPlayer.GetComponentInChildren<FogOfWar>().CreateFogBlock();
+        // fogOfWarPlayer.GetComponentInChildren<FogOfWar>().SetResolution(width);
+        // fogOfWarPlayer.GetComponentInChildren<FogOfWar>().SetHeight(depth * biomes[biomes.Length - 1].biomeHeight);
+        // fogOfWarPlayer.GetComponentInChildren<FogOfWar>().CreateFogBlock();
+        fogOfWarPlayer.GetComponentInChildren<FogOfWar>().SetResolution(terrain.terrainData.heightmapResolution);
+        fogOfWarPlayer.GetComponentInChildren<FogOfWar>().CreateFogBlock(new Vector3(terrain.terrainData.size.x, terrain.terrainData.size.y, terrain.terrainData.size.z), terrain.terrainData.GetHeights(0, 0, terrain.terrainData.heightmapResolution, terrain.terrainData.heightmapResolution));
     }
 
     public void GenerateHighlightMap()

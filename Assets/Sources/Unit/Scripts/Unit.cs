@@ -4,22 +4,24 @@ using System.Collections;
 using Unity.Netcode;
 using System;
 
-public static class UnitlList
+public static class UnitList
 {
     public static List<Unit> AllUnits = new List<Unit>();
+    public static List<Unit> MyUnitsList = new List<Unit>();
 }
 
 public class Unit : NetworkBehaviour
 {
     [NonSerialized] public bool isMoving = false;
     [NonSerialized] public int id;
+    [NonSerialized] public int visibility = 2;
     [NonSerialized] public string unitName;
     [NonSerialized] public Vector2 gridPosition;
 
     void Start()
     {
         var (x, y) = ElementaryBasics.GetGridPositionFromWorldPosition(transform.position);
-        id = 0;
+        id = UnitList.AllUnits.Count;
         unitName = name;
         gridPosition = new Vector2(x, y);
         // if (IsOwner) PlayerManager.instance.SetSelectedUnit(this);
@@ -29,7 +31,28 @@ public class Unit : NetworkBehaviour
     {
         base.OnNetworkSpawn();
 
-        if (IsOwner) UnitlList.AllUnits.Add(this);
+        if (IsOwner) 
+        {
+            UnitList.MyUnitsList.Add(this);
+            UpdateAllUnitListServerRpc(NetworkObjectId);
+        }
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    public void UpdateAllUnitListServerRpc(ulong objectId, ServerRpcParams rpcParams = default)
+    {
+        if (!IsServer) return;
+        UpdateAllUnitListClientRpc(objectId);
+    }
+
+    [ClientRpc]
+    public void UpdateAllUnitListClientRpc(ulong objectId)
+    {
+        if (NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(objectId, out var netObj))
+        {
+            Unit unit = netObj.GetComponent<Unit>();
+            UnitList.AllUnits.Add(unit);
+        }
     }
 
     public IEnumerator Goto(List<Vector2> path, float speed, System.Action<bool> onComplete)

@@ -21,13 +21,13 @@ public class UnlockedFog : MonoBehaviour
             {
                 existingMeshFilter.mesh = GenerateMesh(sizeTerrain, heights);
             }
-            existingBlock.localPosition = new Vector3(0, 3f, 0);
+            existingBlock.localPosition = new Vector3(0, 1.6f, 0);
             return;
         }
         // Création du GameObject
         GameObject groundBlock = new GameObject(highlightObjectName);
         groundBlock.transform.parent = transform; // Assigner le parent
-        groundBlock.transform.localPosition = new Vector3(0, 3f, 0);
+        groundBlock.transform.localPosition = new Vector3(0, 1.6f, 0);
         groundBlock.tag = "UnlockedFog";
         
         // Ajout du MeshFilter et du MeshRenderer

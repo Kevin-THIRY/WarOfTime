@@ -7,6 +7,8 @@ using System;
 
 public class ElementaryBasics
 {
+    public static HashSet<(int, int)> revealedCells = new HashSet<(int, int)>();
+    public static HashSet<(int, int)> visibleCells = new HashSet<(int, int)>();
     public static TerrainGenerator terrainGenerator { get; set;}
     public static (int, int) GetGridPositionFromWorldPosition(Vector3 worldPosition)
     {
