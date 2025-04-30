@@ -33,6 +33,7 @@ public class Unit : NetworkBehaviour
 
         if (IsOwner) 
         {
+            gameObject.layer = LayerMask.NameToLayer("HiddenFromPlayer");
             UnitList.MyUnitsList.Add(this);
             UpdateAllUnitListServerRpc(NetworkObjectId);
         }
@@ -52,6 +53,22 @@ public class Unit : NetworkBehaviour
         {
             Unit unit = netObj.GetComponent<Unit>();
             UnitList.AllUnits.Add(unit);
+        }
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    public void NotifyUnitMovedServerRpc(ulong unitId, Vector2 newGridPos)
+    {
+        UpdateUnitPositionClientRpc(unitId, newGridPos);
+    }
+
+    [ClientRpc]
+    private void UpdateUnitPositionClientRpc(ulong unitId, Vector2 newGridPos)
+    {
+        if (NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(unitId, out var netObj))
+        {
+            var unit = netObj.GetComponent<Unit>();
+            unit.gridPosition = newGridPos;
         }
     }
 
@@ -78,6 +95,7 @@ public class Unit : NetworkBehaviour
                     }
                     
                     gridPosition = targetGridPos; // Met à jour la position une fois arrivé
+                    NotifyUnitMovedServerRpc(NetworkObjectId, gridPosition);
                 }
                 isMoving = false;
                 onComplete?.Invoke(true); // Succès

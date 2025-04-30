@@ -90,6 +90,14 @@ public class UnlockedFogManager : MonoBehaviour
                 UpdateColor();
             }
         }
+        foreach (Unit enemy in UnitList.AllUnits)
+        {
+            if (!UnitList.MyUnitsList.Contains(enemy))
+            {
+                bool isVisible = ElementaryBasics.visibleCells.Contains(((int)enemy.gridPosition.x, (int)enemy.gridPosition.y));
+                SetLayerRecursively(enemy.gameObject, isVisible ? LayerMask.NameToLayer("VisibleToPlayer") : LayerMask.NameToLayer("HiddenFromPlayer"));
+            }
+        }
     }
 
     private void Initialize()
@@ -108,5 +116,14 @@ public class UnlockedFogManager : MonoBehaviour
     {
         unlockedFogBlock.GetComponent<MeshRenderer>().material.enableInstancing = true;
         mesh.colors = colors;
+    }
+
+    private void SetLayerRecursively(GameObject obj, int newLayer)
+    {
+        obj.layer = newLayer;
+        foreach (Transform child in obj.transform)
+        {
+            SetLayerRecursively(child.gameObject, newLayer);
+        }
     }
 }

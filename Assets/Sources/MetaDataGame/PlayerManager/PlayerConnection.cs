@@ -62,7 +62,8 @@ public class PlayerConnection : MonoBehaviour
                             .GetComponent<Camera>();
             
             cam.cullingMask = LayerMask.GetMask("Default") | LayerMask.GetMask("TransparentFX") | LayerMask.GetMask("Ignore Raycast")
-                                & LayerMask.GetMask("Water") | LayerMask.GetMask("UI") | LayerMask.GetMask("Player" + playerNumber);
+                                | LayerMask.GetMask("Water") | LayerMask.GetMask("UI") | LayerMask.GetMask("Player" + playerNumber)
+                                | LayerMask.GetMask("VisibleToPlayer");
         }
 
         if (GameData.playerInfos == null)
