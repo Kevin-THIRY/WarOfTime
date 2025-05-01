@@ -40,7 +40,7 @@ public class MapManager : NetworkBehaviour
 
         if (IsServer && !IsOwner)
         {
-            Destroy(gameObject); 
+            Destroy(gameObject);
         }
         else Instance = this;
 

@@ -5,10 +5,24 @@ using System.Collections.Generic;
 
 public class NetworkSpawnerManager : NetworkBehaviour
 {
+    public static NetworkSpawnerManager Instance;
     [SerializeField] private List<GameObject> unitPrefabs; // Liste des prefabs dispo
 
     public override void OnNetworkSpawn()
     {
+
+        // if (Instance != null && Instance != this)
+        // {
+        //     Destroy(gameObject);
+        //     return;
+        // }
+        // Instance = this;
+
+        // if (!IsServer)
+        // {
+        //     Destroy(gameObject); 
+        // }
+
         if (IsOwner)
         {
             RequestAllUnitsServerRpc();

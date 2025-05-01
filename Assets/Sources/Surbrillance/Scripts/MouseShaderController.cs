@@ -25,6 +25,11 @@ public class MouseShaderController : MonoBehaviour
 
     void FixedUpdate()
     {
+        ManageClicke();
+    }
+
+    void ManageClicke()
+    {
         if (highlightMaterial == null || cam == null) return;
 
         highlightMaterial.SetFloat("_GridLenght", cellSize);

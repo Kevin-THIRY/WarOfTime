@@ -1,0 +1,26 @@
+# Blender MTL File: 'medieval_building.blend'
+# Material Count: 2
+
+newmtl Roof_mat
+Ns 0.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.154545 0.154545 0.154545
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump Roof_mat_Normal_OpenGL.png
+map_Ns Roof_mat_Roughness.png
+
+newmtl walls_mat
+Ns 0.911155
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.177273 0.177273 0.177273
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump walls_mat_Normal_OpenGL.png
+map_Ns walls_mat_Roughness.png

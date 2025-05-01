@@ -101,6 +101,15 @@ public class PlayerManager : MonoBehaviour
         }
     }
 
+    public void Build()
+    {
+        if (TerrainGenerator.instance.gridCells == null || allUnitsOfThePlayer == null || selectedUnit == null || selectedCell == null) return;
+        if (!selectedUnit.isMoving && selectedCell.gridPosition != selectedUnit.gridPosition)
+        {
+            
+        }
+    }
+
     private void ShowPathLine(List<Vector2> path)
     {
         lineRenderer.positionCount = path.Count;
