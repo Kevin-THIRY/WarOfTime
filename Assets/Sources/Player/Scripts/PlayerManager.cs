@@ -106,7 +106,12 @@ public class PlayerManager : MonoBehaviour
         if (TerrainGenerator.instance.gridCells == null || allUnitsOfThePlayer == null || selectedUnit == null || selectedCell == null) return;
         if (!selectedUnit.isMoving && selectedCell.gridPosition != selectedUnit.gridPosition)
         {
+            selectedCell.isOccupied = true;
+            MapManager.Instance.RequestGridCellUpdate(selectedCell);
+            Vector3 posSpawn = ElementaryBasics.GetWorldPositionFromGridCoordinates((int)selectedCell.gridPosition.x, (int)selectedCell.gridPosition.y, true);
+            NetworkSpawnerManager.Instance.RequestSpawnUnitServerRpc(NetworkSpawnerManager.Instance.nationType, UnitType.HDV, posSpawn);
             
+            MovementManager.instance.SetInOutInventory(false);
         }
     }
 

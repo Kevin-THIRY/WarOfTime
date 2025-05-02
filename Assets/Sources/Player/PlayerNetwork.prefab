@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 9020018082546086588}
   - component: {fileID: 8315905349255440708}
-  - component: {fileID: -960662402348324953}
+  - component: {fileID: 5248693812130967997}
   m_Layer: 0
   m_Name: PlayerNetwork
   m_TagString: Untagged
@@ -58,7 +58,7 @@ MonoBehaviour:
   AutoObjectParentSync: 1
   SyncOwnerTransformWhenParented: 1
   AllowOwnerToParent: 0
---- !u!114 &-960662402348324953
+--- !u!114 &5248693812130967997
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -71,7 +71,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
-  unitPrefabs:
-  - {fileID: 7120857267438426476, guid: 0d4064ffd33e3534d9b279a62222b8e7, type: 3}
-  - {fileID: 1276793047587215747, guid: f111a6a57dd98f34db3a464e65d8140d, type: 3}
-  selectedPrefabIndex: 0
+  unitMappings:
+  - unitType: 0
+    prefab: {fileID: 7120857267438426476, guid: 0d4064ffd33e3534d9b279a62222b8e7, type: 3}
+  - unitType: 1
+    prefab: {fileID: 1276793047587215747, guid: a2f36927b7aff2a4296eb5b65fc4afa3, type: 3}
+  - unitType: 4
+    prefab: {fileID: 1276793047587215747, guid: ad8ee61be11dab84b84ffa58ea8a42cf, type: 3}
+  nationType: 0
+  unitPrefab: {fileID: 0}

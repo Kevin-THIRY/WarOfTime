@@ -2,51 +2,64 @@ using UnityEngine;
 using Unity.Netcode;
 using UnityEngine.UI;
 using System.Collections.Generic;
+using System;
 
 public class NetworkSpawnerManager : NetworkBehaviour
 {
     public static NetworkSpawnerManager Instance;
-    [SerializeField] private List<GameObject> unitPrefabs; // Liste des prefabs dispo
+    // [SerializeField] private List<GameObject> unitPrefabs; // Liste des prefabs dispo
+    [SerializeField] private List<UnitMapping> unitMappings;
+    private Dictionary<NationType, Dictionary<UnitType, GameObject>> nationUnitDict;
+    [SerializeField] public NationType nationType;
 
     public override void OnNetworkSpawn()
     {
+        base.OnNetworkSpawn();
+        
+        nationUnitDict = new();
+        nationUnitDict[nationType] = new();
 
-        // if (Instance != null && Instance != this)
-        // {
-        //     Destroy(gameObject);
-        //     return;
-        // }
-        // Instance = this;
-
-        // if (!IsServer)
-        // {
-        //     Destroy(gameObject); 
-        // }
+        foreach (var unit in unitMappings)
+        {
+            nationUnitDict[nationType][unit.unitType] = unit.prefab;
+        }
 
         if (IsOwner)
         {
+            Instance = this;
             RequestAllUnitsServerRpc();
-            if (IsServer) RequestSpawnUnitServerRpc(0, "MapManager");
-            RequestSpawnUnitServerRpc(1);
+            if (IsServer) RequestSpawnUnitServerRpc(nationType, UnitType.MapManager, Vector3.zero);
+            RequestSpawnUnitServerRpc(nationType, UnitType.Peasant, Vector3.zero);
         }
+    }
+
+    public GameObject GetPrefab(NationType nation, UnitType unit)
+    {
+        if (nationUnitDict.TryGetValue(nation, out var unitDict) &&
+            unitDict.TryGetValue(unit, out var prefab))
+        {
+            return prefab;
+        }
+
+        Debug.LogWarning($"Aucun prefab trouvé pour {nation} - {unit}");
+        return null;
     }
 
     [ServerRpc(RequireOwnership = false)]
-    public void RequestSpawnUnitServerRpc(int prefabIndex, string gameObjectName = "Unit", ServerRpcParams rpcParams = default)
+    public void RequestSpawnUnitServerRpc(NationType nation, UnitType unitType, Vector3 spawnPos, ServerRpcParams rpcParams = default)
     {
         ulong clientId = rpcParams.Receive.SenderClientId;
 
-        if (prefabIndex < 0 || prefabIndex >= unitPrefabs.Count)
-        {
-            Debug.LogWarning($"Invalid prefab index {prefabIndex} from client {clientId}");
-            return;
-        }
+        GameObject prefab = GetPrefab(nation, unitType); // comme défini plus tôt
+        if (prefab == null) return;
 
-        Vector3 spawnPos = new Vector3(0f, 0f, 0f);
-        GameObject go = Instantiate(unitPrefabs[prefabIndex], spawnPos, Quaternion.identity);
-        go.name = $"{gameObjectName}_{clientId}_P{prefabIndex}";
-        go.GetComponent<NetworkObject>().SpawnWithOwnership(clientId);
+        GameObject unit = Instantiate(prefab, spawnPos, Quaternion.identity);
+        
+        unit.name = $"Client_{clientId}_Nation_{nation}_Unit_{unitType}";
+        unit.GetComponent<NetworkObject>().SpawnWithOwnership(clientId);
+        SetLayerRecursively(unit, LayerMask.NameToLayer("VisibleToPlayer"));
     }
+
 
     [ServerRpc(RequireOwnership = false)]
     public void RequestAllUnitsServerRpc(ServerRpcParams rpcParams = default)
@@ -76,6 +89,16 @@ public class NetworkSpawnerManager : NetworkBehaviour
                 var unit = netObj.GetComponent<Unit>();
                 UnitList.AllUnits.Add(unit);
             }
+        }
+    }
+
+    private void SetLayerRecursively(GameObject obj, int newLayer)
+    {
+        obj.layer = newLayer;
+
+        foreach (Transform child in obj.transform)
+        {
+            SetLayerRecursively(child.gameObject, newLayer);
         }
     }
 }

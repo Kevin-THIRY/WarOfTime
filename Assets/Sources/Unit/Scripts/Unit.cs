@@ -4,6 +4,25 @@ using System.Collections;
 using Unity.Netcode;
 using System;
 
+public enum UnitType
+{
+    MapManager,
+    Peasant,
+    Tank,
+    Medic,
+    HDV,
+    // etc.
+}
+
+public enum NationType { France, England, Germany, Russia }
+
+[Serializable]
+public struct UnitMapping
+{
+    public UnitType unitType;
+    public GameObject prefab;
+}
+
 public static class UnitList
 {
     public static List<Unit> AllUnits = new List<Unit>();
