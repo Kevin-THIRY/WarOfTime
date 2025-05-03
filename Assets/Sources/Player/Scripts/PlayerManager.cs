@@ -83,15 +83,16 @@ public class PlayerManager : MonoBehaviour
             ShowPathLine(path);
             TerrainGenerator.instance.gridCells[(int)selectedUnit.gridPosition.x, (int)selectedUnit.gridPosition.y].isOccupied = false;
             MapManager.Instance.RequestGridCellUpdate(TerrainGenerator.instance.gridCells[(int)selectedUnit.gridPosition.x, (int)selectedUnit.gridPosition.y]);
-            StartCoroutine(selectedUnit.Goto(path, 10, (success) =>
+            StartCoroutine(selectedUnit.Goto(path, 10, (success, finalPosition) =>
             {
                 if (success)
                 {
-                    selectedCell.isOccupied = true;
-                    MapManager.Instance.RequestGridCellUpdate(selectedCell);
+                    var finalCell = TerrainGenerator.instance.gridCells[(int)finalPosition.x, (int)finalPosition.y];
+                    finalCell.isOccupied = true;
+                    MapManager.Instance.RequestGridCellUpdate(finalCell);
+
                     MovementManager.instance.SetInOutInventory(false);
                     selectedUnit = null;
-                    // Debug.Log("Déplacement terminé avec succès !");
                 }
                 else
                 {
@@ -148,7 +149,20 @@ public class PlayerManager : MonoBehaviour
                 if (!IsInsideGrid((int)neighbor.x, (int)neighbor.y)) continue;
 
                 // Check occupation ici
-                if (TerrainGenerator.instance.gridCells[(int)neighbor.x, (int)neighbor.y].isOccupied) continue;
+                // if (TerrainGenerator.instance.gridCells[(int)neighbor.x, (int)neighbor.y].isOccupied) continue;
+                var cell = TerrainGenerator.instance.gridCells[(int)neighbor.x, (int)neighbor.y];
+
+                bool isEnemyInvisible =
+                    cell.isOccupied &&
+                    UnitList.AllUnits.Any(u =>
+                        u.gridPosition == neighbor &&
+                        !UnitList.MyUnitsList.Contains(u) &&
+                        !ElementaryBasics.visibleCells.Contains(((int)neighbor.x, (int)neighbor.y))
+                    );
+
+                if (cell.isOccupied && !isEnemyInvisible)
+                    continue;
+                
 
                 float newCost = costSoFar[current] + TerrainGenerator.instance.gridCells[(int)neighbor.x, (int)neighbor.y].cost;
 
@@ -182,6 +196,18 @@ public class PlayerManager : MonoBehaviour
             current = cameFrom[current];
         }
         path.Reverse();
+        if (path.Count > 0)
+        {
+            Vector2 last = path.Last();
+            if (UnitList.AllUnits.Any(u =>
+                u.gridPosition == last &&
+                !UnitList.MyUnitsList.Contains(u) &&
+                !ElementaryBasics.visibleCells.Contains(((int)last.x, (int)last.y))
+            ))
+            {
+                path.RemoveAt(path.Count - 1); // Stop avant
+            }
+        }
         return path;
     }
 

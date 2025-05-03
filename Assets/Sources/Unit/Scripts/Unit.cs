@@ -91,13 +91,13 @@ public class Unit : NetworkBehaviour
         }
     }
 
-    public IEnumerator Goto(List<Vector2> path, float speed, System.Action<bool> onComplete)
+    public IEnumerator Goto(List<Vector2> path, float speed, System.Action<bool, Vector2> onComplete)
     {
         if (IsOwner)
         {
             if (path == null || path.Count == 0) 
             {
-                onComplete?.Invoke(false);
+                onComplete?.Invoke(false, Vector2.zero);
                 yield return null;
             }
             if (!isMoving)
@@ -117,12 +117,12 @@ public class Unit : NetworkBehaviour
                     NotifyUnitMovedServerRpc(NetworkObjectId, gridPosition);
                 }
                 isMoving = false;
-                onComplete?.Invoke(true); // Succès
+                onComplete?.Invoke(true, gridPosition); // Succès
             }
         }
         else
         {
-            onComplete?.Invoke(false);
+            onComplete?.Invoke(false, Vector2.zero);
             yield return null;
         }
     }

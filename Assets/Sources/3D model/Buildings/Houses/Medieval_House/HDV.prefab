@@ -11,8 +11,6 @@ GameObject:
   - component: {fileID: 3657551072466032974}
   - component: {fileID: 1053786964288931746}
   - component: {fileID: 7693269966653201036}
-  - component: {fileID: 3166262550065915794}
-  - component: {fileID: 224615655994571661}
   - component: {fileID: -4348895239545482396}
   - component: {fileID: 2773289229060446413}
   - component: {fileID: 8272025493531351576}
@@ -88,34 +86,6 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 2.3367405, y: 2.287085, z: 2.114222}
   m_Center: {x: 0.16500705, y: 1.0320504, z: -0.019782543}
---- !u!114 &3166262550065915794
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1276793047587215747}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 95dc907bb6649f940afdf123a1361f6e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  forOfWarPlane: {fileID: 0}
-  radius: 10
---- !u!114 &224615655994571661
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1276793047587215747}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1c4afa46aa5add24a88cbc9138e16a79, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  unlockedFogBlock: {fileID: 0}
-  radius: 10
 --- !u!114 &-4348895239545482396
 MonoBehaviour:
   m_ObjectHideFlags: 0

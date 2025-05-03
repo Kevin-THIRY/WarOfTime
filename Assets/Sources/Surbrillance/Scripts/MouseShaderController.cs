@@ -65,7 +65,7 @@ public class MouseShaderController : MonoBehaviour
                 {
                     if (PlayerManager.instance.selectedUnit)
                     {
-                        if (!cell.isOccupied)
+                        if (!cell.isOccupied || !ElementaryBasics.visibleCells.Contains(((int)cell.gridPosition.x, (int)cell.gridPosition.y)))
                         {
                             PlayerManager.instance.SetSelectedCell(cell);
                             MenuController.instance.CreatePanelAndOpenNextToMe(listCanvasManager[0].gameObject, MenuController.instance.GetActiveCanvas().GetUniqueId(), new Vector2Int(30, 30));

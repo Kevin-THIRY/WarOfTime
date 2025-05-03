@@ -1,5 +1,6 @@
 using UnityEngine;
 using System;
+using System.Collections.Generic;
 
 public enum FogState { Hidden, Revealed, Visible }
 
@@ -8,78 +9,53 @@ public class FogOfWar : MonoBehaviour
 {
     [SerializeField] private Material fogMaterial;
     private int resolution;
-    // private float height;
+    private Dictionary<(int, int), List<int>> vertexGridMap = new();
+    private Color[] vertexColors;
+    private Mesh mesh;
+    private Color[] colors;
 
-    // public void CreateFogBlock()
-    // {
-    //     // Création du GameObject
-    //     string fogObjectName = "Fog of War";
+    void Update()
+    {
+        DiscoverFog();
+    }
 
-    //     // Vérifier si l'objet existe déjà
-    //     Transform existingBlock = transform.Find(fogObjectName);
-    //     if (existingBlock != null)
-    //     {
-    //         existingBlock.position = new Vector3(0, 1.1f, 0); //new Vector3(0, height, 0);
-    //         return;
-    //     }
-    //     // Création du GameObject
-    //     GameObject groundBlock = new GameObject(fogObjectName);
-    //     groundBlock.transform.parent = transform; // Assigner le parent
-    //     groundBlock.transform.localPosition = new Vector3(0, 1.1f, 0); //new Vector3(0, height, 0);
-    //     groundBlock.tag = "FogPlane";
+    private void DiscoverFog()
+    {
+        if (mesh == null || colors == null || vertexGridMap == null || UnitList.MyUnitsList.Count == 0 || UnitList.MyUnitsList.Count == 0) return;
         
-    //     // Ajout du MeshFilter et du MeshRenderer
-    //     MeshFilter meshFilter = groundBlock.AddComponent<MeshFilter>();
-    //     MeshRenderer meshRenderer = groundBlock.AddComponent<MeshRenderer>();
+        // 1. Récupère les cases visibles de TOUTES les unités du joueur
+        foreach (Unit unit in UnitList.MyUnitsList)
+        {
+            if (unit == null) break;
+            Vector3 worldPos = unit.transform.position;
+            (int centerX, int centerY) = ElementaryBasics.GetGridPositionFromWorldPosition(worldPos);
 
-    //     int size = resolution + 1; // Nombre de sommets par ligne/colonne
-    //     Vector3[] vertices = new Vector3[size * size];
-    //     int[] triangles = new int[resolution * resolution * 6];
+            for (int x = -unit.visibility; x <= unit.visibility; x++)
+            {
+                for (int y = -unit.visibility; y <= unit.visibility; y++)
+                {
+                    if (Mathf.Abs(x) + Mathf.Abs(y) <= unit.visibility)
+                    {
+                        ElementaryBasics.revealedCells.Add((centerX + x, centerY + y));
+                    }
+                }
+            }
+        }
 
-    //     // Générer les sommets
-    //     for (int z = 0; z < size; z++)
-    //     {
-    //         for (int x = 0; x < size; x++)
-    //         {
-    //             vertices[z * size + x] = new Vector3(x, height, z);
-    //         }
-    //     }
+        // 3. Mets à jour les vertices affectés
+        foreach ((int gx, int gy) in ElementaryBasics.revealedCells)
+        {
+            if (vertexGridMap.TryGetValue((gx, gy), out var indices))
+            {
+                foreach (int i in indices)
+                {
+                    colors[i].a = 0f;
+                }
+            }
+        }
 
-    //     // Générer les triangles
-    //     int triIndex = 0;
-    //     for (int z = 0; z < resolution; z++)
-    //     {
-    //         for (int x = 0; x < resolution; x++)
-    //         {
-    //             int start = z * size + x;
-    //             triangles[triIndex++] = start;
-    //             triangles[triIndex++] = start + size;
-    //             triangles[triIndex++] = start + 1;
-
-    //             triangles[triIndex++] = start + 1;
-    //             triangles[triIndex++] = start + size;
-    //             triangles[triIndex++] = start + size + 1;
-    //         }
-    //     }
-
-    //     // Création du mesh
-    //     Mesh mesh = new Mesh();
-    //     mesh.vertices = vertices;
-    //     mesh.triangles = triangles;
-    //     // mesh.uv = uvs;
-    //     mesh.RecalculateNormals();
-
-    //     // Application du mesh
-    //     meshFilter.mesh = mesh;
-        
-    //     // Application du Material
-    //     meshRenderer.material = fogMaterial;
-    //     MeshCollider mc = GetComponent<MeshCollider>();
-    //     if (mc == null) mc = groundBlock.AddComponent<MeshCollider>();
-    //     mc.sharedMesh = mesh;
-
-    //     meshRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
-    // }
+        mesh.colors = colors;
+    }
 
     public void CreateFogBlock(Vector3 sizeTerrain, float[,] heights)
     {
@@ -119,6 +95,33 @@ public class FogOfWar : MonoBehaviour
 
         // Désactive les ombres pour éviter les artefacts
         meshRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+
+        BuildVertexGridMap(mesh, groundBlock.transform);
+        colors = mesh.colors;
+    }
+
+    private void BuildVertexGridMap(Mesh mesh, Transform meshTransform)
+    {
+        Vector3[] vertices = mesh.vertices;
+        vertexColors = new Color[vertices.Length];
+
+        vertexGridMap.Clear();
+
+        for (int i = 0; i < vertices.Length; i++)
+        {
+            Vector3 worldPos = meshTransform.TransformPoint(vertices[i]);
+            (int vx, int vy) = ElementaryBasics.GetGridPositionFromWorldPosition(worldPos);
+            var key = (vx, vy);
+
+            if (!vertexGridMap.ContainsKey(key))
+                vertexGridMap[key] = new List<int>();
+
+            vertexGridMap[key].Add(i);
+            vertexColors[i] = new Color(0, 0, 0, 1); // alpha de base
+        }
+
+        mesh.colors = vertexColors;
+        this.mesh = mesh;
     }
 
     private Mesh GenerateMesh(Vector3 sizeTerrain, float[,] heights)
@@ -177,5 +180,9 @@ public class FogOfWar : MonoBehaviour
     #region Setter
     public void SetResolution(int res) { resolution = res; }
     // public void SetHeight(float fogHeight) { height = fogHeight; }
+    #endregion
+
+    #region Getter
+    public Dictionary<(int, int), List<int>> GetVertexGridMap() => vertexGridMap;
     #endregion
 }
