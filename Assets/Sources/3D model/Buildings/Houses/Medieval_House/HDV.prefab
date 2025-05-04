@@ -177,6 +177,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 0
+  isBuilding: 1
 --- !u!1001 &4001215316614583402
 PrefabInstance:
   m_ObjectHideFlags: 0

@@ -36,6 +36,7 @@ public class Unit : NetworkBehaviour
     [NonSerialized] public int visibility = 2;
     [NonSerialized] public string unitName;
     [NonSerialized] public Vector2 gridPosition;
+    public bool isBuilding = false; 
 
     void Start()
     {

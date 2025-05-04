@@ -152,15 +152,23 @@ public class PlayerManager : MonoBehaviour
                 // if (TerrainGenerator.instance.gridCells[(int)neighbor.x, (int)neighbor.y].isOccupied) continue;
                 var cell = TerrainGenerator.instance.gridCells[(int)neighbor.x, (int)neighbor.y];
 
+                bool isVisible = ElementaryBasics.visibleCells.Contains(((int)neighbor.x, (int)neighbor.y));
+
                 bool isEnemyInvisible =
                     cell.isOccupied &&
                     UnitList.AllUnits.Any(u =>
                         u.gridPosition == neighbor &&
                         !UnitList.MyUnitsList.Contains(u) &&
-                        !ElementaryBasics.visibleCells.Contains(((int)neighbor.x, (int)neighbor.y))
+                        !isVisible
                     );
 
-                if (cell.isOccupied && !isEnemyInvisible)
+                bool isMyVisibleBuilding = UnitList.MyUnitsList.Any(u =>
+                    u.gridPosition == neighbor &&
+                    u.isBuilding &&
+                    isVisible
+                );
+
+                if (cell.isOccupied && !isEnemyInvisible && !isMyVisibleBuilding)
                     continue;
                 
 
@@ -202,8 +210,16 @@ public class PlayerManager : MonoBehaviour
         foreach (var step in fullPath)
         {
             var cell = TerrainGenerator.instance.gridCells[(int)step.x, (int)step.y];
-            if (cell.isOccupied)
-                break; // Stop avant la première case occupée
+
+            bool isVisible = ElementaryBasics.visibleCells.Contains(((int)step.x, (int)step.y));
+            bool isMyVisibleBuilding = UnitList.MyUnitsList.Any(u =>
+                u.gridPosition == step &&
+                u.isBuilding &&
+                isVisible
+            );
+
+            if (cell.isOccupied && !isMyVisibleBuilding)
+                break; // Stop avant
 
             finalPath.Add(step);
         }
