@@ -55,6 +55,9 @@ public class Unit : NetworkBehaviour
             gameObject.layer = LayerMask.NameToLayer("HiddenFromPlayer");
             UnitList.MyUnitsList.Add(this);
             UpdateAllUnitListServerRpc(NetworkObjectId);
+            var spawnCell = TerrainGenerator.instance.gridCells[(int)gridPosition.x, (int)gridPosition.y];
+            spawnCell.isOccupied = true;
+            MapManager.Instance.RequestGridCellUpdate(spawnCell);
         }
     }
 

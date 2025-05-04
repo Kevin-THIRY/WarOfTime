@@ -88,6 +88,7 @@ public class NetworkSpawnerManager : NetworkBehaviour
             {
                 var unit = netObj.GetComponent<Unit>();
                 UnitList.AllUnits.Add(unit);
+                TerrainGenerator.instance.gridCells[(int)unit.gridPosition.x, (int)unit.gridPosition.y].isOccupied = true;
             }
         }
     }

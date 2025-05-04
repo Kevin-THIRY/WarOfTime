@@ -180,35 +180,34 @@ public class PlayerManager : MonoBehaviour
 
     private List<Vector2> ReconstructPath(Dictionary<Vector2, Vector2> cameFrom, Vector2 start, Vector2 goal)
     {
-        List<Vector2> path = new List<Vector2>();
+        List<Vector2> fullPath = new List<Vector2>();
 
         if (!cameFrom.ContainsKey(goal))
         {
             // Peut-être que le goal est occupé => chercher la case la plus proche
             goal = FindNearestNonOccupied(cameFrom, goal);
-            if (goal == Vector2.zero) return path; // Rien trouvé
+            if (goal == Vector2.zero) return fullPath; // Rien trouvé
         }
 
         Vector2 current = goal;
         while (current != start)
         {
-            path.Add(current);
+            fullPath.Add(current);
             current = cameFrom[current];
         }
-        path.Reverse();
-        if (path.Count > 0)
+        fullPath.Reverse();
+
+        // Nouvelle logique : on arrête le path au premier obstacle
+        List<Vector2> finalPath = new List<Vector2>();
+        foreach (var step in fullPath)
         {
-            Vector2 last = path.Last();
-            if (UnitList.AllUnits.Any(u =>
-                u.gridPosition == last &&
-                !UnitList.MyUnitsList.Contains(u) &&
-                !ElementaryBasics.visibleCells.Contains(((int)last.x, (int)last.y))
-            ))
-            {
-                path.RemoveAt(path.Count - 1); // Stop avant
-            }
+            var cell = TerrainGenerator.instance.gridCells[(int)step.x, (int)step.y];
+            if (cell.isOccupied)
+                break; // Stop avant la première case occupée
+
+            finalPath.Add(step);
         }
-        return path;
+        return finalPath;
     }
 
     private bool IsInsideGrid(int x, int y)
