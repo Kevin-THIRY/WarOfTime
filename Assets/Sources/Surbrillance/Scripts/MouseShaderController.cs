@@ -1,12 +1,28 @@
 using System.Linq;
 using UnityEngine;
-using Unity.Netcode;
 using System.Collections.Generic;
+using System;
+
+public enum CanvasType
+{
+    UnitMoveOrBuild,
+    BuildingSelected,
+    // etc.
+}
+
+[Serializable]
+public struct CanvasMapping
+{
+    public CanvasType canvasType;
+    public CanvasManager canvas;
+}
 
 public class MouseShaderController : MonoBehaviour
 {
     [SerializeField] private Material highlightMaterial;
-    [SerializeField] private List<CanvasManager> listCanvasManager = new List<CanvasManager>();
+    // [SerializeField] private List<CanvasManager> listCanvasManager = new List<CanvasManager>();
+    [SerializeField] private List<CanvasMapping> canvasMapping;
+    private Dictionary<CanvasType, CanvasManager> canvasMappingDict;
     private float cellSize;
     private Camera cam;
     private int resolution;
@@ -16,10 +32,23 @@ public class MouseShaderController : MonoBehaviour
     {
         clickedOnCell = false;
         cam = Camera.main;
+        canvasMappingDict = new();
+
+        foreach (var canvas in canvasMapping)
+        {
+            canvasMappingDict[canvas.canvasType] = canvas.canvas;
+        }
     }
 
     void Update()
     {
+        // if (canvasMappingDict == null)
+        // {
+        //     foreach (var canvas in canvasMapping)
+        //     {
+        //         canvasMappingDict[canvas.canvasType] = canvas.canvas;
+        //     }
+        // }
         if (Input.GetMouseButtonDown(0)) clickedOnCell = true;
     }
 
@@ -61,18 +90,34 @@ public class MouseShaderController : MonoBehaviour
                 }
                 // Vector3 adjustedPosition = hit.point + hit.normal; // Décale légèrement
                 highlightMaterial.SetVector("_MousePosition", new Vector3(cell.center.x, hit.point.y + hit.normal.y, cell.center.y));
-                if (PlayerManager.instance != null && clickedOnCell)
+                DoActionsWithUnit(cell);
+                break; // Si tu veux sortir dès que tu trouves le premier plan
+            }
+        }
+        if (hits.Length == 0) highlightMaterial.SetVector("_MousePosition", new Vector4(-1000, -1000, -1000, -1));
+    }
+
+    private void DoActionsWithUnit(TerrainGenerator.GridCell cell)
+    {
+        if (PlayerManager.instance != null && clickedOnCell && MapManager.Instance.IsMyTurn())
+        {
+            if (PlayerManager.instance.selectedUnit)
+            {
+                if (!PlayerManager.instance.selectedUnit.moveEnded)
                 {
-                    if (PlayerManager.instance.selectedUnit)
+                    if (!PlayerManager.instance.selectedUnit.isBuilding)
                     {
+                        // Cas d'une unité qui veut se déplacer ou construire un batiment
                         if (!cell.isOccupied ||
                             !ElementaryBasics.visibleCells.Contains(((int)cell.gridPosition.x, (int)cell.gridPosition.y)) ||
                             UnitList.MyUnitsList.Any(u => u.gridPosition == cell.gridPosition && u.isBuilding))
                         {
                             PlayerManager.instance.SetSelectedCell(cell);
-                            MenuController.instance.CreatePanelAndOpenNextToMe(listCanvasManager[0].gameObject, MenuController.instance.GetActiveCanvas().GetUniqueId(), new Vector2Int(30, 30));
+                            // MenuController.instance.CreatePanelAndOpenNextToMe(listCanvasManager[0].gameObject, MenuController.instance.GetActiveCanvas().GetUniqueId(), new Vector2Int(30, 30));
+                            MenuController.instance.CreatePanelAndOpenNextToMe(canvasMappingDict[CanvasType.UnitMoveOrBuild].gameObject, MenuController.instance.GetActiveCanvas().GetUniqueId(), new Vector2Int(30, 30));
                             MovementManager.instance.SetInOutInventory(true);
                         }
+                        // Cas d'une unité qui veut combattre
                         else
                         {
                             Debug.Log("Cell is occupied");
@@ -80,21 +125,42 @@ public class MouseShaderController : MonoBehaviour
                     }
                     else
                     {
-                        Unit unit = UnitList.MyUnitsList.FirstOrDefault(u => u.gridPosition == cell.gridPosition);
-                        if (unit != null)
-                        {
-                            // Une unité a été trouvée sur la cellule
-                            PlayerManager.instance.SetSelectedUnit(unit);
-                            // Ouvre un menu de selection d'unité
-                            // MenuController.instance.CreatePanelAndOpenNextToMe(listCanvasManager[0].gameObject, MenuController.instance.GetActiveCanvas().GetUniqueId(), new Vector2Int(30, 30));
-                        }
+                        // MenuController.instance.CreatePanelAndOpenNextToMe(listCanvasManager[0].gameObject, MenuController.instance.GetActiveCanvas().GetUniqueId(), new Vector2Int(30, 30));
+                        // MenuController.instance.CreatePanelAndOpenNextToMe(canvasMappingDict[CanvasType.BuildingSelected].gameObject, MenuController.instance.GetActiveCanvas().GetUniqueId(), new Vector2Int(30, 30));
+                        // MovementManager.instance.SetInOutInventory(true);
                     }
-                    clickedOnCell = false;
                 }
-                break; // Si tu veux sortir dès que tu trouves le premier plan
+                else
+                {
+                    PlayerManager.instance.SetSelectedUnit(null);
+                    Debug.Log("L'unité a déjà joué ce tour");
+                }
             }
+            else
+            {
+                // Unit unit = UnitList.MyUnitsList.FirstOrDefault(u => u.gridPosition == cell.gridPosition);
+                var unitsOnCell = UnitList.MyUnitsList
+                    .Where(u => u.gridPosition == cell.gridPosition)
+                    .ToList();
+
+                if (unitsOnCell != null)
+                {
+                    Unit selectedUnit = unitsOnCell.Count == 1
+                        ? unitsOnCell[0]
+                        : unitsOnCell.FirstOrDefault(u => !u.isBuilding);
+                    // Une unité a été trouvée sur la cellule
+                    PlayerManager.instance.SetSelectedUnit(selectedUnit);
+                    // Ouvre un menu de selection d'unité
+                    if (PlayerManager.instance.selectedUnit && !PlayerManager.instance.selectedUnit.moveEnded && PlayerManager.instance.selectedUnit.isBuilding)
+                    {
+                        MenuController.instance.CreatePanelAndOpenNextToMe(canvasMappingDict[CanvasType.BuildingSelected].gameObject, MenuController.instance.GetActiveCanvas().GetUniqueId(), new Vector2Int(30, 30));
+                        MovementManager.instance.SetInOutInventory(true);
+                    }
+                    // MenuController.instance.CreatePanelAndOpenNextToMe(listCanvasManager[0].gameObject, MenuController.instance.GetActiveCanvas().GetUniqueId(), new Vector2Int(30, 30));
+                }
+            }
+            clickedOnCell = false;
         }
-        if (hits.Length == 0) highlightMaterial.SetVector("_MousePosition", new Vector4(-1000, -1000, -1000, -1));
     }
 
     public void CreateHighlightBlock(Vector3 sizeTerrain, float[,] heights)

@@ -50,12 +50,12 @@ public class ElementaryBasics
 public class PlayerManager : MonoBehaviour
 {
     public static PlayerManager instance {private set; get;}
-    [SerializeField] private TerrainGenerator terrainGenerator;
     [SerializeField] private LineRenderer lineRenderer;
     private TerrainGenerator.GridCell selectedCell;
     public Unit selectedUnit {private set; get;}
     private List<Unit> allUnitsOfThePlayer = new List<Unit>();
     private List<Vector2> path;
+    [NonSerialized] public bool turnEnded = false;
 
     private void Awake() {
         if(instance != null){
@@ -72,6 +72,20 @@ public class PlayerManager : MonoBehaviour
 
     void Update()
     {
+        if (!MapManager.Instance) return;
+        if (MapManager.Instance.IsMyTurn() && turnEnded)
+        {
+            turnEnded = false;
+            ResetUnits();
+        }
+    }
+
+    private void ResetUnits()
+    {
+        foreach (Unit unit in UnitList.MyUnitsList)
+        {
+            unit.moveEnded = false;
+        }
     }
 
     public void MoveUnit()
@@ -92,13 +106,14 @@ public class PlayerManager : MonoBehaviour
                     MapManager.Instance.RequestGridCellUpdate(finalCell);
 
                     MovementManager.instance.SetInOutInventory(false);
-                    selectedUnit = null;
                 }
                 else
                 {
                     // Debug.Log("Échec du déplacement.");
                 }
             }));
+            selectedUnit.moveEnded = true;
+            selectedUnit = null;
         }
     }
 
@@ -113,6 +128,20 @@ public class PlayerManager : MonoBehaviour
             NetworkSpawnerManager.Instance.RequestSpawnUnitServerRpc(NetworkSpawnerManager.Instance.nationType, UnitType.HDV, posSpawn);
             
             MovementManager.instance.SetInOutInventory(false);
+            selectedUnit = null;
+        }
+    }
+
+    public void CreateUnit()
+    {
+        if (TerrainGenerator.instance.gridCells == null || allUnitsOfThePlayer == null || selectedUnit == null) return;
+        if (!selectedUnit.isMoving)
+        {
+            Vector3 posSpawn = ElementaryBasics.GetWorldPositionFromGridCoordinates((int)selectedUnit.gridPosition.x, (int)selectedUnit.gridPosition.y, true);
+            NetworkSpawnerManager.Instance.RequestSpawnUnitServerRpc(NetworkSpawnerManager.Instance.nationType, UnitType.Peasant, posSpawn);
+
+            MovementManager.instance.SetInOutInventory(false);
+            selectedUnit = null;
         }
     }
 
@@ -162,13 +191,14 @@ public class PlayerManager : MonoBehaviour
                         !isVisible
                     );
 
-                bool isMyVisibleBuilding = UnitList.MyUnitsList.Any(u =>
-                    u.gridPosition == neighbor &&
-                    u.isBuilding &&
-                    isVisible
-                );
+                // bool isMyVisibleBuilding = UnitList.MyUnitsList.Any(u =>
+                //     u.gridPosition == neighbor &&
+                //     u.isBuilding &&
+                //     isVisible
+                // );
+                bool isMyUnit = UnitList.MyUnitsList.Any(u => u.gridPosition == neighbor);
 
-                if (cell.isOccupied && !isEnemyInvisible && !isMyVisibleBuilding)
+                if (cell.isOccupied && !isEnemyInvisible && !isMyUnit)
                     continue;
                 
 
@@ -211,14 +241,16 @@ public class PlayerManager : MonoBehaviour
         {
             var cell = TerrainGenerator.instance.gridCells[(int)step.x, (int)step.y];
 
-            bool isVisible = ElementaryBasics.visibleCells.Contains(((int)step.x, (int)step.y));
-            bool isMyVisibleBuilding = UnitList.MyUnitsList.Any(u =>
-                u.gridPosition == step &&
-                u.isBuilding &&
-                isVisible
-            );
+            // bool isVisible = ElementaryBasics.visibleCells.Contains(((int)step.x, (int)step.y));
+            // bool isMyVisibleBuilding = UnitList.MyUnitsList.Any(u =>
+            //     u.gridPosition == step &&
+            //     u.isBuilding &&
+            //     isVisible
+            // );
+            bool isMyUnit = UnitList.MyUnitsList.Any(u => u.gridPosition == step);
+            // Debug.Log($"Pour la position : {step} Unit dans la liste : {isMyUnit} et cellule is occupied est a : {cell.isOccupied}");
 
-            if (cell.isOccupied && !isMyVisibleBuilding)
+            if (cell.isOccupied && !isMyUnit)
                 break; // Stop avant
 
             finalPath.Add(step);

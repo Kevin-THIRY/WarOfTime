@@ -36,7 +36,8 @@ public class Unit : NetworkBehaviour
     [NonSerialized] public int visibility = 2;
     [NonSerialized] public string unitName;
     [NonSerialized] public Vector2 gridPosition;
-    public bool isBuilding = false; 
+    [NonSerialized] public bool moveEnded;
+    public bool isBuilding = false;
 
     void Start()
     {
@@ -51,7 +52,7 @@ public class Unit : NetworkBehaviour
     {
         base.OnNetworkSpawn();
 
-        if (IsOwner) 
+        if (IsOwner)
         {
             gameObject.layer = LayerMask.NameToLayer("HiddenFromPlayer");
             UnitList.MyUnitsList.Add(this);

@@ -95,6 +95,7 @@ public class MapManager : NetworkBehaviour
     {
         if (activePlayerId.Value == NetworkManager.Singleton.LocalClientId)
         {
+            PlayerManager.instance.turnEnded = true;
             RequestEndTurnServerRpc();
         }
     }

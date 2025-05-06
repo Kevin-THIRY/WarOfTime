@@ -26,6 +26,7 @@ public enum ButtonFunction{
 	CloseInventory,
 	MoveUnit,
 	Build,
+	CreateUnit,
 	Test
 }
 
@@ -90,6 +91,7 @@ public class ButtonManager : MonoBehaviour
 			{ ButtonFunction.CloseInventory, new Action(CloseInventory) },
 			{ ButtonFunction.MoveUnit, new Action(MoveUnit) },
 			{ ButtonFunction.Build, new Action(Build) },
+			{ ButtonFunction.CreateUnit, new Action(CreateUnit) },
 			{ ButtonFunction.Test, new Action(Test) }
         };
     }
@@ -352,6 +354,11 @@ public class ButtonManager : MonoBehaviour
 	private void Build()
 	{
 		PlayerManager.instance.Build();
+	}
+
+	private void CreateUnit()
+	{
+		PlayerManager.instance.CreateUnit();
 	}
 
 	private void Test()
