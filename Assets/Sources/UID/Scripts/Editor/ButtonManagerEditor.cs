@@ -17,6 +17,7 @@ public class ButtonManagerEditor : Editor
     private SerializedProperty panelToCreateNextToMe;
     private SerializedProperty panelToDelete;
     private SerializedProperty positionPanel;
+    private SerializedProperty blockCanvas;
     private List<ButtonFunction> actionsToPerformList;
  
     private void OnEnable()
@@ -30,6 +31,7 @@ public class ButtonManagerEditor : Editor
         panelToCreateNextToMe = serializedObject.FindProperty("panelToCreateNextToMe");
         positionPanel = serializedObject.FindProperty("positionPanel");
         panelToDelete = serializedObject.FindProperty("panelToDelete");
+        blockCanvas = serializedObject.FindProperty("blockCanvas");
 
     }
 
@@ -78,6 +80,9 @@ public class ButtonManagerEditor : Editor
             }
             if (action == ButtonFunction.LaunchNewSceneFromHost){
                 base.serializedObject.FindProperty("sceneFromHost").stringValue = EditorGUILayout.TextField("Scene générée par l'hote :", buttonManager.GetSceneLoadedFromHost());
+            }
+            if (action == ButtonFunction.BlockCanvas){
+                EditorGUILayout.PropertyField(blockCanvas);
             }
         }
         serializedObject.ApplyModifiedProperties();

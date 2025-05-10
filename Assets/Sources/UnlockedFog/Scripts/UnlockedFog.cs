@@ -26,8 +26,8 @@ public class UnlockedFog : MonoBehaviour
         foreach (Unit unit in UnitList.MyUnitsList)
         {
             if (unit == null) break;
-            Vector3 worldPos = unit.transform.position;
-            (int centerX, int centerY) = ElementaryBasics.GetGridPositionFromWorldPosition(worldPos);
+            (int centerX, int centerY) = ((int)unit.gridPosition.x, (int)unit.gridPosition.y);
+            // (int centerX, int centerY) = ElementaryBasics.GetGridPositionFromWorldPosition(worldPos);
 
             for (int x = -unit.visibility; x <= unit.visibility; x++)
             {

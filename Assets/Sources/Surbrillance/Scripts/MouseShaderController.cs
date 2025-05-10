@@ -90,7 +90,7 @@ public class MouseShaderController : MonoBehaviour
                 }
                 // Vector3 adjustedPosition = hit.point + hit.normal; // Décale légèrement
                 highlightMaterial.SetVector("_MousePosition", new Vector3(cell.center.x, hit.point.y + hit.normal.y, cell.center.y));
-                DoActionsWithUnit(cell);
+                if (!MenuController.instance.blockingCanvas) DoActionsWithUnit(cell);
                 break; // Si tu veux sortir dès que tu trouves le premier plan
             }
         }
@@ -116,6 +116,7 @@ public class MouseShaderController : MonoBehaviour
                             // MenuController.instance.CreatePanelAndOpenNextToMe(listCanvasManager[0].gameObject, MenuController.instance.GetActiveCanvas().GetUniqueId(), new Vector2Int(30, 30));
                             MenuController.instance.CreatePanelAndOpenNextToMe(canvasMappingDict[CanvasType.UnitMoveOrBuild].gameObject, MenuController.instance.GetActiveCanvas().GetUniqueId(), new Vector2Int(30, 30));
                             MovementManager.instance.SetInOutInventory(true);
+                            MenuController.instance.SetBlockingCanvas(true);
                         }
                         // Cas d'une unité qui veut combattre
                         else
@@ -155,6 +156,7 @@ public class MouseShaderController : MonoBehaviour
                     {
                         MenuController.instance.CreatePanelAndOpenNextToMe(canvasMappingDict[CanvasType.BuildingSelected].gameObject, MenuController.instance.GetActiveCanvas().GetUniqueId(), new Vector2Int(30, 30));
                         MovementManager.instance.SetInOutInventory(true);
+                        MenuController.instance.SetBlockingCanvas(true);
                     }
                     // MenuController.instance.CreatePanelAndOpenNextToMe(listCanvasManager[0].gameObject, MenuController.instance.GetActiveCanvas().GetUniqueId(), new Vector2Int(30, 30));
                 }

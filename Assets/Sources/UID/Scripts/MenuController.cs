@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 using System.Linq;
+using System;
 
 public enum Type{
     None,
@@ -37,6 +38,7 @@ public class MenuController : MonoBehaviour
     private CanvasManager activeCanvas;
     private List<int> pileCanvas = new List<int>();
     private int maxId = 0;
+    [NonSerialized] public bool blockingCanvas = false;
 
     private void Awake() {
         if(instance != null){
@@ -205,6 +207,12 @@ public class MenuController : MonoBehaviour
     #region Getter
 
     public CanvasManager GetActiveCanvas() { return activeCanvas; }
+
+    #endregion
+
+    #region Setter
+
+    public void SetBlockingCanvas(bool _blockingCanvas) { blockingCanvas = _blockingCanvas; }
 
     #endregion
 }

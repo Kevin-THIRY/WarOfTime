@@ -41,10 +41,10 @@ public class Unit : NetworkBehaviour
 
     void Start()
     {
-        var (x, y) = ElementaryBasics.GetGridPositionFromWorldPosition(transform.position);
-        id = UnitList.AllUnits.Count;
-        unitName = name;
-        gridPosition = new Vector2(x, y);
+        // var (x, y) = ElementaryBasics.GetGridPositionFromWorldPosition(transform.position);
+        // id = UnitList.AllUnits.Count;
+        // unitName = name;
+        // gridPosition = new Vector2(x, y);
         // if (IsOwner) PlayerManager.instance.SetSelectedUnit(this);
     }
 
@@ -52,12 +52,19 @@ public class Unit : NetworkBehaviour
     {
         base.OnNetworkSpawn();
 
+        var (x, y) = ElementaryBasics.GetGridPositionFromWorldPosition(transform.position);
+        id = UnitList.AllUnits.Count;
+        unitName = name;
+        
+        gridPosition.x = x;
+        gridPosition.y = y;
+
         if (IsOwner)
         {
             gameObject.layer = LayerMask.NameToLayer("HiddenFromPlayer");
             UnitList.MyUnitsList.Add(this);
             UpdateAllUnitListServerRpc(NetworkObjectId);
-            var spawnCell = TerrainGenerator.instance.gridCells[(int)gridPosition.x, (int)gridPosition.y];
+            var spawnCell = TerrainGenerator.instance.gridCells[x, y];
             spawnCell.isOccupied = true;
             MapManager.Instance.RequestGridCellUpdate(spawnCell);
         }

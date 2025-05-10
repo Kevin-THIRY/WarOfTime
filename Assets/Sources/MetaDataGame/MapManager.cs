@@ -73,6 +73,7 @@ public class MapManager : NetworkBehaviour
         // Mettre à jour côté serveur
         TerrainGenerator.instance.gridCells[x, y].isOccupied = isOccupied;
         TerrainGenerator.instance.gridCells[x, y].resourceType = resourceType;
+        Debug.Log($"Cellule : {gridPos} is occupied : {isOccupied}");
 
         // Propager aux autres clients
         UpdateGridCellClientRpc(gridPos, isOccupied, resourceType);
@@ -85,6 +86,8 @@ public class MapManager : NetworkBehaviour
 
         int x = (int)gridPos.x;
         int y = (int)gridPos.y;
+
+        Debug.Log($"Cellule : {gridPos} is occupied : {isOccupied}");
 
         // Mettre à jour localement sur les clients
         TerrainGenerator.instance.gridCells[x, y].isOccupied = isOccupied;

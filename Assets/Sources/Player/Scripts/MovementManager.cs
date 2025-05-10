@@ -66,6 +66,7 @@ public class MovementManager : MonoBehaviour
         if (!is_in_inventory && (openOption != 0))
         {
             MenuController.instance.ChangePanel(Type.Options, 0, type => type == Type.None, (type, button) => button.GetButtonType() == type);
+            MenuController.instance.SetBlockingCanvas(true);
             is_in_inventory = true;
         }
     }

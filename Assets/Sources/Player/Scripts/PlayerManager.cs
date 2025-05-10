@@ -95,6 +95,23 @@ public class PlayerManager : MonoBehaviour
         {
             path = FindPath(selectedUnit.gridPosition, selectedCell.gridPosition);
             ShowPathLine(path);
+
+
+            // Il y a un bug, il faut d'abord vérifier que l'unité est pas sur un batiment, si c'est le cas, on met pas isOccupied a false
+            // Il faudrait faire une fonctiond dans la classe Unit pour savoir si c'est une unité qui est sur un batiment. Cette fonction devrait aussi
+            // etre appelé coté MouseShaderController au lieu de faire :
+
+            // Unit unit = UnitList.MyUnitsList.FirstOrDefault(u => u.gridPosition == cell.gridPosition);
+            // var unitsOnCell = UnitList.MyUnitsList
+            //     .Where(u => u.gridPosition == cell.gridPosition)
+            //     .ToList();
+
+            // if (unitsOnCell != null)
+            // {
+            //     Unit selectedUnit = unitsOnCell.Count == 1
+            //         ? unitsOnCell[0]
+            //         : unitsOnCell.FirstOrDefault(u => !u.isBuilding);
+
             TerrainGenerator.instance.gridCells[(int)selectedUnit.gridPosition.x, (int)selectedUnit.gridPosition.y].isOccupied = false;
             MapManager.Instance.RequestGridCellUpdate(TerrainGenerator.instance.gridCells[(int)selectedUnit.gridPosition.x, (int)selectedUnit.gridPosition.y]);
             StartCoroutine(selectedUnit.Goto(path, 10, (success, finalPosition) =>
@@ -122,8 +139,9 @@ public class PlayerManager : MonoBehaviour
         if (TerrainGenerator.instance.gridCells == null || allUnitsOfThePlayer == null || selectedUnit == null || selectedCell == null) return;
         if (!selectedUnit.isMoving && selectedCell.gridPosition != selectedUnit.gridPosition)
         {
-            selectedCell.isOccupied = true;
-            MapManager.Instance.RequestGridCellUpdate(selectedCell);
+            // selectedCell.isOccupied = true;
+            // Debug.Log($"Position de la selected cell : {selectedCell.gridPosition.x} et : {selectedCell.gridPosition.y}");
+            // MapManager.Instance.RequestGridCellUpdate(selectedCell);
             Vector3 posSpawn = ElementaryBasics.GetWorldPositionFromGridCoordinates((int)selectedCell.gridPosition.x, (int)selectedCell.gridPosition.y, true);
             NetworkSpawnerManager.Instance.RequestSpawnUnitServerRpc(NetworkSpawnerManager.Instance.nationType, UnitType.HDV, posSpawn);
             
@@ -248,7 +266,6 @@ public class PlayerManager : MonoBehaviour
             //     isVisible
             // );
             bool isMyUnit = UnitList.MyUnitsList.Any(u => u.gridPosition == step);
-            // Debug.Log($"Pour la position : {step} Unit dans la liste : {isMyUnit} et cellule is occupied est a : {cell.isOccupied}");
 
             if (cell.isOccupied && !isMyUnit)
                 break; // Stop avant

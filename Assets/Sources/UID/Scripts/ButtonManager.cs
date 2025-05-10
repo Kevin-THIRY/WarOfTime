@@ -27,6 +27,7 @@ public enum ButtonFunction{
 	MoveUnit,
 	Build,
 	CreateUnit,
+	BlockCanvas,
 	Test
 }
 
@@ -59,6 +60,7 @@ public class ButtonManager : MonoBehaviour
 	[SerializeField] private GameObject panelToDelete;
 	[SerializeField] private string ipAddress;
 	[SerializeField] private string sceneFromHost;
+	[SerializeField] private bool blockCanvas;
 	
     void Start()
     {
@@ -92,6 +94,7 @@ public class ButtonManager : MonoBehaviour
 			{ ButtonFunction.MoveUnit, new Action(MoveUnit) },
 			{ ButtonFunction.Build, new Action(Build) },
 			{ ButtonFunction.CreateUnit, new Action(CreateUnit) },
+			{ ButtonFunction.BlockCanvas, new Action<bool>(BlockCanvas) },
 			{ ButtonFunction.Test, new Action(Test) }
         };
     }
@@ -186,6 +189,9 @@ public class ButtonManager : MonoBehaviour
 					break;
 				case ButtonFunction.LaunchNewSceneFromHost:
 					ExecuteAction(action, sceneFromHost);
+					break;
+				case ButtonFunction.BlockCanvas:
+					ExecuteAction(action, blockCanvas);
 					break;
 				default:
 					ExecuteAction(action);
@@ -359,6 +365,11 @@ public class ButtonManager : MonoBehaviour
 	private void CreateUnit()
 	{
 		PlayerManager.instance.CreateUnit();
+	}
+
+	private void BlockCanvas(bool _blockCanvas)
+	{
+		MenuController.instance.SetBlockingCanvas(_blockCanvas);
 	}
 
 	private void Test()
