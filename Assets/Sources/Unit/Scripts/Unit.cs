@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections;
 using Unity.Netcode;
 using System;
+using System.Linq;
 
 public enum UnitType
 {
@@ -101,6 +102,21 @@ public class Unit : NetworkBehaviour
             var unit = netObj.GetComponent<Unit>();
             unit.gridPosition = newGridPos;
         }
+    }
+
+    public bool IsOnABuilding()
+    {
+        var unitsOnCell = UnitList.MyUnitsList
+            .Where(u => u.gridPosition == this.gridPosition)
+            .ToList();
+
+        if (unitsOnCell.Count > 0)
+        {
+            // Vérifie si l'une des unités sur la case est un bâtiment
+            return unitsOnCell.Any(u => u.isBuilding);
+        }
+
+        return false;
     }
 
     public IEnumerator Goto(List<Vector2> path, float speed, System.Action<bool, Vector2> onComplete)
