@@ -310,29 +310,29 @@ public class ButtonManager : MonoBehaviour
 
 	private void AddPlayer()
 	{
-		GameData.playerInfos = new PlayerInfos { Name = "Joueur" + NetworkManager.Singleton.ConnectedClientsList.Count, localPlayerIndex = NetworkManager.Singleton.ConnectedClientsList.Count + 1, Color = Color.blue };
+		GameData.playerInfos = new PlayerInfos { Name = "Joueur" + NetworkManager.Singleton.ConnectedClientsList.Count, Color = Color.blue, Team = 0 };
 	}
 
 	private void AddBot()
 	{
-		GameData.botList.Add(new BotOption { botDifficulty = BotDifficulty.Easy });
+		GameData.botList.Add(new BotOption { botDifficulty = BotDifficulty.Easy, Team = 0 });
 	}
 
 	private void LaunchHostSession()
 	{
-		GameData.playerInfos = new PlayerInfos { Name = "Host", localPlayerIndex = 0, Color = Color.blue };
+		GameData.playerInfos = new PlayerInfos { Name = "Host", Color = Color.blue, Team = 0 };
 		manager.StartServeur();
 	}
 
 	private void LaunchHost()
 	{
-		GameData.playerInfos = new PlayerInfos { Name = "Host", localPlayerIndex = 0, Color = Color.blue };
+		GameData.playerInfos = new PlayerInfos { Name = "Host", Color = Color.blue, Team = 0 };
 		manager.StartHost();
 	}
 
 	private void ConnectClient(string ipAddress)
 	{
-		GameData.playerInfos = new PlayerInfos { Name = "Client " + NetworkManager.Singleton.ConnectedClientsList.Count, localPlayerIndex = NetworkManager.Singleton.ConnectedClientsList.Count + 1, Color = Color.red };
+		GameData.playerInfos = new PlayerInfos { Name = "Client", Color = Color.red, Team = NetworkManager.Singleton.ConnectedClientsList.Count };
 		manager.StartClient(ipAddress);
 	}
 

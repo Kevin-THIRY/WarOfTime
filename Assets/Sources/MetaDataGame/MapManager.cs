@@ -1,9 +1,7 @@
-using System;
-using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine.UI;
 using UnityEngine;
-using Unity.VisualScripting;
+using Unity.Collections;
 
 public class MapManager : NetworkBehaviour
 {
@@ -11,27 +9,17 @@ public class MapManager : NetworkBehaviour
     private NetworkVariable<ulong> activePlayerId = new NetworkVariable<ulong>(0);
     private Text turnText;
     private Text activePlayerIdText;
+    private Text playerNameText;
+    private Text playerColorText;
+    private Text playerTeamText;
     private NetworkVariable<int> turnCount = new NetworkVariable<int>(0);
-
-    // private void Awake()
-    // {
-    //     if (Instance != null && Instance != this)
-    //     {
-    //         Destroy(gameObject);
-    //         return;
-    //     }
-    //     Instance = this;
-
-    //     if (!IsServer)
-    //     {
-    //         Destroy(gameObject); 
-    //     }
-    // }
+    private NetworkVariable<FixedString64Bytes> playerName = new NetworkVariable<FixedString64Bytes>("");
+    private NetworkVariable<Color> playerColor = new NetworkVariable<Color>(Color.white);
+    private NetworkVariable<int> playerTeam = new NetworkVariable<int>(0);
 
     public void Start()
     {
-        turnText = GameObject.Find("MenuSwitch").transform.Find("Base UID Game").transform.Find("Nombre de tour").GetComponent<Text>();
-        activePlayerIdText = GameObject.Find("MenuSwitch").transform.Find("Base UID Game").transform.Find("Joueur actif ID").GetComponent<Text>();
+        
     }
 
     public override void OnNetworkSpawn()
@@ -44,14 +32,42 @@ public class MapManager : NetworkBehaviour
         }
         else Instance = this;
 
+        GetUITextInit();
+
         turnCount.OnValueChanged += UpdateTurnDisplay;
         activePlayerId.OnValueChanged += UpdateActivePlayerIdDisplay;
+
+        playerName.OnValueChanged  += UpdatePlayerNameDisplay;
+        playerColor.OnValueChanged += UpdatePlayerColorDisplay;
+        playerTeam.OnValueChanged  += UpdateTeamDisplay;
 
         if (IsServer)
         {
             if (NetworkManager.Singleton.ConnectedClientsList.Count > 0)
                 activePlayerId.Value = NetworkManager.Singleton.ConnectedClientsList[0].ClientId;
+            UpdatePlayerInfosServerRpc();
         }
+
+        InitUIText();
+    }
+
+    private void InitUIText()
+    {
+        UpdateTurnDisplay(0, turnCount.Value);
+        UpdateActivePlayerIdDisplay(0, activePlayerId.Value);
+        UpdatePlayerNameDisplay("", playerName.Value);
+        UpdatePlayerColorDisplay(Color.white, playerColor.Value);
+        UpdateTeamDisplay(0, playerTeam.Value);
+    }
+
+    private void GetUITextInit()
+    {
+        turnText = GameObject.Find("MenuSwitch").transform.Find("Base UID Game").transform.Find("Nombre de tour").GetComponent<Text>();
+        activePlayerIdText = GameObject.Find("MenuSwitch").transform.Find("Base UID Game").transform.Find("Joueur actif ID").GetComponent<Text>();
+
+        playerNameText = GameObject.Find("MenuSwitch").transform.Find("MultiSettings").transform.Find("HostRowDisplay").transform.Find("PlayerName").GetComponent<Text>();
+        playerColorText = GameObject.Find("MenuSwitch").transform.Find("MultiSettings").transform.Find("HostRowDisplay").transform.Find("PlayerColor").GetComponent<Text>();
+        playerTeamText = GameObject.Find("MenuSwitch").transform.Find("MultiSettings").transform.Find("HostRowDisplay").transform.Find("PlayerTeam").GetComponent<Text>();
     }
 
     public void RequestGridCellUpdate(TerrainGenerator.GridCell updatedCell)
@@ -137,6 +153,32 @@ public class MapManager : NetworkBehaviour
     {
         if (activePlayerIdText != null)
             activePlayerIdText.text = $"I d   j o u e u r   a c t i f   :   {_activePlayerId}";
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    private void UpdatePlayerInfosServerRpc(ServerRpcParams rpcParams = default)
+    {
+        playerName.Value  = GameData.playerInfos.Name;
+        playerColor.Value = GameData.playerInfos.Color;
+        playerTeam.Value  = GameData.playerInfos.Team;
+    }
+
+    private void UpdatePlayerNameDisplay(FixedString64Bytes oldValue, FixedString64Bytes _playerName)
+    {
+        if (playerNameText != null)
+            playerNameText.text = $"{_playerName}";
+    }
+
+    private void UpdatePlayerColorDisplay(Color oldValue, Color _playerColor)
+    {
+        if (playerColorText != null)
+            playerColorText.text = $"{_playerColor}";
+    }
+
+    private void UpdateTeamDisplay(int oldValue, int _playerTeam)
+    {
+        if (playerTeamText != null)
+            playerTeamText.text = $"{_playerTeam}";
     }
 
     public bool IsMyTurn()

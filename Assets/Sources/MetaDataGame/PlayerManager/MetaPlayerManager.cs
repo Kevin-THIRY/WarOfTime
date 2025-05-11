@@ -11,12 +11,13 @@ public class PlayerInfos
 {
     public string Name { get; set;}
     public Color Color { get; set;}
-    public int localPlayerIndex { get; set;}
+    public int Team { get; set;}
 }
 
 public class BotOption
 {
     public BotDifficulty botDifficulty{ get; set;}
+    public int Team { get; set;}
 }
 
 public class GameData

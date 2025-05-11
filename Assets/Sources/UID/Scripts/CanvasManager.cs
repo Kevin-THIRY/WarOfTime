@@ -45,7 +45,7 @@ public class CanvasManager : MonoBehaviour
                 horizontalIndexList.Add(button.GetHorizontalIndex());
                 buttonPositions.Add(new Vector2Int(button.GetVerticalIndex(), button.GetHorizontalIndex()));
             }
-            else noButton = true;
+            if (ButtonList.Count == 0) noButton = true;
         }
         try{
             if (verticalIndexList == null || verticalIndexList.Count == 0) return;
