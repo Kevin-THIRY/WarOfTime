@@ -123,13 +123,13 @@ public class PlayerManager : MonoBehaviour
 
     public void Build()
     {
-        if (TerrainGenerator.instance.gridCells == null || allUnitsOfThePlayer == null || selectedUnit == null || selectedCell == null) return;
-        if (!selectedUnit.isMoving && selectedCell.gridPosition != selectedUnit.gridPosition)
+        if (TerrainGenerator.instance.gridCells == null || allUnitsOfThePlayer == null || selectedUnit == null) return;
+        if (!selectedUnit.isMoving)
         {
             // selectedCell.isOccupied = true;
             // Debug.Log($"Position de la selected cell : {selectedCell.gridPosition.x} et : {selectedCell.gridPosition.y}");
             // MapManager.Instance.RequestGridCellUpdate(selectedCell);
-            Vector3 posSpawn = ElementaryBasics.GetWorldPositionFromGridCoordinates((int)selectedCell.gridPosition.x, (int)selectedCell.gridPosition.y, true);
+            Vector3 posSpawn = ElementaryBasics.GetWorldPositionFromGridCoordinates((int)selectedUnit.gridPosition.x, (int)selectedUnit.gridPosition.y, true);
             NetworkSpawnerManager.Instance.RequestSpawnUnitServerRpc(NetworkSpawnerManager.Instance.nationType, UnitType.HDV, posSpawn);
             
             MovementManager.instance.SetInOutInventory(false);
@@ -148,6 +148,11 @@ public class PlayerManager : MonoBehaviour
             MovementManager.instance.SetInOutInventory(false);
             selectedUnit = null;
         }
+    }
+
+    public void ChoosePath()
+    {
+
     }
 
     private void ShowPathLine(List<Vector2> path)

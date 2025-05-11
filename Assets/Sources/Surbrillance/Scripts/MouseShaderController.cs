@@ -7,6 +7,8 @@ public enum CanvasType
 {
     UnitMoveOrBuild,
     BuildingSelected,
+    GoToSelectedPath,
+    UnitMove,
     // etc.
 }
 
@@ -99,36 +101,22 @@ public class MouseShaderController : MonoBehaviour
 
     private void DoActionsWithUnit(TerrainGenerator.GridCell cell)
     {
-        if (PlayerManager.instance != null && clickedOnCell && MapManager.Instance.IsMyTurn())
+        if (PlayerManager.instance != null && MapManager.Instance.IsMyTurn())
         {
             if (PlayerManager.instance.selectedUnit)
             {
-                if (!PlayerManager.instance.selectedUnit.moveEnded)
+                if (!PlayerManager.instance.selectedUnit.moveEnded && !PlayerManager.instance.selectedUnit.isBuilding)
                 {
-                    if (!PlayerManager.instance.selectedUnit.isBuilding)
+                    if (!clickedOnCell)
                     {
-                        // Cas d'une unité qui veut se déplacer ou construire un batiment
-                        if (!cell.isOccupied ||
-                            !ElementaryBasics.visibleCells.Contains(((int)cell.gridPosition.x, (int)cell.gridPosition.y)) ||
-                            UnitList.MyUnitsList.Any(u => u.gridPosition == cell.gridPosition && u.isBuilding))
-                        {
-                            PlayerManager.instance.SetSelectedCell(cell);
-                            // MenuController.instance.CreatePanelAndOpenNextToMe(listCanvasManager[0].gameObject, MenuController.instance.GetActiveCanvas().GetUniqueId(), new Vector2Int(30, 30));
-                            MenuController.instance.CreatePanelAndOpenNextToMe(canvasMappingDict[CanvasType.UnitMoveOrBuild].gameObject, MenuController.instance.GetActiveCanvas().GetUniqueId(), new Vector2Int(30, 30));
-                            MovementManager.instance.SetInOutInventory(true);
-                            MenuController.instance.SetBlockingCanvas(true);
-                        }
-                        // Cas d'une unité qui veut combattre
-                        else
-                        {
-                            Debug.Log("Cell is occupied");
-                        }
+                        // PlayerManager.instance.SetSelectedCell(cell);
                     }
                     else
                     {
-                        // MenuController.instance.CreatePanelAndOpenNextToMe(listCanvasManager[0].gameObject, MenuController.instance.GetActiveCanvas().GetUniqueId(), new Vector2Int(30, 30));
-                        // MenuController.instance.CreatePanelAndOpenNextToMe(canvasMappingDict[CanvasType.BuildingSelected].gameObject, MenuController.instance.GetActiveCanvas().GetUniqueId(), new Vector2Int(30, 30));
-                        // MovementManager.instance.SetInOutInventory(true);
+                        PlayerManager.instance.SetSelectedCell(cell);
+                        MenuController.instance.CreatePanelAndOpenNextToMe(canvasMappingDict[CanvasType.GoToSelectedPath].gameObject, MenuController.instance.GetActiveCanvas().GetUniqueId(), new Vector2Int(30, 30));
+                        MovementManager.instance.SetInOutInventory(true);
+                        MenuController.instance.SetBlockingCanvas(true);
                     }
                 }
                 else
@@ -139,26 +127,47 @@ public class MouseShaderController : MonoBehaviour
             }
             else
             {
-                // Unit unit = UnitList.MyUnitsList.FirstOrDefault(u => u.gridPosition == cell.gridPosition);
-                var unitsOnCell = UnitList.MyUnitsList
-                    .Where(u => u.gridPosition == cell.gridPosition)
-                    .ToList();
-
-                if (unitsOnCell != null)
+                if (clickedOnCell)
                 {
-                    Unit selectedUnit = unitsOnCell.Count == 1
-                        ? unitsOnCell[0]
-                        : unitsOnCell.FirstOrDefault(u => !u.isBuilding);
-                    // Une unité a été trouvée sur la cellule
-                    PlayerManager.instance.SetSelectedUnit(selectedUnit);
-                    // Ouvre un menu de selection d'unité
-                    if (PlayerManager.instance.selectedUnit && !PlayerManager.instance.selectedUnit.moveEnded && PlayerManager.instance.selectedUnit.isBuilding)
+                    // Unit unit = UnitList.MyUnitsList.FirstOrDefault(u => u.gridPosition == cell.gridPosition);
+                    var unitsOnCell = UnitList.MyUnitsList
+                        .Where(u => u.gridPosition == cell.gridPosition)
+                        .ToList();
+
+                    if (unitsOnCell != null)
                     {
-                        MenuController.instance.CreatePanelAndOpenNextToMe(canvasMappingDict[CanvasType.BuildingSelected].gameObject, MenuController.instance.GetActiveCanvas().GetUniqueId(), new Vector2Int(30, 30));
-                        MovementManager.instance.SetInOutInventory(true);
-                        MenuController.instance.SetBlockingCanvas(true);
+                        Unit selectedUnit = unitsOnCell.Count == 1
+                            ? unitsOnCell[0]
+                            : unitsOnCell.FirstOrDefault(u => !u.isBuilding);
+                        // Une unité a été trouvée sur la cellule
+                        PlayerManager.instance.SetSelectedUnit(selectedUnit);
+                        // Ouvre un menu de selection d'unité
+                        if (PlayerManager.instance.selectedUnit && !PlayerManager.instance.selectedUnit.moveEnded)
+                        {
+                            if (PlayerManager.instance.selectedUnit.isBuilding)
+                            {
+                                MenuController.instance.CreatePanelAndOpenNextToMe(canvasMappingDict[CanvasType.BuildingSelected].gameObject, MenuController.instance.GetActiveCanvas().GetUniqueId(), new Vector2Int(30, 30));
+                            }
+                            else
+                            {
+                                if (!PlayerManager.instance.selectedUnit.IsOnABuilding())
+                                {
+                                    MenuController.instance.CreatePanelAndOpenNextToMe(canvasMappingDict[CanvasType.UnitMoveOrBuild].gameObject, MenuController.instance.GetActiveCanvas().GetUniqueId(), new Vector2Int(30, 30));
+                                }
+                                else
+                                {
+                                    MenuController.instance.CreatePanelAndOpenNextToMe(canvasMappingDict[CanvasType.UnitMove].gameObject, MenuController.instance.GetActiveCanvas().GetUniqueId(), new Vector2Int(30, 30));
+                                }
+                            }
+                            MovementManager.instance.SetInOutInventory(true);
+                            MenuController.instance.SetBlockingCanvas(true);
+                        }
+                        else
+                        {
+                            Debug.Log("Aucune unité");
+                        }
+                        // MenuController.instance.CreatePanelAndOpenNextToMe(listCanvasManager[0].gameObject, MenuController.instance.GetActiveCanvas().GetUniqueId(), new Vector2Int(30, 30));
                     }
-                    // MenuController.instance.CreatePanelAndOpenNextToMe(listCanvasManager[0].gameObject, MenuController.instance.GetActiveCanvas().GetUniqueId(), new Vector2Int(30, 30));
                 }
             }
             clickedOnCell = false;

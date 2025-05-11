@@ -137,7 +137,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2078115754089386209, guid: 56d7554febe14cb4db3e2998c3c7a3ef, type: 3}
       propertyPath: canvasMapping.Array.size
-      value: 2
+      value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 2078115754089386209, guid: 56d7554febe14cb4db3e2998c3c7a3ef, type: 3}
       propertyPath: listCanvasManager.Array.size
@@ -156,8 +156,24 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 19344224693171388, guid: 2952ac655f5e32a45bca943a63fd0d59, type: 3}
     - target: {fileID: 2078115754089386209, guid: 56d7554febe14cb4db3e2998c3c7a3ef, type: 3}
+      propertyPath: canvasMapping.Array.data[2].canvas
+      value: 
+      objectReference: {fileID: 19344224693171388, guid: a7ff112f5a321e244836795281037c5e, type: 3}
+    - target: {fileID: 2078115754089386209, guid: 56d7554febe14cb4db3e2998c3c7a3ef, type: 3}
+      propertyPath: canvasMapping.Array.data[3].canvas
+      value: 
+      objectReference: {fileID: 19344224693171388, guid: a102f666bfecb274aa5e61c17dcedd29, type: 3}
+    - target: {fileID: 2078115754089386209, guid: 56d7554febe14cb4db3e2998c3c7a3ef, type: 3}
       propertyPath: canvasMapping.Array.data[1].canvasType
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2078115754089386209, guid: 56d7554febe14cb4db3e2998c3c7a3ef, type: 3}
+      propertyPath: canvasMapping.Array.data[2].canvasType
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 2078115754089386209, guid: 56d7554febe14cb4db3e2998c3c7a3ef, type: 3}
+      propertyPath: canvasMapping.Array.data[3].canvasType
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 2208439988909188666, guid: 56d7554febe14cb4db3e2998c3c7a3ef, type: 3}
       propertyPath: terrain

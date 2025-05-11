@@ -28,6 +28,7 @@ public enum ButtonFunction{
 	Build,
 	CreateUnit,
 	BlockCanvas,
+	ChoosePath,
 	Test
 }
 
@@ -95,6 +96,7 @@ public class ButtonManager : MonoBehaviour
 			{ ButtonFunction.Build, new Action(Build) },
 			{ ButtonFunction.CreateUnit, new Action(CreateUnit) },
 			{ ButtonFunction.BlockCanvas, new Action<bool>(BlockCanvas) },
+			{ ButtonFunction.ChoosePath, new Action(ChoosePath) },
 			{ ButtonFunction.Test, new Action(Test) }
         };
     }
@@ -370,6 +372,11 @@ public class ButtonManager : MonoBehaviour
 	private void BlockCanvas(bool _blockCanvas)
 	{
 		MenuController.instance.SetBlockingCanvas(_blockCanvas);
+	}
+
+	private void ChoosePath()
+	{
+		PlayerManager.instance.ChoosePath();
 	}
 
 	private void Test()
