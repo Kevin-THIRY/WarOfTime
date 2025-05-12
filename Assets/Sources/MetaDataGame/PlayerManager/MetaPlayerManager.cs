@@ -14,10 +14,9 @@ public class PlayerInfos
     public int Team { get; set;}
 }
 
-public class BotOption
+public class BotOption : PlayerInfos
 {
     public BotDifficulty botDifficulty{ get; set;}
-    public int Team { get; set;}
 }
 
 public class GameData

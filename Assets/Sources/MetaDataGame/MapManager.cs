@@ -2,20 +2,48 @@ using Unity.Netcode;
 using UnityEngine.UI;
 using UnityEngine;
 using Unity.Collections;
+using System;
+
+
+[System.Serializable]
+public struct PlayerData : INetworkSerializable, IEquatable<PlayerData>
+{
+    public FixedString64Bytes playerName;
+    public Color playerColor;
+    public int playerTeam;
+
+    public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
+    {
+        serializer.SerializeValue(ref playerName);
+        serializer.SerializeValue(ref playerColor);
+        serializer.SerializeValue(ref playerTeam);
+    }
+
+    // Implémentation de IEquatable pour NetworkList
+    public bool Equals(PlayerData other)
+    {
+        return playerName.Equals(other.playerName) &&
+               playerColor.Equals(other.playerColor) &&
+               playerTeam == other.playerTeam;
+    }
+
+    public override int GetHashCode()
+    {
+        return playerName.GetHashCode() ^ playerColor.GetHashCode() ^ playerTeam.GetHashCode();
+    }
+}
 
 public class MapManager : NetworkBehaviour
 {
     public static MapManager Instance;
-    private NetworkVariable<ulong> activePlayerId = new NetworkVariable<ulong>(0);
+    
     private Text turnText;
     private Text activePlayerIdText;
-    private Text playerNameText;
-    private Text playerColorText;
-    private Text playerTeamText;
+
     private NetworkVariable<int> turnCount = new NetworkVariable<int>(0);
-    private NetworkVariable<FixedString64Bytes> playerName = new NetworkVariable<FixedString64Bytes>("");
-    private NetworkVariable<Color> playerColor = new NetworkVariable<Color>(Color.white);
-    private NetworkVariable<int> playerTeam = new NetworkVariable<int>(0);
+    private NetworkVariable<ulong> activePlayerId = new NetworkVariable<ulong>(0);
+
+    public NetworkList<PlayerData> playerList = new NetworkList<PlayerData>();
 
     public void Start()
     {
@@ -34,40 +62,86 @@ public class MapManager : NetworkBehaviour
 
         GetUITextInit();
 
-        turnCount.OnValueChanged += UpdateTurnDisplay;
-        activePlayerId.OnValueChanged += UpdateActivePlayerIdDisplay;
-
-        playerName.OnValueChanged  += UpdatePlayerNameDisplay;
-        playerColor.OnValueChanged += UpdatePlayerColorDisplay;
-        playerTeam.OnValueChanged  += UpdateTeamDisplay;
+        turnCount.OnValueChanged += (oldValue, newValue) => UpdateDisplay(newValue, turnText);
+        activePlayerId.OnValueChanged += (oldValue, newValue) => UpdateDisplay(newValue, activePlayerIdText);
+        
+        playerList.OnListChanged += UpdatePlayerTable;
 
         if (IsServer)
         {
             if (NetworkManager.Singleton.ConnectedClientsList.Count > 0)
                 activePlayerId.Value = NetworkManager.Singleton.ConnectedClientsList[0].ClientId;
-            UpdatePlayerInfosServerRpc();
         }
 
         InitUIText();
+        UpdatePlayerTable();
+        if (IsServer) AddPlayerServerRpc(GameData.playerInfos.Name, GameData.playerInfos.Color, GameData.playerInfos.Team);
+    }
+
+    private void UpdatePlayerTable()
+    {
+        // Vider la table avant de la remplir
+        PlayerTable.Instance.ClearTable();
+
+        // Ajouter chaque joueur présent
+        foreach (PlayerData player in playerList)
+        {
+            PlayerTable.Instance.AddPlayerRow(player.playerName.ToString(), player.playerColor.ToString(), player.playerTeam);
+        }
+    }
+
+    private void UpdatePlayerTable(NetworkListEvent<PlayerData> changeEvent)
+    {
+        switch (changeEvent.Type)
+        {
+            case NetworkListEvent<PlayerData>.EventType.Add:
+                // Ajouter la nouvelle ligne
+                var newPlayer = changeEvent.Value;
+                PlayerTable.Instance.AddPlayerRow(newPlayer.playerName.ToString(), newPlayer.playerColor.ToString(), newPlayer.playerTeam);
+                break;
+
+            case NetworkListEvent<PlayerData>.EventType.Remove:
+                // Supprimer la ligne correspondante
+                var removedPlayer = changeEvent.Value;
+                PlayerTable.Instance.RemovePlayerRow(removedPlayer.playerName.ToString());
+                break;
+
+            case NetworkListEvent<PlayerData>.EventType.Value:
+            case NetworkListEvent<PlayerData>.EventType.Insert:
+            case NetworkListEvent<PlayerData>.EventType.Clear:
+                // Rafraîchir complètement la table si l'événement est complexe
+                UpdatePlayerTable();
+                break;
+        }
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    public void AddPlayerServerRpc(FixedString64Bytes name, Color color, int team)
+    {
+        if (playerList.Count >= 4)
+        {
+            Debug.LogWarning("Impossible d'ajouter le joueur : nombre maximum atteint.");
+            return;
+        }
+        PlayerData newPlayer = new PlayerData
+        {
+            playerName = name,
+            playerColor = color,
+            playerTeam = team
+        };
+        playerList.Add(newPlayer);
     }
 
     private void InitUIText()
     {
-        UpdateTurnDisplay(0, turnCount.Value);
-        UpdateActivePlayerIdDisplay(0, activePlayerId.Value);
-        UpdatePlayerNameDisplay("", playerName.Value);
-        UpdatePlayerColorDisplay(Color.white, playerColor.Value);
-        UpdateTeamDisplay(0, playerTeam.Value);
+        UpdateDisplay(turnCount.Value, turnText);
+        UpdateDisplay(activePlayerId.Value, activePlayerIdText);
     }
 
     private void GetUITextInit()
     {
         turnText = GameObject.Find("MenuSwitch").transform.Find("Base UID Game").transform.Find("Nombre de tour").GetComponent<Text>();
         activePlayerIdText = GameObject.Find("MenuSwitch").transform.Find("Base UID Game").transform.Find("Joueur actif ID").GetComponent<Text>();
-
-        playerNameText = GameObject.Find("MenuSwitch").transform.Find("MultiSettings").transform.Find("HostRowDisplay").transform.Find("PlayerName").GetComponent<Text>();
-        playerColorText = GameObject.Find("MenuSwitch").transform.Find("MultiSettings").transform.Find("HostRowDisplay").transform.Find("PlayerColor").GetComponent<Text>();
-        playerTeamText = GameObject.Find("MenuSwitch").transform.Find("MultiSettings").transform.Find("HostRowDisplay").transform.Find("PlayerTeam").GetComponent<Text>();
     }
 
     public void RequestGridCellUpdate(TerrainGenerator.GridCell updatedCell)
@@ -143,42 +217,10 @@ public class MapManager : NetworkBehaviour
         turnCount.Value++;
     }
 
-    private void UpdateTurnDisplay(int oldValue, int _turnCount)
+    private void UpdateDisplay<T>(T value, Text textComponent)
     {
-        if (turnText != null)
-            turnText.text = $"N o m b r e   d e   t o u r s   :   {_turnCount}";
-    }
-
-    private void UpdateActivePlayerIdDisplay(ulong oldValue, ulong _activePlayerId)
-    {
-        if (activePlayerIdText != null)
-            activePlayerIdText.text = $"I d   j o u e u r   a c t i f   :   {_activePlayerId}";
-    }
-
-    [ServerRpc(RequireOwnership = false)]
-    private void UpdatePlayerInfosServerRpc(ServerRpcParams rpcParams = default)
-    {
-        playerName.Value  = GameData.playerInfos.Name;
-        playerColor.Value = GameData.playerInfos.Color;
-        playerTeam.Value  = GameData.playerInfos.Team;
-    }
-
-    private void UpdatePlayerNameDisplay(FixedString64Bytes oldValue, FixedString64Bytes _playerName)
-    {
-        if (playerNameText != null)
-            playerNameText.text = $"{_playerName}";
-    }
-
-    private void UpdatePlayerColorDisplay(Color oldValue, Color _playerColor)
-    {
-        if (playerColorText != null)
-            playerColorText.text = $"{_playerColor}";
-    }
-
-    private void UpdateTeamDisplay(int oldValue, int _playerTeam)
-    {
-        if (playerTeamText != null)
-            playerTeamText.text = $"{_playerTeam}";
+        if (textComponent != null)
+            textComponent.text = value.ToString();
     }
 
     public bool IsMyTurn()

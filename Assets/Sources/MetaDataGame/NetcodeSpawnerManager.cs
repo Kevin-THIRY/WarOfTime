@@ -29,6 +29,7 @@ public class NetworkSpawnerManager : NetworkBehaviour
             Instance = this;
             RequestAllUnitsServerRpc();
             if (IsServer) RequestSpawnUnitServerRpc(nationType, UnitType.MapManager, Vector3.zero);
+            if (!IsHost) MapManager.Instance.AddPlayerServerRpc(GameData.playerInfos.Name, GameData.playerInfos.Color, GameData.playerInfos.Team);
             MovementManager.instance.SetInOutInventory(true);
             // RequestSpawnUnitServerRpc(nationType, UnitType.Peasant, Vector3.zero);
         }
