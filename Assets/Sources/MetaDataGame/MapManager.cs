@@ -136,6 +136,32 @@ public class MapManager : NetworkBehaviour
         playerList.Add(newPlayer);
     }
 
+    [ServerRpc(RequireOwnership = false)]
+    public void RemovePlayerFromNameServerRpc(FixedString64Bytes name)
+    {
+        if (playerList == null || playerList.Count == 0) return;
+
+        // Cherche l'index du joueur à supprimer
+        int indexToRemove = -1;
+        for (int i = 0; i < playerList.Count; i++)
+        {
+            if (playerList[i].playerName == name)
+            {
+                indexToRemove = i;
+                break;
+            }
+        }
+
+        if (indexToRemove != -1) playerList.RemoveAt(indexToRemove);
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    public void RemovePlayerFromRowIndexServerRpc(int index)
+    {
+        if (playerList == null || playerList.Count == 0) return;
+        playerList.RemoveAt(index);
+    }
+
     private void InitUIText()
     {
         UpdateDisplay(turnCount.Value, turnText);
