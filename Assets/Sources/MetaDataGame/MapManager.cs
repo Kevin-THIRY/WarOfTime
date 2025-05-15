@@ -11,12 +11,14 @@ public struct PlayerData : INetworkSerializable, IEquatable<PlayerData>
     public FixedString64Bytes playerName;
     public Color playerColor;
     public int playerTeam;
+    public bool isBot;
 
     public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
     {
         serializer.SerializeValue(ref playerName);
         serializer.SerializeValue(ref playerColor);
         serializer.SerializeValue(ref playerTeam);
+        serializer.SerializeValue(ref isBot);
     }
 
     // Implémentation de IEquatable pour NetworkList
@@ -24,12 +26,13 @@ public struct PlayerData : INetworkSerializable, IEquatable<PlayerData>
     {
         return playerName.Equals(other.playerName) &&
                playerColor.Equals(other.playerColor) &&
-               playerTeam == other.playerTeam;
+               playerTeam == other.playerTeam &&
+               isBot == other.isBot;
     }
 
     public override int GetHashCode()
     {
-        return playerName.GetHashCode() ^ playerColor.GetHashCode() ^ playerTeam.GetHashCode();
+        return playerName.GetHashCode() ^ playerColor.GetHashCode() ^ playerTeam.GetHashCode() ^ isBot.GetHashCode();
     }
 }
 
@@ -75,7 +78,7 @@ public class MapManager : NetworkBehaviour
 
         InitUIText();
         UpdatePlayerTable();
-        if (IsServer) AddPlayerServerRpc(GameData.playerInfos.Name, GameData.playerInfos.Color, GameData.playerInfos.Team);
+        if (IsServer) AddPlayerServerRpc(GameData.playerInfos.Name, GameData.playerInfos.Color, GameData.playerInfos.Team, GameData.playerInfos.isBot);
     }
 
     private void UpdatePlayerTable()
@@ -86,7 +89,7 @@ public class MapManager : NetworkBehaviour
         // Ajouter chaque joueur présent
         foreach (PlayerData player in playerList)
         {
-            PlayerTable.Instance.AddPlayerRow(player.playerName.ToString(), player.playerColor.ToString(), player.playerTeam);
+            PlayerTable.Instance.AddPlayerRow(player.playerName.ToString(), player.playerColor.ToString(), player.playerTeam, player.isBot);
         }
     }
 
@@ -97,7 +100,7 @@ public class MapManager : NetworkBehaviour
             case NetworkListEvent<PlayerData>.EventType.Add:
                 // Ajouter la nouvelle ligne
                 var newPlayer = changeEvent.Value;
-                PlayerTable.Instance.AddPlayerRow(newPlayer.playerName.ToString(), newPlayer.playerColor.ToString(), newPlayer.playerTeam);
+                PlayerTable.Instance.AddPlayerRow(newPlayer.playerName.ToString(), newPlayer.playerColor.ToString(), newPlayer.playerTeam, newPlayer.isBot);
                 break;
 
             case NetworkListEvent<PlayerData>.EventType.Remove:
@@ -116,7 +119,7 @@ public class MapManager : NetworkBehaviour
     }
 
     [ServerRpc(RequireOwnership = false)]
-    public void AddPlayerServerRpc(FixedString64Bytes name, Color color, int team)
+    public void AddPlayerServerRpc(FixedString64Bytes name, Color color, int team, bool bot)
     {
         if (playerList.Count >= 4)
         {
@@ -127,7 +130,8 @@ public class MapManager : NetworkBehaviour
         {
             playerName = name,
             playerColor = color,
-            playerTeam = team
+            playerTeam = team,
+            isBot = bot
         };
         playerList.Add(newPlayer);
     }

@@ -310,30 +310,30 @@ public class ButtonManager : MonoBehaviour
 
 	private void AddPlayer()
 	{
-		GameData.playerInfos = new PlayerInfos { Name = "Joueur" + NetworkManager.Singleton.ConnectedClientsList.Count, Color = Color.blue, Team = 0 };
+		GameData.playerInfos = new PlayerInfos { Name = "Joueur" + NetworkManager.Singleton.ConnectedClientsList.Count, Color = Color.blue, Team = 0, isBot = false };
 	}
 
 	private void AddBot()
 	{
 		GameData.botList.Add(new BotOption { Name = "Bot" + GameData.botList.Count, Color = Color.blue, botDifficulty = BotDifficulty.Easy, Team = 0 });
-		MapManager.Instance.AddPlayerServerRpc(GameData.botList[GameData.botList.Count - 1].Name, GameData.botList[GameData.botList.Count - 1].Color, GameData.botList[GameData.botList.Count - 1].Team);
+		MapManager.Instance.AddPlayerServerRpc(GameData.botList[GameData.botList.Count - 1].Name, GameData.botList[GameData.botList.Count - 1].Color, GameData.botList[GameData.botList.Count - 1].Team, true);
 	}
 
 	private void LaunchHostSession()
 	{
-		GameData.playerInfos = new PlayerInfos { Name = "Host", Color = Color.blue, Team = 0 };
+		GameData.playerInfos = new PlayerInfos { Name = "Host", Color = Color.blue, Team = 0, isBot = false };
 		manager.StartServeur();
 	}
 
 	private void LaunchHost()
 	{
-		GameData.playerInfos = new PlayerInfos { Name = "Host", Color = Color.blue, Team = 0 };
+		GameData.playerInfos = new PlayerInfos { Name = "Host", Color = Color.blue, Team = 0, isBot = false };
 		manager.StartHost();
 	}
 
 	private void ConnectClient(string ipAddress)
 	{
-		GameData.playerInfos = new PlayerInfos { Name = "Client", Color = Color.red, Team = NetworkManager.Singleton.ConnectedClientsList.Count };
+		GameData.playerInfos = new PlayerInfos { Name = "Client", Color = Color.red, Team = NetworkManager.Singleton.ConnectedClientsList.Count, isBot = false };
 		manager.StartClient(ipAddress);
 	}
 

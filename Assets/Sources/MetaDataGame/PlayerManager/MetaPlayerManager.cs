@@ -12,6 +12,7 @@ public class PlayerInfos
     public string Name { get; set;}
     public Color Color { get; set;}
     public int Team { get; set;}
+    public bool isBot { get; set;}
 }
 
 public class BotOption : PlayerInfos

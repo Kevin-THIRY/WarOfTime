@@ -22,7 +22,7 @@ public class PlayerTable : MonoBehaviour
         }
     }
 
-    public void AddPlayerRow(string playerName, string playerColor, int playerTeam)
+    public void AddPlayerRow(string playerName, string playerColor, int playerTeam, bool isBot)
     {
         // Vérifie que les éléments UI sont bien assignés
         if (rowPrefab == null || tableParent == null)
@@ -37,11 +37,12 @@ public class PlayerTable : MonoBehaviour
         // Récupère tous les éléments Text de la ligne
         Text[] columns = newRow.GetComponentsInChildren<Text>();
         
-        if (columns.Length >= 3)
+        if (columns.Length >= 4)
         {
             columns[0].text = playerName;
             columns[1].text = playerColor;
             columns[2].text = playerTeam.ToString();
+            columns[3].text = isBot.ToString();
         }
         else
         {
