@@ -62,6 +62,37 @@ public class PlayerTable : MonoBehaviour
         }
     }
 
+    public void UpdatePlayerRow(int index, string playerName, Color playerColor, int playerTeam, bool isBot)
+    {
+        // Vérification de base
+        if (index < 0 || index >= tableParent.childCount)
+        {
+            Debug.LogError("Index hors limites !");
+            return;
+        }
+
+        // Récupère la ligne existante
+        Transform row = tableParent.GetChild(index);
+        Text[] columns = row.GetComponentsInChildren<Text>();
+
+        // MAJ UI
+        if (columns.Length >= 4)
+        {
+            columns[0].text = playerName;
+            columns[1].text = playerColor.ToString();
+            columns[2].text = playerTeam.ToString();
+            columns[3].text = isBot.ToString();
+        }
+        else
+        {
+            Debug.LogError("Le prefab de ligne doit contenir au moins 4 Text !");
+        }
+
+        if (!isBot) players.Add(new PlayerInfos { Name = playerName, Color = playerColor, Team = playerTeam, isBot = isBot });
+        else bots.Add(new BotOption { Name = playerName, Color = playerColor, Team = playerTeam, isBot = isBot, botDifficulty = BotDifficulty.Easy });
+        playersAndBots.Add(new PlayerInfos { Name = playerName, Color = playerColor, Team = playerTeam, isBot = isBot });
+    }
+
     public void RemovePlayerRow(string playerName)
     {
         foreach (Transform row in tableParent)
@@ -83,8 +114,17 @@ public class PlayerTable : MonoBehaviour
         {
             Destroy(child.gameObject);
         }
+        playersAndBots.Clear();
+        players.Clear();
+        bots.Clear();
     }
 
+    public void ClearLists()
+    {
+        playersAndBots.Clear();
+        players.Clear();
+        bots.Clear();
+    }
     public string GetPlayerName(string searchValue, int columnIndex = 0)
     {
         foreach (Transform row in tableParent)

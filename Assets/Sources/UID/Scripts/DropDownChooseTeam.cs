@@ -1,7 +1,8 @@
 using UnityEngine;
-using UnityEngine.UI;
 using System.Collections.Generic;
 using TMPro;
+using System.Linq;
+using Unity.Netcode;
 
 public class DropDownChooseTeam : MonoBehaviour
 {
@@ -13,7 +14,9 @@ public class DropDownChooseTeam : MonoBehaviour
         dropdown = GetComponent<TMP_Dropdown>();
         if (dropdown == null) return;
         if (PlayerTable.Instance == null) return;
-        oldList = PlayerTable.Instance.playersAndBots;
+        oldList = new List<PlayerInfos>();
+        dropdown.onValueChanged.AddListener(OnDropdownChanged);
+        if (!NetworkManager.Singleton.IsServer) dropdown.interactable = false;
     }
 
     private void FixedUpdate()
@@ -24,15 +27,39 @@ public class DropDownChooseTeam : MonoBehaviour
             return;
         }
         if (PlayerTable.Instance == null) return;
-
-        // if (oldList.Select(p => p.Name).SequenceEqual(PlayerTable.Instance.playersAndBots.Select(p => p.Name))) return;
-        // Ajouter des options dynamiquement
-        dropdown.ClearOptions();
-        List<string> options = new List<string>();
-        foreach (PlayerInfos player in PlayerTable.Instance.playersAndBots)
+        if (!oldList.SequenceEqual(PlayerTable.Instance.playersAndBots))
         {
-            if (!options.Contains($"Team {player.Team}")) options.Add($"Team {player.Team}");
+            dropdown.onValueChanged.RemoveAllListeners();
+            dropdown.onValueChanged.AddListener(OnDropdownChanged);
+
+            dropdown.ClearOptions();
+            List<string> options = new List<string>();
+
+            for (int i = 0; i < PlayerTable.Instance.playersAndBots.Count; i++) options.Add($"Team {i}");
+            dropdown.AddOptions(options);
+            dropdown.value = MapManager.Instance.playerList[transform.parent.GetSiblingIndex()].playerTeam;
+
+            oldList = new List<PlayerInfos>(PlayerTable.Instance.playersAndBots); // Copie profonde
         }
-        dropdown.AddOptions(options);
+    }
+
+    private void OnDropdownChanged(int index)
+    {
+        if (!NetworkManager.Singleton.IsServer) return;
+        string selectedOption = dropdown.options[index].text;
+
+        // Tu peux parser l’index si tu veux retrouver le numéro de team
+        if (selectedOption.StartsWith("Team "))
+        {
+            if (int.TryParse(selectedOption.Substring(5), out int teamNumber))
+            {
+                PlayerData _playerDatasForDropDownBox = MapManager.Instance.playerList[transform.parent.GetSiblingIndex()];
+                MapManager.Instance.UpdatePlayerInfosServerRpc(transform.parent.GetSiblingIndex(),
+                                                                _playerDatasForDropDownBox.playerName.ToString(),
+                                                                _playerDatasForDropDownBox.playerColor,
+                                                                teamNumber,
+                                                                _playerDatasForDropDownBox.isBot);
+            }
+        }
     }
 }

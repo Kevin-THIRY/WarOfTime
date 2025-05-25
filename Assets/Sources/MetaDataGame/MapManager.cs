@@ -77,11 +77,11 @@ public class MapManager : NetworkBehaviour
         }
 
         InitUIText();
-        UpdatePlayerTable();
+        ResetPlayerTable();
         if (IsServer) AddPlayerServerRpc(GameData.playerInfos.Name, GameData.playerInfos.Color, GameData.playerInfos.Team, GameData.playerInfos.isBot);
     }
 
-    private void UpdatePlayerTable()
+    private void ResetPlayerTable()
     {
         // Vider la table avant de la remplir
         PlayerTable.Instance.ClearTable();
@@ -90,6 +90,17 @@ public class MapManager : NetworkBehaviour
         foreach (PlayerData player in playerList)
         {
             PlayerTable.Instance.AddPlayerRow(player.playerName.ToString(), player.playerColor, player.playerTeam, player.isBot);
+        }
+    }
+
+    private void UpdatePlayerTable()
+    {
+        PlayerTable.Instance.ClearLists();
+        // Ajouter chaque joueur présent
+        for (int i = 0; i < playerList.Count; i++)
+        {
+            PlayerData player = playerList[i];
+            PlayerTable.Instance.UpdatePlayerRow(i, player.playerName.ToString(), player.playerColor, player.playerTeam, player.isBot);
         }
     }
 
@@ -110,10 +121,12 @@ public class MapManager : NetworkBehaviour
                 break;
 
             case NetworkListEvent<PlayerData>.EventType.Value:
+                UpdatePlayerTable();
+                break;
             case NetworkListEvent<PlayerData>.EventType.Insert:
             case NetworkListEvent<PlayerData>.EventType.Clear:
                 // Rafraîchir complètement la table si l'événement est complexe
-                UpdatePlayerTable();
+                ResetPlayerTable();
                 break;
         }
     }
@@ -153,6 +166,15 @@ public class MapManager : NetworkBehaviour
         }
 
         if (indexToRemove != -1) playerList.RemoveAt(indexToRemove);
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    public void UpdatePlayerInfosServerRpc(int idx, FixedString64Bytes name, Color color, int team, bool bot)
+    {
+        if (playerList == null || playerList.Count == 0) return;
+
+        // Cherche l'index du joueur à supprimer
+        playerList[idx] = new PlayerData { playerName = name, playerColor = color, playerTeam = team, isBot = bot };
     }
 
     [ServerRpc(RequireOwnership = false)]

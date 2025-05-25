@@ -315,9 +315,7 @@ public class ButtonManager : MonoBehaviour
 
 	private void AddBot()
 	{
-		int nbBots = PlayerTable.Instance.GetBotList().Count;
-		GameData.botList.Add(new BotOption { Name = "Bot" + nbBots, Color = Color.blue, botDifficulty = BotDifficulty.Easy, Team = 0 });
-		MapManager.Instance.AddPlayerServerRpc(GameData.botList[GameData.botList.Count - 1].Name, GameData.botList[GameData.botList.Count - 1].Color, 0, true);
+		MapManager.Instance.AddPlayerServerRpc("Bot " + PlayerTable.Instance.bots.Count, Color.blue, PlayerTable.Instance.playersAndBots.Count, true);
 	}
 
 	private void LaunchHostSession()
@@ -334,8 +332,8 @@ public class ButtonManager : MonoBehaviour
 
 	private void ConnectClient(string ipAddress)
 	{
-		GameData.playerInfos = new PlayerInfos { Name = "Client", Color = Color.red, Team = PlayerTable.Instance.players.Count + 1, isBot = false };
 		manager.StartClient(ipAddress);
+		GameData.playerInfos = new PlayerInfos { Name = "Client", Color = Color.red, Team = PlayerTable.Instance.playersAndBots.Count, isBot = false };
 	}
 
 	private void LaunchNewSceneFromHost(string sceneFromHost)
