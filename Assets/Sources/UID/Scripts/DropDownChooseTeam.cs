@@ -5,20 +5,34 @@ using TMPro;
 
 public class DropDownChooseTeam : MonoBehaviour
 {
-    [SerializeField] private TMP_Dropdown dropdown;
+    private TMP_Dropdown dropdown;
+    private List<PlayerInfos> oldList;
 
     private void Start()
     {
+        dropdown = GetComponent<TMP_Dropdown>();
         if (dropdown == null) return;
         if (PlayerTable.Instance == null) return;
+        oldList = PlayerTable.Instance.playersAndBots;
+    }
 
+    private void FixedUpdate()
+    {
+        if (dropdown == null)
+        {
+            dropdown = GetComponent<TMP_Dropdown>();
+            return;
+        }
+        if (PlayerTable.Instance == null) return;
+
+        // if (oldList.Select(p => p.Name).SequenceEqual(PlayerTable.Instance.playersAndBots.Select(p => p.Name))) return;
         // Ajouter des options dynamiquement
         dropdown.ClearOptions();
-        PlayerTable.Instance.GetPlayerList();
-
         List<string> options = new List<string>();
-        List<string> playerNames = PlayerTable.Instance.GetPlayerList();
-        for (int i = 0; i < playerNames.Count; i++) options.Add($"Team {i + 1} - {playerNames[i]}");
+        foreach (PlayerInfos player in PlayerTable.Instance.playersAndBots)
+        {
+            if (!options.Contains($"Team {player.Team}")) options.Add($"Team {player.Team}");
+        }
         dropdown.AddOptions(options);
     }
 }

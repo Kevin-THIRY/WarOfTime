@@ -89,7 +89,7 @@ public class MapManager : NetworkBehaviour
         // Ajouter chaque joueur présent
         foreach (PlayerData player in playerList)
         {
-            PlayerTable.Instance.AddPlayerRow(player.playerName.ToString(), player.playerColor.ToString(), player.playerTeam, player.isBot);
+            PlayerTable.Instance.AddPlayerRow(player.playerName.ToString(), player.playerColor, player.playerTeam, player.isBot);
         }
     }
 
@@ -100,7 +100,7 @@ public class MapManager : NetworkBehaviour
             case NetworkListEvent<PlayerData>.EventType.Add:
                 // Ajouter la nouvelle ligne
                 var newPlayer = changeEvent.Value;
-                PlayerTable.Instance.AddPlayerRow(newPlayer.playerName.ToString(), newPlayer.playerColor.ToString(), newPlayer.playerTeam, newPlayer.isBot);
+                PlayerTable.Instance.AddPlayerRow(newPlayer.playerName.ToString(), newPlayer.playerColor, newPlayer.playerTeam, newPlayer.isBot);
                 break;
 
             case NetworkListEvent<PlayerData>.EventType.Remove:

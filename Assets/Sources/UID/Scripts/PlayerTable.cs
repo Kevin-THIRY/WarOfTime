@@ -10,6 +10,10 @@ public class PlayerTable : MonoBehaviour
     [SerializeField] private GameObject rowPrefab;
     [SerializeField] private Transform tableParent;
 
+    public List<PlayerInfos> players;
+    public List<BotOption> bots;
+    public List<PlayerInfos> playersAndBots;
+
     private void Awake()
     {
         // Singleton pattern pour un accès global
@@ -21,9 +25,12 @@ public class PlayerTable : MonoBehaviour
         {
             Destroy(gameObject);
         }
+        players = new List<PlayerInfos>();
+        bots = new List<BotOption>();
+        playersAndBots = new List<PlayerInfos>();
     }
 
-    public void AddPlayerRow(string playerName, string playerColor, int playerTeam, bool isBot)
+    public void AddPlayerRow(string playerName, Color playerColor, int playerTeam, bool isBot)
     {
         // Vérifie que les éléments UI sont bien assignés
         if (rowPrefab == null || tableParent == null)
@@ -37,11 +44,15 @@ public class PlayerTable : MonoBehaviour
 
         // Récupère tous les éléments Text de la ligne
         Text[] columns = newRow.GetComponentsInChildren<Text>();
+
+        if (!isBot) players.Add(new PlayerInfos { Name = playerName, Color = playerColor, Team = playerTeam, isBot = isBot });
+        else bots.Add(new BotOption { Name = playerName, Color = playerColor, Team = playerTeam, isBot = isBot, botDifficulty = BotDifficulty.Easy });
+        playersAndBots.Add(new PlayerInfos { Name = playerName, Color = playerColor, Team = playerTeam, isBot = isBot });
         
         if (columns.Length >= 4)
         {
             columns[0].text = playerName;
-            columns[1].text = playerColor;
+            columns[1].text = playerColor.ToString();
             columns[2].text = playerTeam.ToString();
             columns[3].text = isBot.ToString();
         }
@@ -104,18 +115,5 @@ public class PlayerTable : MonoBehaviour
         }
 
         return botNames;
-    }
-
-    public List<string> GetPlayerList()
-    {
-        List<string> playerNames = new List<string>();
-
-        foreach (Transform row in tableParent)
-        {
-            Text[] columns = row.GetComponentsInChildren<Text>();
-            // Vérifie si la ligne a au moins 1 colonne (le nom du joueur)
-            if (columns.Length > 0) playerNames.Add(columns[0].text);
-        }
-        return playerNames;
     }
 }

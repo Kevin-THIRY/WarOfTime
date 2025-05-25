@@ -101,7 +101,7 @@ public class MouseShaderController : MonoBehaviour
 
     private void DoActionsWithUnit(TerrainGenerator.GridCell cell)
     {
-        if (PlayerManager.instance != null && MapManager.Instance.IsMyTurn())
+        if (PlayerManager.instance != null && MapManager.Instance != null && MapManager.Instance.IsMyTurn())
         {
             if (PlayerManager.instance.selectedUnit)
             {
