@@ -29,6 +29,7 @@ public enum ButtonFunction{
 	CreateUnit,
 	BlockCanvas,
 	ChoosePath,
+	StartParty,
 	Test
 }
 
@@ -97,6 +98,7 @@ public class ButtonManager : MonoBehaviour
 			{ ButtonFunction.CreateUnit, new Action(CreateUnit) },
 			{ ButtonFunction.BlockCanvas, new Action<bool>(BlockCanvas) },
 			{ ButtonFunction.ChoosePath, new Action(ChoosePath) },
+			{ ButtonFunction.StartParty, new Action(StartParty) },
 			{ ButtonFunction.Test, new Action(Test) }
         };
     }
@@ -377,6 +379,12 @@ public class ButtonManager : MonoBehaviour
 	private void ChoosePath()
 	{
 		PlayerManager.instance.ChoosePath();
+	}
+
+	private void StartParty()
+	{
+
+		NetworkSpawnerManager.Instance.InitSpawnServerRpc();
 	}
 
 	private void Test()

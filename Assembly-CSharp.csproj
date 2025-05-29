@@ -86,6 +86,7 @@
     <Compile Include="Assets\Sources\MetaDataGame\PlayerManager\MetaPlayerManager.cs" />
     <Compile Include="Assets\Sources\Player\Scripts\CanvasCharacterManager.cs" />
     <Compile Include="Assets\TutorialInfo\Scripts\Readme.cs" />
+    <Compile Include="Assets\Sources\Ai\MetaAIManager.cs" />
     <Compile Include="Assets\Sources\FogOfWar\Scripts\FogOfWar.cs" />
     <Compile Include="Assets\Sources\UnlockedFog\Scripts\UnlockedFog.cs" />
     <Compile Include="Assets\Sources\Mesh Optimizer\Scripts\OptimizeMesh.cs" />

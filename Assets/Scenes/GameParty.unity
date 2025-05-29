@@ -3433,7 +3433,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5355458695114469533, guid: 2f0fe4adaa414154683c6e4720dac96f, type: 3}
       propertyPath: actionsToPerform.Array.size
-      value: 3
+      value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 5355458695114469533, guid: 2f0fe4adaa414154683c6e4720dac96f, type: 3}
       propertyPath: 'actionsToPerform.Array.data[1]'
@@ -3442,6 +3442,10 @@ PrefabInstance:
     - target: {fileID: 5355458695114469533, guid: 2f0fe4adaa414154683c6e4720dac96f, type: 3}
       propertyPath: 'actionsToPerform.Array.data[2]'
       value: 19
+      objectReference: {fileID: 0}
+    - target: {fileID: 5355458695114469533, guid: 2f0fe4adaa414154683c6e4720dac96f, type: 3}
+      propertyPath: 'actionsToPerform.Array.data[3]'
+      value: 21
       objectReference: {fileID: 0}
     - target: {fileID: 8157862164507402858, guid: 2f0fe4adaa414154683c6e4720dac96f, type: 3}
       propertyPath: m_SizeDelta.x

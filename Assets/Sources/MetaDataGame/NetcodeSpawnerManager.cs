@@ -35,6 +35,34 @@ public class NetworkSpawnerManager : NetworkBehaviour
         }
     }
 
+    [ServerRpc(RequireOwnership = false)]
+    public void InitSpawnServerRpc(ServerRpcParams rpcParams = default)
+    {
+        if (IsServer)
+        {
+            InitSpawnClientRpc();
+            RequestSpawnUnitServerRpc(nationType, UnitType.Peasant, Vector3.zero); // Faire une fonction pour faire spawn les untités de départ d'un joueur
+            foreach (BotOption bot in PlayerTable.Instance.bots)
+            {
+                BotList.AllBots.Add(bot);
+                // SpawnBot(bot); // Fonction qui gere la meta du bot
+                // SpawnBotUnits(bot); // Fonction qui fait spawn les unités de départ d'un bot
+            }
+        }
+    }
+
+    [ClientRpc]
+    private void InitSpawnClientRpc()
+    {
+        if (!IsHost)
+        {
+            RequestSpawnUnitServerRpc(nationType, UnitType.Peasant, Vector3.zero); // Faire une fonction pour faire spawn les untités de départ d'un joueur
+            MovementManager.instance.SetInOutInventory(false);
+            MenuController.instance.SetBlockingCanvas(false);
+            MenuController.instance.ChangePanel(Type.BaseUID, 0, type => type == Type.None, (type, button) => button.GetButtonType() == type);
+        }
+    }
+
     public GameObject GetPrefab(NationType nation, UnitType unit)
     {
         if (nationUnitDict.TryGetValue(nation, out var unitDict) &&

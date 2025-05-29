@@ -37,11 +37,6 @@ public class PlayerInfos
     }
 }
 
-public class BotOption : PlayerInfos
-{
-    public BotDifficulty botDifficulty{ get; set;}
-}
-
 public class GameData
 {
     public static PlayerInfos playerInfos = new PlayerInfos();
