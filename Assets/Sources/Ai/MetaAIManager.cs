@@ -2,11 +2,12 @@
 using System.Collections.Generic;
 public static class BotList
 {
-    public static List<BotOption> AllBots = new List<BotOption>();
+    public static List<BotOption> Bots = new List<BotOption>();
 }
 
 public class BotOption : PlayerInfos
 {
+    public int id;
     public BotDifficulty botDifficulty { get; set; }
-    public static List<Unit> BotUnits = new List<Unit>();
+    public List<Unit> BotUnits = new List<Unit>();
 }

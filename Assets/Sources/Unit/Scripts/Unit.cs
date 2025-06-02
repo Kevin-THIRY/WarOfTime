@@ -39,6 +39,8 @@ public class Unit : NetworkBehaviour
     [NonSerialized] public Vector2 gridPosition;
     [NonSerialized] public bool moveEnded;
     public bool isBuilding = false;
+    public bool isBot; // ta variable locale bool
+    public int botId = -1;
 
     void Start()
     {
@@ -56,7 +58,7 @@ public class Unit : NetworkBehaviour
         var (x, y) = ElementaryBasics.GetGridPositionFromWorldPosition(transform.position);
         id = UnitList.AllUnits.Count;
         unitName = name;
-        
+
         gridPosition.x = x;
         gridPosition.y = y;
 
@@ -68,6 +70,7 @@ public class Unit : NetworkBehaviour
             var spawnCell = TerrainGenerator.instance.gridCells[x, y];
             spawnCell.isOccupied = true;
             MapManager.Instance.RequestGridCellUpdate(spawnCell);
+            if (isBot) ChangeIntoBotServerRpc(NetworkObjectId, botId);
         }
     }
 
@@ -86,6 +89,23 @@ public class Unit : NetworkBehaviour
             Unit unit = netObj.GetComponent<Unit>();
             UnitList.AllUnits.Add(unit);
         }
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    void ChangeIntoBotServerRpc(ulong networkObjectId, int botId)
+    {
+        ChangeIntoBotClientRpc(networkObjectId, botId);
+    }
+
+    [ClientRpc]
+    void ChangeIntoBotClientRpc(ulong networkObjectId, int botId)
+    {
+        // Trouve ton unité par NetworkObjectId
+        var unit = NetworkManager.Singleton.SpawnManager.SpawnedObjects[networkObjectId].GetComponent<Unit>();
+        if (unit == null) return;
+        unit.isBot = true;
+        unit.botId = botId;
+        MoveUnitToBotList(unit, botId);
     }
 
     [ServerRpc(RequireOwnership = false)]
@@ -123,7 +143,7 @@ public class Unit : NetworkBehaviour
     {
         if (IsOwner)
         {
-            if (path == null || path.Count == 0) 
+            if (path == null || path.Count == 0)
             {
                 onComplete?.Invoke(false, Vector2.zero);
                 yield return null;
@@ -134,13 +154,13 @@ public class Unit : NetworkBehaviour
                 foreach (Vector2 targetGridPos in path)
                 {
                     Vector3 targetWorldPos = ElementaryBasics.GetWorldPositionFromGridCoordinates((int)targetGridPos.x, (int)targetGridPos.y, true);
-                    
+
                     while (Vector3.Distance(transform.position, targetWorldPos) > 0.1f)
                     {
                         transform.position = Vector3.MoveTowards(transform.position, targetWorldPos, speed * Time.deltaTime);
                         yield return null;
                     }
-                    
+
                     gridPosition = targetGridPos; // Met à jour la position une fois arrivé
                     NotifyUnitMovedServerRpc(NetworkObjectId, gridPosition);
                 }
@@ -153,5 +173,23 @@ public class Unit : NetworkBehaviour
             onComplete?.Invoke(false, Vector2.zero);
             yield return null;
         }
+    }
+    
+    public void MoveUnitToBotList(Unit unit, int botId)
+    {
+        // Enlève l'unité de MyUnitsList si elle y est
+        UnitList.MyUnitsList.Remove(unit);
+
+        // Cherche le BotOption correspondant au botId
+        BotOption bot = BotList.Bots.Find(b => b.id == botId);
+
+        if (bot == null)
+        {
+            Debug.LogWarning($"Bot avec id {botId} introuvable dans BotList !");
+            return;
+        }
+
+        // Ajoute l'unité à la liste BotUnits de ce bot
+        if (!bot.BotUnits.Contains(unit)) bot.BotUnits.Add(unit);
     }
 }

@@ -42,9 +42,12 @@ public class NetworkSpawnerManager : NetworkBehaviour
         {
             InitSpawnClientRpc();
             RequestSpawnUnitServerRpc(nationType, UnitType.Peasant, Vector3.zero); // Faire une fonction pour faire spawn les untités de départ d'un joueur
+
             foreach (BotOption bot in PlayerTable.Instance.bots)
             {
-                BotList.AllBots.Add(bot);
+                int id = BotList.Bots.Count;
+                AddBotServerRpc(bot.botDifficulty, id);
+                RequestSpawnUnitServerRpc(nationType, UnitType.Peasant, Vector3.zero, true, id);
                 // SpawnBot(bot); // Fonction qui gere la meta du bot
                 // SpawnBotUnits(bot); // Fonction qui fait spawn les unités de départ d'un bot
             }
@@ -76,7 +79,7 @@ public class NetworkSpawnerManager : NetworkBehaviour
     }
 
     [ServerRpc(RequireOwnership = false)]
-    public void RequestSpawnUnitServerRpc(NationType nation, UnitType unitType, Vector3 spawnPos, ServerRpcParams rpcParams = default)
+    public void RequestSpawnUnitServerRpc(NationType nation, UnitType unitType, Vector3 spawnPos, bool isBot = false, int botId = -1, ServerRpcParams rpcParams = default)
     {
         ulong clientId = rpcParams.Receive.SenderClientId;
 
@@ -85,6 +88,12 @@ public class NetworkSpawnerManager : NetworkBehaviour
 
         GameObject unit = Instantiate(prefab, spawnPos, Quaternion.identity);
         
+        Unit unitComponent = unit.GetComponent<Unit>(); // ton script avec IsBot
+        if (unitComponent != null)
+        {
+            unitComponent.isBot = isBot;
+            unitComponent.botId = botId;
+        }
         unit.name = $"Client_{clientId}_Nation_{nation}_Unit_{unitType}";
         unit.GetComponent<NetworkObject>().SpawnWithOwnership(clientId);
         SetLayerRecursively(unit, LayerMask.NameToLayer("VisibleToPlayer"));
@@ -121,6 +130,21 @@ public class NetworkSpawnerManager : NetworkBehaviour
                 TerrainGenerator.instance.gridCells[(int)unit.gridPosition.x, (int)unit.gridPosition.y].isOccupied = true;
             }
         }
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    void AddBotServerRpc(BotDifficulty botDifficulty, int botId)
+    {
+        AddBotClientRpc(botDifficulty, botId);
+    }
+
+    [ClientRpc]
+    void AddBotClientRpc(BotDifficulty botDifficulty, int botId)
+    {
+        BotOption bot = new BotOption();
+        bot.botDifficulty = botDifficulty;
+        bot.id = botId;
+        BotList.Bots.Add(bot);
     }
 
     private void SetLayerRecursively(GameObject obj, int newLayer)
