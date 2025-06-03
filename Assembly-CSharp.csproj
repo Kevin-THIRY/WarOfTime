@@ -69,6 +69,7 @@
     <Compile Include="Assets\Sources\UID\Scripts\MenuController.cs" />
     <Compile Include="Assets\Sources\MetaDataGame\GameManager.cs" />
     <Compile Include="Assets\Sources\Terrain\Scripts\TerrainGenerator.cs" />
+    <Compile Include="Assets\Sources\Ai\AIManager.cs" />
     <Compile Include="Assets\Sources\Surbrillance\Scripts\MouseShaderController.cs" />
     <Compile Include="Assets\Sources\MetaDataGame\MapManager.cs" />
     <Compile Include="Assets\Sources\Terrain\Scripts\ResourcesGenerator.cs" />

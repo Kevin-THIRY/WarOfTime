@@ -5,57 +5,16 @@ using System.Collections;
 using Unity.Netcode;
 using System;
 
-public class ElementaryBasics
+public class AIManager : MonoBehaviour
 {
-    public static HashSet<(int, int)> revealedCells = new HashSet<(int, int)>();
-    public static HashSet<(int, int)> visibleCells = new HashSet<(int, int)>();
-    public static TerrainGenerator terrainGenerator { get; set;}
-    public static (int, int) GetGridPositionFromWorldPosition(Vector3 worldPosition)
-    {
-        int gridX = TerrainGenerator.instance.gridCells.GetLength(0) - 1;
-        int gridY = TerrainGenerator.instance.gridCells.GetLength(1) - 1;
-
-        float adjustedCellSizeX = terrainGenerator.GetWidth() / gridX;
-        float adjustedCellSizeY = terrainGenerator.GetWidth() / gridY;
-
-        float x_position = worldPosition.x / adjustedCellSizeX;
-        float z_position = worldPosition.z / adjustedCellSizeY;
-
-        // Convertit la position Unity en coordonnées de la grille
-        int X = Mathf.FloorToInt(Mathf.Clamp(x_position, 0, gridX - 1));
-        int Y = Mathf.FloorToInt(Mathf.Clamp(z_position, 0, gridY - 1));
-
-        return (X, Y);
-    }
-
-    public static Vector3 GetWorldPositionFromGridCoordinates(int x, int y, bool getCenterPosition = false)
-    {
-        float worldPosY = TerrainGenerator.instance.gridCells[x, y].position.y;
-
-        if (getCenterPosition) 
-        {
-            float worldPosX = TerrainGenerator.instance.gridCells[x, y].center.x;
-            float worldPosZ = TerrainGenerator.instance.gridCells[x, y].center.y;
-            return new Vector3(worldPosX, worldPosY, worldPosZ);
-        }
-        else
-        {
-            float worldPosX = TerrainGenerator.instance.gridCells[x, y].position.x;
-            float worldPosZ = TerrainGenerator.instance.gridCells[x, y].position.z;
-            return new Vector3(worldPosX, worldPosY, worldPosZ);
-        }
-    }
-}
-
-public class PlayerManager : MonoBehaviour
-{
-    public static PlayerManager instance {private set; get;}
+    public static AIManager instance { private set; get; }
     [SerializeField] private LineRenderer lineRenderer;
     private TerrainGenerator.GridCell selectedCell;
-    public Unit selectedUnit {private set; get;}
+    public Unit selectedUnit { private set; get; }
     private List<Vector2> path;
     [NonSerialized] public bool turnEnded = false;
     [NonSerialized] public int id;
+    [NonSerialized] public List<int> idList = new List<int>();
 
     private void Awake()
     {
@@ -133,7 +92,7 @@ public class PlayerManager : MonoBehaviour
             // MapManager.Instance.RequestGridCellUpdate(selectedCell);
             Vector3 posSpawn = ElementaryBasics.GetWorldPositionFromGridCoordinates((int)selectedUnit.gridPosition.x, (int)selectedUnit.gridPosition.y, true);
             NetworkSpawnerManager.Instance.RequestSpawnUnitServerRpc(NetworkSpawnerManager.Instance.nationType, UnitType.HDV, posSpawn);
-            
+
             MovementManager.instance.SetInOutInventory(false);
             selectedUnit = null;
         }
@@ -212,7 +171,7 @@ public class PlayerManager : MonoBehaviour
 
                 if (cell.isOccupied && !isEnemyInvisible && !isMyUnit)
                     continue;
-                
+
 
                 float newCost = costSoFar[current] + TerrainGenerator.instance.gridCells[(int)neighbor.x, (int)neighbor.y].cost;
 
@@ -295,32 +254,4 @@ public class PlayerManager : MonoBehaviour
     public void SetSelectedCell(TerrainGenerator.GridCell _cell) { selectedCell = _cell; }
     public void SetSelectedUnit(Unit _unit) { selectedUnit = _unit; }
     #endregion
-}
-
-public class PriorityQueue<T>
-{
-    private SortedDictionary<float, Queue<T>> elements = new SortedDictionary<float, Queue<T>>();
-    public int Count { get; private set; }
-    
-    public void Enqueue(T item, float priority)
-    {
-        if (!elements.ContainsKey(priority))
-            elements[priority] = new Queue<T>();
-        
-        elements[priority].Enqueue(item);
-        Count++;
-    }
-
-    public T Dequeue()
-    {
-        if (Count == 0) return default;
-        
-        var firstKey = elements.Keys.First();
-        var queue = elements[firstKey];
-        T item = queue.Dequeue();
-        
-        if (queue.Count == 0) elements.Remove(firstKey);
-        Count--;
-        return item;
-    }
 }

@@ -13,14 +13,16 @@ public class PlayerInfos
     public Color Color { get; set; }
     public int Team { get; set; }
     public bool isBot { get; set; }
-    
+    public int id { get; set; }
+
     public override bool Equals(object obj)
     {
         if (obj is not PlayerInfos other) return false;
         return Name == other.Name &&
             Color.Equals(other.Color) &&
             Team == other.Team &&
-            isBot == other.isBot;
+            isBot == other.isBot &&
+            id == other.id;
     }
 
     public override int GetHashCode()
@@ -32,6 +34,7 @@ public class PlayerInfos
             hash = hash * 23 + Color.GetHashCode();
             hash = hash * 23 + Team.GetHashCode();
             hash = hash * 23 + isBot.GetHashCode();
+            hash = hash * 23 + id.GetHashCode();
             return hash;
         }
     }

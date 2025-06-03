@@ -45,9 +45,12 @@ public class PlayerTable : MonoBehaviour
         // Récupère tous les éléments Text de la ligne
         Text[] columns = newRow.GetComponentsInChildren<Text>();
 
-        if (!isBot) players.Add(new PlayerInfos { Name = playerName, Color = playerColor, Team = playerTeam, isBot = isBot });
-        else bots.Add(new BotOption { Name = playerName, Color = playerColor, Team = playerTeam, isBot = isBot, botDifficulty = BotDifficulty.Easy });
-        playersAndBots.Add(new PlayerInfos { Name = playerName, Color = playerColor, Team = playerTeam, isBot = isBot });
+        if (!isBot) players.Add(new PlayerInfos { Name = playerName, Color = playerColor, Team = playerTeam, isBot = isBot, id = players.Count });
+        else bots.Add(new BotOption { Name = playerName, Color = playerColor, Team = playerTeam, isBot = isBot, botDifficulty = BotDifficulty.Easy, id = bots.Count });
+        playersAndBots.Add(new PlayerInfos { Name = playerName, Color = playerColor, Team = playerTeam, isBot = isBot, id = playersAndBots.Count });
+
+        if (!isBot) PlayerManager.instance.id = playersAndBots.Count;
+        else AIManager.instance.idList.Add(playersAndBots.Count);
         
         if (columns.Length >= 4)
         {
@@ -88,9 +91,12 @@ public class PlayerTable : MonoBehaviour
             Debug.LogError("Le prefab de ligne doit contenir au moins 4 Text !");
         }
 
-        if (!isBot) players.Add(new PlayerInfos { Name = playerName, Color = playerColor, Team = playerTeam, isBot = isBot });
-        else bots.Add(new BotOption { Name = playerName, Color = playerColor, Team = playerTeam, isBot = isBot, botDifficulty = BotDifficulty.Easy });
-        playersAndBots.Add(new PlayerInfos { Name = playerName, Color = playerColor, Team = playerTeam, isBot = isBot });
+        if (!isBot) players.Add(new PlayerInfos { Name = playerName, Color = playerColor, Team = playerTeam, isBot = isBot, id = players.Count });
+        else bots.Add(new BotOption { Name = playerName, Color = playerColor, Team = playerTeam, isBot = isBot, botDifficulty = BotDifficulty.Easy, id = bots.Count });
+        playersAndBots.Add(new PlayerInfos { Name = playerName, Color = playerColor, Team = playerTeam, isBot = isBot, id = playersAndBots.Count });
+
+        if (!isBot) PlayerManager.instance.id = playersAndBots.Count;
+        else AIManager.instance.idList.Add(playersAndBots.Count);
     }
 
     public void RemovePlayerRow(string playerName)
@@ -117,6 +123,7 @@ public class PlayerTable : MonoBehaviour
         playersAndBots.Clear();
         players.Clear();
         bots.Clear();
+        AIManager.instance.idList.Clear();
     }
 
     public void ClearLists()
@@ -124,6 +131,7 @@ public class PlayerTable : MonoBehaviour
         playersAndBots.Clear();
         players.Clear();
         bots.Clear();
+        AIManager.instance.idList.Clear();
     }
     public string GetPlayerName(string searchValue, int columnIndex = 0)
     {

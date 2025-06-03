@@ -43,11 +43,10 @@ public class NetworkSpawnerManager : NetworkBehaviour
             InitSpawnClientRpc();
             RequestSpawnUnitServerRpc(nationType, UnitType.Peasant, Vector3.zero); // Faire une fonction pour faire spawn les untités de départ d'un joueur
 
-            foreach (BotOption bot in PlayerTable.Instance.bots)
+            for (int i = 0; i < AIManager.instance.idList.Count; i++)
             {
-                int id = BotList.Bots.Count;
-                AddBotServerRpc(bot.botDifficulty, id);
-                RequestSpawnUnitServerRpc(nationType, UnitType.Peasant, Vector3.zero, true, id);
+                AddBotServerRpc(PlayerTable.Instance.bots[i].botDifficulty, AIManager.instance.idList[i]);
+                RequestSpawnUnitServerRpc(nationType, UnitType.Peasant, Vector3.zero, true, AIManager.instance.idList[i]);
                 // SpawnBot(bot); // Fonction qui gere la meta du bot
                 // SpawnBotUnits(bot); // Fonction qui fait spawn les unités de départ d'un bot
             }

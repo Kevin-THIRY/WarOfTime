@@ -238,23 +238,47 @@ public class MapManager : NetworkBehaviour
 
     public void EndTurn()
     {
-        if (activePlayerId.Value == NetworkManager.Singleton.LocalClientId)
+        if (IsMyTurn())
         {
             PlayerManager.instance.turnEnded = true;
             RequestEndTurnServerRpc();
         }
     }
 
+    // [ServerRpc(RequireOwnership = false)]
+    // private void RequestEndTurnServerRpc(ServerRpcParams rpcParams = default)
+    // {
+    //     if (!IsServer) return;
+
+    //     var clients = NetworkManager.Singleton.ConnectedClientsList;
+    //     int currentIndex = -1;
+    //     for (int i = 0; i < clients.Count; i++)
+    //     {
+    //         if (clients[i].ClientId == activePlayerId.Value)
+    //         {
+    //             currentIndex = i;
+    //             break;
+    //         }
+    //     }
+
+    //     if (currentIndex == -1) currentIndex = 0;
+
+    //     int nextIndex = (currentIndex + 1) % clients.Count;
+    //     activePlayerId.Value = clients[nextIndex].ClientId;
+
+    //     turnCount.Value++;
+    // }
+
     [ServerRpc(RequireOwnership = false)]
     private void RequestEndTurnServerRpc(ServerRpcParams rpcParams = default)
     {
         if (!IsServer) return;
 
-        var clients = NetworkManager.Singleton.ConnectedClientsList;
+        // var clients = NetworkManager.Singleton.ConnectedClientsList;
         int currentIndex = -1;
-        for (int i = 0; i < clients.Count; i++)
+        for (int i = 0; i < PlayerTable.Instance.playersAndBots.Count; i++)
         {
-            if (clients[i].ClientId == activePlayerId.Value)
+            if ((ulong)i == activePlayerId.Value)
             {
                 currentIndex = i;
                 break;
@@ -263,8 +287,8 @@ public class MapManager : NetworkBehaviour
 
         if (currentIndex == -1) currentIndex = 0;
 
-        int nextIndex = (currentIndex + 1) % clients.Count;
-        activePlayerId.Value = clients[nextIndex].ClientId;
+        int nextIndex = (currentIndex + 1) % PlayerTable.Instance.playersAndBots.Count;
+        activePlayerId.Value = (ulong)nextIndex;
 
         turnCount.Value++;
     }
@@ -275,8 +299,12 @@ public class MapManager : NetworkBehaviour
             textComponent.text = value.ToString();
     }
 
-    public bool IsMyTurn()
+    public bool IsMyTurn(int botId = -1)
     {
-        return NetworkManager.Singleton.LocalClientId == activePlayerId.Value;
+        if (botId == -1) return (ulong)PlayerManager.instance.id == activePlayerId.Value;
+        else {
+            return false;
+        }
+        // return NetworkManager.Singleton.LocalClientId == activePlayerId.Value;
     }
 } 

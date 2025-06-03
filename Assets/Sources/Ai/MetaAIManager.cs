@@ -7,7 +7,6 @@ public static class BotList
 
 public class BotOption : PlayerInfos
 {
-    public int id;
     public BotDifficulty botDifficulty { get; set; }
     public List<Unit> BotUnits = new List<Unit>();
 }
